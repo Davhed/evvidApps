@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Aviation 3D - Helicopter</string>
+    <string name="lwp_name">Aviation 3D - Helicopter</string>
+    <string name="lwp_desc">Aviation 3D brings the exhilaration of true 3D flight right into your hands.</string>
+    <string name="lwp_author">Evvid</string>
+    
+    <string name="picker_toast_prefix">Choose \"</string>
+    <string name="picker_toast_suffix">\" from this list.</string>
+    
+    <string name="lwp_settings">Aviation 3D Settings</string>
+    
+    <string-array name="home_screen_num_titles">
+        <item >Three Screens</item>
+        <item >Five Screens</item>
+        <item >Seven Screens</item>
+    </string-array>
+    
+    <string-array name="home_screen_num">
+        <item>8</item>
+        <item>5</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="autospeed_titles">
+        <item >Hover</item>
+        <item >Standby</item>
+        <item >Alert</item>
+        <item >Crisis</item>
+    </string-array>
+    
+    <string-array name="autospeed_num">
+        <item>0</item>
+        <item>2</item>
+        <item>3</item>
+        <item>5</item>
+    </string-array>
+</resources>

@@ -1,0 +1,79 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/lwp_settings"
+        android:key="aviation3dsharedprefs">
+        <PreferenceCategory 
+            android:title="Camera Settings">
+			<PreferenceScreen 
+			    android:title="Swipe Settings" 
+			    android:summary="Change the horizontal swipe mode">
+				<CheckBoxPreference 
+				    android:key="home_screen_swipe"
+				    android:title="Home Screen Mode"
+				    android:summary="Uses position information from your home screen menu. May not work on all devices."
+				    android:defaultValue="false" />
+				<CheckBoxPreference
+				    android:key="manual_swipe"
+				    android:title="Manual Mode"
+				    android:summary="Uses direct inputs from the touch screen. More compatible."
+				    android:defaultValue="true" />
+				<ListPreference
+		                android:key="screen_count"
+		                android:dependency="manual_swipe"
+		                android:title="Number of Home Screens"
+		                android:summary="Set the number of home screens that you use"
+		                android:defaultValue="5"
+		                android:entries="@array/home_screen_num_titles"
+		                android:entryValues="@array/home_screen_num"/>			    
+			</PreferenceScreen>
+			<CheckBoxPreference 
+			    android:key="accel_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Allow your accelerometer to effect the camera" 
+			    android:title="Use Accelerometer"/>
+			
+			<CheckBoxPreference 
+			    android:key="cam_drift" 
+			    android:defaultValue="true" 
+			    android:summary="Allow the camera to drift" 
+			    android:title="Allow Camera Drift"/>
+			<CheckBoxPreference 
+			    android:key="cam_lock" 
+			    android:defaultValue="false" 
+			    android:summary="Constrain camera view to the airplane" 
+			    android:title="Lock View"/>
+						
+            
+        </PreferenceCategory>
+        <PreferenceCategory 
+            android:title="Cloud Settings">
+			<CheckBoxPreference 
+			    android:key="backCloud_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable or disable background clouds" 
+			    android:title="Background Clouds"/>
+            <CheckBoxPreference 
+			    android:key="foreCloud_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable or disable foreground cloud objects\n**  disabling may improve performance **" 
+			    android:title="Foreground Clouds"/>
+				<ListPreference 
+	                android:summary="Set the quantity of clouds" 
+	                android:key="cloud_num" 
+	                android:dependency="foreCloud_pref"
+	                android:title="Cloud Quantity" 
+	                android:entries="@array/cloud_num_titles"
+	                android:entryValues="@array/cloud_num"/>
+			
+        </PreferenceCategory>
+        
+        <PreferenceCategory 
+            android:title="Flight Settings">
+			<CheckBoxPreference 
+			    android:key="autopilot_pref" 
+			    android:defaultValue="false" 
+			    android:summary="Enable or disable autopilot" 
+			    android:title="Autopilot"/>
+			
+        </PreferenceCategory>
+
+</PreferenceScreen>

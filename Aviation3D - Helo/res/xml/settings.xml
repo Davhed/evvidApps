@@ -1,0 +1,90 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/lwp_settings"
+        android:key="aviation3dsharedprefs">
+        <PreferenceCategory 
+            android:title="Camera Settings">
+			<PreferenceScreen 
+			    android:title="Swipe Settings" 
+			    android:summary="Change the horizontal swipe mode">
+				<CheckBoxPreference 
+				    android:key="home_screen_swipe"
+				    android:title="Home Screen Mode"
+				    android:summary="Uses position information from your home screen menu. May not work on all devices."
+				    android:defaultValue="false" />
+				<CheckBoxPreference
+				    android:key="manual_swipe"
+				    android:title="Manual Mode"
+				    android:summary="Uses direct inputs from the touch screen. More compatible."
+				    android:defaultValue="true" />
+				<ListPreference
+		                android:key="screen_count"
+		                android:dependency="manual_swipe"
+		                android:title="Number of Home Screens"
+		                android:summary="Set the number of home screens that you use"
+		                android:defaultValue="5"
+		                android:entries="@array/home_screen_num_titles"
+		                android:entryValues="@array/home_screen_num"/>			    
+			</PreferenceScreen>
+			<CheckBoxPreference 
+			    android:key="accel_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable accelerometer controls" 
+			    android:title="Use Accelerometer"/>
+	
+			
+			<CheckBoxPreference 
+			    android:key="cam_drift" 
+			    android:defaultValue="true" 
+			    android:summary="Allow the camera to drift" 
+			    android:title="Allow Camera Drift"/>
+			<CheckBoxPreference 
+			    android:key="cam_lock" 
+			    android:defaultValue="false" 
+			    android:summary="Constrain camera view to the helicopter" 
+			    android:title="Lock View"/>
+			            
+        </PreferenceCategory>
+        
+        <PreferenceCategory 
+            android:title="Environment Settings">
+				<CheckBoxPreference 
+				    android:key="bgClouds_pref" 
+				    android:defaultValue="true" 
+				    android:summary="Enable or disable the background clouds\n**May improve performance**" 
+				    android:title="Background Clouds"/>
+			</PreferenceCategory>
+        
+         <PreferenceCategory 
+            android:title="Flight Settings">
+		
+			<CheckBoxPreference 
+			    android:key="autopilot_pref" 
+			    android:defaultValue="false" 
+			    android:summary="Enable or disable autopilot" 
+			    android:title="Autopilot"/>
+			<ListPreference
+		                android:key="autospeed_pref"
+		                android:dependency="autopilot_pref"
+		                android:title="Flight Speed"
+		                android:summary="Set the speed of the helicopter"
+		                android:defaultValue="2"
+		                android:entries="@array/autospeed_titles"
+		                android:entryValues="@array/autospeed_num"/>		
+			
+			<CheckBoxPreference 
+			    android:key="altitude_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Swipe vertically to climb and descend" 
+			    android:title="Altitude"/>
+			
+			<CheckBoxPreference 
+			    android:key="autolight_pref" 
+			    android:dependency="accel_pref"
+			    android:defaultValue="false" 
+			    android:summary="Move the spotlight by tilting your device" 
+			    android:title="Spotlight Control"/>
+			
+			
+			</PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Aviation 3D Free - Light Plane</string>
+    <string name="lwp_name">Aviation 3D Free - Light Plane</string>
+    <string name="lwp_desc">Aviation 3D Free brings the exhilaration of true 3D flight right into your hands.</string>
+    <string name="lwp_author">Evvid</string>
+    
+    <string name="picker_toast_prefix">Choose \"</string>
+    <string name="picker_toast_suffix">\" from this list.</string>
+	
+    <string name="title">Thank you for trying Aviation 3D!</string>
+    <string name="summary">\nIf you like this wallpaper please consider the full version which gives you access to a variety of options that let you customize it.\n\nWe are committed to making high quality applications for Android devices and are constantly at work to add improvements and enhancements. Please send us your comments, suggestions and bug reports!\n</string>
+    <string name="buyNow">Tap here to upgrade!</string>
+    <string name="feedback">Send Feedback</string>
+    
+</resources>

@@ -1,0 +1,100 @@
+GLES20
+GLES20: void glVertexAttribPointer(int,int,int,boolean,int,int)
+GLES20: void glDrawElements(int,int,int,int)
+android.support.v4.app.BackStackState
+android.support.v4.app.BackStackState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.Fragment$SavedState
+android.support.v4.app.Fragment$SavedState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.FragmentManagerState
+android.support.v4.app.FragmentManagerState: android.os.Parcelable$Creator CREATOR
+android.support.v4.app.FragmentState
+android.support.v4.app.FragmentState: android.os.Parcelable$Creator CREATOR
+android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status[] values()
+android.support.v4.content.ModernAsyncTask$Status: android.support.v4.content.ModernAsyncTask$Status valueOf(java.lang.String)
+android.support.v4.view.PagerTabStrip: void setTabIndicatorColor(int)
+android.support.v4.view.PagerTabStrip: void setTabIndicatorColorResource(int)
+android.support.v4.view.PagerTabStrip: int getTabIndicatorColor()
+android.support.v4.view.PagerTabStrip: void setTextSpacing(int)
+android.support.v4.view.PagerTabStrip: void setBackgroundDrawable(android.graphics.drawable.Drawable)
+android.support.v4.view.PagerTabStrip: void setBackgroundColor(int)
+android.support.v4.view.PagerTabStrip: void setBackgroundResource(int)
+android.support.v4.view.PagerTabStrip: void setDrawFullUnderline(boolean)
+android.support.v4.view.PagerTabStrip: boolean getDrawFullUnderline()
+android.support.v4.view.PagerTabStrip: int getMinHeight()
+android.support.v4.view.PagerTitleStrip: void setSingleLineAllCaps(android.widget.TextView)
+android.support.v4.view.PagerTitleStrip: void setTextSpacing(int)
+android.support.v4.view.PagerTitleStrip: int getTextSpacing()
+android.support.v4.view.PagerTitleStrip: void setNonPrimaryAlpha(float)
+android.support.v4.view.PagerTitleStrip: void setTextColor(int)
+android.support.v4.view.PagerTitleStrip: void setGravity(int)
+android.support.v4.view.PagerTitleStrip: int getMinHeight()
+android.support.v4.view.ViewPager: void setScrollState(int)
+android.support.v4.view.ViewPager: void setAdapter(android.support.v4.view.PagerAdapter)
+android.support.v4.view.ViewPager: android.support.v4.view.PagerAdapter getAdapter()
+android.support.v4.view.ViewPager: void setOnAdapterChangeListener(android.support.v4.view.ViewPager$OnAdapterChangeListener)
+android.support.v4.view.ViewPager: void setCurrentItem(int)
+android.support.v4.view.ViewPager: int getCurrentItem()
+android.support.v4.view.ViewPager: void setOnPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener)
+android.support.v4.view.ViewPager: int getOffscreenPageLimit()
+android.support.v4.view.ViewPager: void setOffscreenPageLimit(int)
+android.support.v4.view.ViewPager: void setPageMargin(int)
+android.support.v4.view.ViewPager: int getPageMargin()
+android.support.v4.view.ViewPager: void setPageMarginDrawable(android.graphics.drawable.Drawable)
+android.support.v4.view.ViewPager: void setPageMarginDrawable(int)
+android.support.v4.view.ViewPager: void setScrollingCacheEnabled(boolean)
+android.support.v4.view.ViewPager$SavedState
+android.support.v4.view.ViewPager$SavedState: android.os.Parcelable$Creator CREATOR
+com.evvid.wallpapers.pocketPlane.R$drawable: int cessna_prop_tex
+com.evvid.wallpapers.pocketPlane.R$drawable: int cessna_tex
+com.evvid.wallpapers.pocketPlane.R$drawable: int cloud1
+com.evvid.wallpapers.pocketPlane.R$drawable: int cloud2
+com.evvid.wallpapers.pocketPlane.R$drawable: int cloudbg
+com.evvid.wallpapers.pocketPlane.R$drawable: int ground
+com.evvid.wallpapers.pocketPlane.R$drawable: int icon
+com.evvid.wallpapers.pocketPlane.R$drawable: int thumbnail
+com.evvid.wallpapers.pocketPlane.R$raw: int cessna
+com.evvid.wallpapers.pocketPlane.R$raw: int cloud
+com.evvid.wallpapers.pocketPlane.R$raw: int cloudbank
+com.evvid.wallpapers.pocketPlane.R$raw: int ground
+com.evvid.wallpapers.pocketPlane.R$raw: int mountains
+com.evvid.wallpapers.pocketPlane.R$raw: int pilot
+com.evvid.wallpapers.pocketPlane.R$raw: int prop
+com.evvid.wallpapers.pocketPlane.R$raw: int windows
+com.evvid.wallpapers.pocketPlane.R$string: int app_name
+com.evvid.wallpapers.pocketPlane.R$string: int lwp_author
+com.evvid.wallpapers.pocketPlane.R$string: int lwp_desc
+com.evvid.wallpapers.pocketPlane.R$string: int lwp_name
+com.evvid.wallpapers.pocketPlane.R$string: int lwp_settings
+com.evvid.wallpapers.pocketPlane.R$string: int picker_toast_prefix
+com.evvid.wallpapers.pocketPlane.R$string: int picker_toast_suffix
+com.evvid.wallpapers.pocketPlane.R$xml: int settings
+com.evvid.wallpapers.pocketPlane.R$xml: int wallpaper
+com.evvid.wallpapers.pocketPlane.WallpaperActivity
+com.evvid.wallpapers.pocketPlane.WallpaperActivity: WallpaperActivity()
+com.evvid.wallpapers.pocketPlane.WallpaperPicker
+com.evvid.wallpapers.pocketPlane.WallpaperPicker: WallpaperPicker()
+fix.android.opengl.GLES20
+fix.android.opengl.GLES20: void glVertexAttribPointer(int,int,int,boolean,int,int)
+fix.android.opengl.GLES20: void glDrawElements(int,int,int,int)
+net.rbgrn.opengl.GLWallpaperService: GLWallpaperService()
+rajawali.Geometry3D$BufferType: rajawali.Geometry3D$BufferType[] values()
+rajawali.Geometry3D$BufferType: rajawali.Geometry3D$BufferType valueOf(java.lang.String)
+rajawali.materials.TextureManager$FilterType: rajawali.materials.TextureManager$FilterType[] values()
+rajawali.materials.TextureManager$FilterType: rajawali.materials.TextureManager$FilterType valueOf(java.lang.String)
+rajawali.materials.TextureManager$TextureType: rajawali.materials.TextureManager$TextureType[] values()
+rajawali.materials.TextureManager$TextureType: rajawali.materials.TextureManager$TextureType valueOf(java.lang.String)
+rajawali.materials.TextureManager$WrapType: rajawali.materials.TextureManager$WrapType[] values()
+rajawali.materials.TextureManager$WrapType: rajawali.materials.TextureManager$WrapType valueOf(java.lang.String)
+rajawali.math.Number3D$Axis: rajawali.math.Number3D$Axis[] values()
+rajawali.math.Number3D$Axis: rajawali.math.Number3D$Axis valueOf(java.lang.String)
+rajawali.math.Plane$PlaneSide: rajawali.math.Plane$PlaneSide[] values()
+rajawali.math.Plane$PlaneSide: rajawali.math.Plane$PlaneSide valueOf(java.lang.String)
+rajawali.preferences.ColorPickerView: int getColor()
+rajawali.preferences.ColorPickerView: void setColor(int)
+rajawali.renderer.PostProcessingRenderer$PostProcessingQuality: rajawali.renderer.PostProcessingRenderer$PostProcessingQuality[] values()
+rajawali.renderer.PostProcessingRenderer$PostProcessingQuality: rajawali.renderer.PostProcessingRenderer$PostProcessingQuality valueOf(java.lang.String)
+rajawali.util.BufferUtil
+rajawali.util.BufferUtil: void copyJni(float[],java.nio.Buffer,int,int)
+rajawali.util.MeshExporter$ExportType: rajawali.util.MeshExporter$ExportType[] values()
+rajawali.util.MeshExporter$ExportType: rajawali.util.MeshExporter$ExportType valueOf(java.lang.String)
+rajawali.wallpaper.Wallpaper: Wallpaper()

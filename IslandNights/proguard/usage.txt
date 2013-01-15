@@ -1,0 +1,1170 @@
+GLES20
+android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat
+android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$AccessibilityServiceInfoIcsImpl
+android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$AccessibilityServiceInfoStubImpl
+android.support.v4.accessibilityservice.AccessibilityServiceInfoCompat$AccessibilityServiceInfoVersionImpl
+android.support.v4.accessibilityservice.AccessibilityServiceInfoCompatIcs
+android.support.v4.app.ActivityCompat
+android.support.v4.app.ActivityCompatHoneycomb:
+    27:27:ActivityCompatHoneycomb()
+    34:35:static void dump(android.app.Activity,java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
+android.support.v4.app.BackStackRecord:
+    static final java.lang.String TAG
+    static final int OP_NULL
+    static final int OP_ADD
+    static final int OP_REPLACE
+    static final int OP_REMOVE
+    static final int OP_HIDE
+    static final int OP_SHOW
+    static final int OP_DETACH
+    static final int OP_ATTACH
+    296:296:public int getId()
+    300:300:public int getBreadCrumbTitleRes()
+    304:304:public int getBreadCrumbShortTitleRes()
+    308:311:public java.lang.CharSequence getBreadCrumbTitle()
+    315:318:public java.lang.CharSequence getBreadCrumbShortTitle()
+    337:338:public android.support.v4.app.FragmentTransaction add(android.support.v4.app.Fragment,java.lang.String)
+    342:343:public android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment)
+    347:348:public android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment,java.lang.String)
+    352:376:private void doAddOp(int,android.support.v4.app.Fragment,java.lang.String,int)
+    379:379:public android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment)
+    383:388:public android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment,java.lang.String)
+    392:397:public android.support.v4.app.FragmentTransaction remove(android.support.v4.app.Fragment)
+    401:406:public android.support.v4.app.FragmentTransaction hide(android.support.v4.app.Fragment)
+    410:415:public android.support.v4.app.FragmentTransaction show(android.support.v4.app.Fragment)
+    419:424:public android.support.v4.app.FragmentTransaction detach(android.support.v4.app.Fragment)
+    428:433:public android.support.v4.app.FragmentTransaction attach(android.support.v4.app.Fragment)
+    437:437:public android.support.v4.app.FragmentTransaction setCustomAnimations(int,int)
+    442:446:public android.support.v4.app.FragmentTransaction setCustomAnimations(int,int,int,int)
+    450:451:public android.support.v4.app.FragmentTransaction setTransition(int)
+    455:456:public android.support.v4.app.FragmentTransaction setTransitionStyle(int)
+    460:466:public android.support.v4.app.FragmentTransaction addToBackStack(java.lang.String)
+    470:470:public boolean isAddToBackStackAllowed()
+    474:479:public android.support.v4.app.FragmentTransaction disallowAddToBackStack()
+    483:485:public android.support.v4.app.FragmentTransaction setBreadCrumbTitle(int)
+    489:491:public android.support.v4.app.FragmentTransaction setBreadCrumbTitle(java.lang.CharSequence)
+    495:497:public android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(int)
+    501:503:public android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(java.lang.CharSequence)
+    532:532:public int commit()
+    536:536:public int commitAllowingStateLoss()
+    540:549:int commitInternal(boolean)
+    727:727:public int getTransition()
+    731:731:public int getTransitionStyle()
+    735:735:public boolean isEmpty()
+android.support.v4.app.DialogFragment
+android.support.v4.app.Fragment:
+    static final int INITIALIZING
+    static final int CREATED
+    static final int ACTIVITY_CREATED
+    static final int STOPPED
+    static final int STARTED
+    static final int RESUMED
+    465:465:public final int getId()
+    472:472:public final java.lang.String getTag()
+    483:487:public void setArguments(android.os.Bundle)
+    494:494:public final android.os.Bundle getArguments()
+    506:511:public void setInitialSavedState(android.support.v4.app.Fragment$SavedState)
+    525:527:public void setTargetFragment(android.support.v4.app.Fragment,int)
+    533:533:public final android.support.v4.app.Fragment getTargetFragment()
+    540:540:public final int getTargetRequestCode()
+    554:557:public final android.content.res.Resources getResources()
+    567:567:public final java.lang.CharSequence getText(int)
+    577:577:public final java.lang.String getString(int)
+    590:590:public final varargs java.lang.String getString(int,java.lang.Object[])
+    601:601:public final android.support.v4.app.FragmentManager getFragmentManager()
+    608:608:public final boolean isAdded()
+    617:617:public final boolean isDetached()
+    626:626:public final boolean isRemoving()
+    637:637:public final boolean isInLayout()
+    645:645:public final boolean isResumed()
+    654:654:public final boolean isVisible()
+    666:666:public final boolean isHidden()
+    694:695:public void setRetainInstance(boolean)
+    698:698:public final boolean getRetainInstance()
+    709:715:public void setHasOptionsMenu(boolean)
+    727:733:public void setMenuVisibility(boolean)
+    749:754:public void setUserVisibleHint(boolean)
+    761:761:public boolean getUserVisibleHint()
+    768:776:public android.support.v4.app.LoaderManager getLoaderManager()
+    784:788:public void startActivity(android.content.Intent)
+    795:799:public void startActivityForResult(android.content.Intent,int)
+    950:950:public android.view.View getView()
+    1222:1223:public void registerForContextMenu(android.view.View)
+    1233:1234:public void unregisterForContextMenu(android.view.View)
+android.support.v4.app.Fragment$SavedState:
+    295:297:Fragment$SavedState(android.os.Bundle)
+android.support.v4.app.FragmentActivity:
+    private static final java.lang.String TAG
+    private static final java.lang.String FRAGMENTS_TAG
+    private static final int HONEYCOMB
+    static final int MSG_REALLY_STOPPED
+    static final int MSG_RESUME_PENDING
+    69:122:public FragmentActivity()
+    576:578:public java.lang.Object getLastCustomNonConfigurationInstance()
+    680:680:public android.support.v4.app.FragmentManager getSupportFragmentManager()
+    700:708:public void startActivityFromFragment(android.support.v4.app.Fragment,android.content.Intent,int)
+    729:734:public android.support.v4.app.LoaderManager getSupportLoaderManager()
+android.support.v4.app.FragmentActivity$1
+android.support.v4.app.FragmentActivity$FragmentTag:
+    public static final int Fragment_id
+    public static final int Fragment_name
+    public static final int Fragment_tag
+    122:122:FragmentActivity$FragmentTag()
+android.support.v4.app.FragmentManager:
+    public static final int POP_BACK_STACK_INCLUSIVE
+    59:114:public FragmentManager()
+    public abstract android.support.v4.app.FragmentTransaction beginTransaction()
+    139:139:public android.support.v4.app.FragmentTransaction openTransaction()
+    public abstract boolean executePendingTransactions()
+    public abstract android.support.v4.app.Fragment findFragmentById(int)
+    public abstract android.support.v4.app.Fragment findFragmentByTag(java.lang.String)
+    public abstract void popBackStack()
+    public abstract boolean popBackStackImmediate()
+    public abstract void popBackStack(java.lang.String,int)
+    public abstract boolean popBackStackImmediate(java.lang.String,int)
+    public abstract void popBackStack(int,int)
+    public abstract boolean popBackStackImmediate(int,int)
+    public abstract int getBackStackEntryCount()
+    public abstract android.support.v4.app.FragmentManager$BackStackEntry getBackStackEntryAt(int)
+    public abstract void addOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
+    public abstract void removeOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
+    public abstract void putFragment(android.os.Bundle,java.lang.String,android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.Fragment getFragment(android.os.Bundle,java.lang.String)
+    public abstract android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment)
+    public abstract void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
+    334:335:public static void enableDebugLogging(boolean)
+android.support.v4.app.FragmentManager$BackStackEntry
+android.support.v4.app.FragmentManagerImpl:
+    static final java.lang.String TAG
+    static final java.lang.String TARGET_REQUEST_CODE_STATE_TAG
+    static final java.lang.String TARGET_STATE_TAG
+    static final java.lang.String VIEW_STATE_TAG
+    static final java.lang.String USER_VISIBLE_HINT_TAG
+    static final int ANIM_DUR
+    public static final int ANIM_STYLE_OPEN_ENTER
+    public static final int ANIM_STYLE_OPEN_EXIT
+    public static final int ANIM_STYLE_CLOSE_ENTER
+    public static final int ANIM_STYLE_CLOSE_EXIT
+    public static final int ANIM_STYLE_FADE_ENTER
+    public static final int ANIM_STYLE_FADE_EXIT
+    377:417:FragmentManagerImpl()
+    426:426:public android.support.v4.app.FragmentTransaction beginTransaction()
+    436:441:public void popBackStack()
+    452:457:public void popBackStack(java.lang.String,int)
+    461:463:public boolean popBackStackImmediate(java.lang.String,int)
+    468:476:public void popBackStack(int,int)
+    480:485:public boolean popBackStackImmediate(int,int)
+    490:490:public int getBackStackEntryCount()
+    495:495:public android.support.v4.app.FragmentManager$BackStackEntry getBackStackEntryAt(int)
+    500:504:public void addOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
+    508:511:public void removeOnBackStackChangedListener(android.support.v4.app.FragmentManager$OnBackStackChangedListener)
+    542:550:public android.support.v4.app.Fragment$SavedState saveFragmentInstanceState(android.support.v4.app.Fragment)
+    1301:1309:public android.support.v4.app.Fragment findFragmentByWho(java.lang.String)
+    1324:1340:public void enqueueAction(java.lang.Runnable,boolean)
+    1343:1359:public int allocBackStackIndex(android.support.v4.app.BackStackRecord)
+android.support.v4.app.FragmentManagerImpl$1
+android.support.v4.app.FragmentManagerImpl$2
+android.support.v4.app.FragmentManagerImpl$3
+android.support.v4.app.FragmentManagerImpl$4
+android.support.v4.app.FragmentPagerAdapter
+android.support.v4.app.FragmentStatePagerAdapter
+android.support.v4.app.FragmentTransaction:
+    public static final int TRANSIT_ENTER_MASK
+    public static final int TRANSIT_EXIT_MASK
+    public static final int TRANSIT_UNSET
+    public static final int TRANSIT_NONE
+    public static final int TRANSIT_FRAGMENT_OPEN
+    public static final int TRANSIT_FRAGMENT_CLOSE
+    public static final int TRANSIT_FRAGMENT_FADE
+    public abstract android.support.v4.app.FragmentTransaction add(android.support.v4.app.Fragment,java.lang.String)
+    public abstract android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction add(int,android.support.v4.app.Fragment,java.lang.String)
+    public abstract android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction replace(int,android.support.v4.app.Fragment,java.lang.String)
+    public abstract android.support.v4.app.FragmentTransaction remove(android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction hide(android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction show(android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction detach(android.support.v4.app.Fragment)
+    public abstract android.support.v4.app.FragmentTransaction attach(android.support.v4.app.Fragment)
+    public abstract boolean isEmpty()
+    public abstract android.support.v4.app.FragmentTransaction setCustomAnimations(int,int)
+    public abstract android.support.v4.app.FragmentTransaction setCustomAnimations(int,int,int,int)
+    public abstract android.support.v4.app.FragmentTransaction setTransition(int)
+    public abstract android.support.v4.app.FragmentTransaction setTransitionStyle(int)
+    public abstract android.support.v4.app.FragmentTransaction addToBackStack(java.lang.String)
+    public abstract boolean isAddToBackStackAllowed()
+    public abstract android.support.v4.app.FragmentTransaction disallowAddToBackStack()
+    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbTitle(int)
+    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbTitle(java.lang.CharSequence)
+    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(int)
+    public abstract android.support.v4.app.FragmentTransaction setBreadCrumbShortTitle(java.lang.CharSequence)
+    public abstract int commit()
+    public abstract int commitAllowingStateLoss()
+android.support.v4.app.ListFragment
+android.support.v4.app.ListFragment$1
+android.support.v4.app.ListFragment$2
+android.support.v4.app.LoaderManager:
+    public abstract android.support.v4.content.Loader initLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    public abstract android.support.v4.content.Loader restartLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    public abstract void destroyLoader(int)
+    public abstract android.support.v4.content.Loader getLoader(int)
+    public abstract void dump(java.lang.String,java.io.FileDescriptor,java.io.PrintWriter,java.lang.String[])
+    177:178:public static void enableDebugLogging(boolean)
+android.support.v4.app.LoaderManagerImpl:
+    static final java.lang.String TAG
+    boolean mRetainingStarted
+    boolean mCreatingLoader
+    486:489:private android.support.v4.app.LoaderManagerImpl$LoaderInfo createLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    495:500:private android.support.v4.app.LoaderManagerImpl$LoaderInfo createAndInstallLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    505:512:void installLoader(android.support.v4.app.LoaderManagerImpl$LoaderInfo)
+    540:562:public android.support.v4.content.Loader initLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    590:644:public android.support.v4.content.Loader restartLoader(int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    655:675:public void destroyLoader(int)
+    683:694:public android.support.v4.content.Loader getLoader(int)
+android.support.v4.app.LoaderManagerImpl$LoaderInfo:
+    226:230:public LoaderManagerImpl$LoaderInfo(android.support.v4.app.LoaderManagerImpl,int,android.os.Bundle,android.support.v4.app.LoaderManager$LoaderCallbacks)
+    360:413:public void onLoadComplete(android.support.v4.content.Loader,java.lang.Object)
+android.support.v4.app.NavUtils
+android.support.v4.app.NavUtils$NavUtilsImpl
+android.support.v4.app.NavUtils$NavUtilsImplBase
+android.support.v4.app.NavUtils$NavUtilsImplJB
+android.support.v4.app.NavUtilsJB
+android.support.v4.app.NotificationCompat
+android.support.v4.app.NotificationCompat$Builder
+android.support.v4.app.NotificationCompat$NotificationCompatImpl
+android.support.v4.app.NotificationCompat$NotificationCompatImplBase
+android.support.v4.app.NotificationCompat$NotificationCompatImplHoneycomb
+android.support.v4.app.NotificationCompatHoneycomb
+android.support.v4.app.ServiceCompat
+android.support.v4.app.ShareCompat
+android.support.v4.app.ShareCompat$IntentBuilder
+android.support.v4.app.ShareCompat$IntentReader
+android.support.v4.app.ShareCompat$ShareCompatImpl
+android.support.v4.app.ShareCompat$ShareCompatImplBase
+android.support.v4.app.ShareCompat$ShareCompatImplICS
+android.support.v4.app.ShareCompat$ShareCompatImplJB
+android.support.v4.app.ShareCompatICS
+android.support.v4.app.ShareCompatJB
+android.support.v4.app.TaskStackBuilder
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImpl
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplBase
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplHoneycomb
+android.support.v4.app.TaskStackBuilder$TaskStackBuilderImplJellybean
+android.support.v4.app.TaskStackBuilderHoneycomb
+android.support.v4.app.TaskStackBuilderJellybean
+android.support.v4.content.AsyncTaskLoader
+android.support.v4.content.AsyncTaskLoader$LoadTask
+android.support.v4.content.ContextCompat
+android.support.v4.content.ContextCompatHoneycomb
+android.support.v4.content.ContextCompatJellybean
+android.support.v4.content.CursorLoader
+android.support.v4.content.IntentCompat
+android.support.v4.content.Loader:
+    android.content.Context mContext
+    90:92:public Loader(android.content.Context)
+    102:105:public void deliverResult(java.lang.Object)
+    111:111:public android.content.Context getContext()
+    118:118:public int getId()
+    157:157:public boolean isStarted()
+    166:166:public boolean isAbandoned()
+    175:175:public boolean isReset()
+    217:218:public void forceLoad()
+    225:225:protected void onForceLoad()
+    261:263:public void abandon()
+    275:275:protected void onAbandon()
+    312:314:public boolean takeContentChanged()
+    326:334:public void onContentChanged()
+android.support.v4.content.Loader$ForceLoadContentObserver
+android.support.v4.content.Loader$OnLoadCompleteListener:
+    public abstract void onLoadComplete(android.support.v4.content.Loader,java.lang.Object)
+android.support.v4.content.LocalBroadcastManager
+android.support.v4.content.LocalBroadcastManager$1
+android.support.v4.content.LocalBroadcastManager$BroadcastRecord
+android.support.v4.content.LocalBroadcastManager$ReceiverRecord
+android.support.v4.content.ModernAsyncTask
+android.support.v4.content.ModernAsyncTask$1
+android.support.v4.content.ModernAsyncTask$2
+android.support.v4.content.ModernAsyncTask$3
+android.support.v4.content.ModernAsyncTask$4
+android.support.v4.content.ModernAsyncTask$AsyncTaskResult
+android.support.v4.content.ModernAsyncTask$InternalHandler
+android.support.v4.content.ModernAsyncTask$Status
+android.support.v4.content.ModernAsyncTask$WorkerRunnable
+android.support.v4.content.pm.ActivityInfoCompat
+android.support.v4.database.DatabaseUtilsCompat
+android.support.v4.net.ConnectivityManagerCompat
+android.support.v4.net.ConnectivityManagerCompat$BaseConnectivityManagerCompatImpl
+android.support.v4.net.ConnectivityManagerCompat$ConnectivityManagerCompatImpl
+android.support.v4.net.ConnectivityManagerCompat$GingerbreadConnectivityManagerCompatImpl
+android.support.v4.net.ConnectivityManagerCompat$HoneycombMR2ConnectivityManagerCompatImpl
+android.support.v4.net.ConnectivityManagerCompat$JellyBeanConnectivityManagerCompatImpl
+android.support.v4.net.ConnectivityManagerCompatGingerbread
+android.support.v4.net.ConnectivityManagerCompatHoneycombMR2
+android.support.v4.net.ConnectivityManagerCompatJellyBean
+android.support.v4.net.TrafficStatsCompat
+android.support.v4.net.TrafficStatsCompat$1
+android.support.v4.net.TrafficStatsCompat$BaseTrafficStatsCompatImpl
+android.support.v4.net.TrafficStatsCompat$BaseTrafficStatsCompatImpl$1
+android.support.v4.net.TrafficStatsCompat$BaseTrafficStatsCompatImpl$SocketTags
+android.support.v4.net.TrafficStatsCompat$IcsTrafficStatsCompatImpl
+android.support.v4.net.TrafficStatsCompat$TrafficStatsCompatImpl
+android.support.v4.net.TrafficStatsCompatIcs
+android.support.v4.os.ParcelableCompat:
+    26:42:public ParcelableCompat()
+android.support.v4.os.ParcelableCompatCreatorHoneycombMR2Stub:
+    22:22:ParcelableCompatCreatorHoneycombMR2Stub()
+android.support.v4.util.DebugUtils:
+    25:25:public DebugUtils()
+android.support.v4.util.LongSparseArray
+android.support.v4.util.LruCache
+android.support.v4.util.SparseArrayCompat:
+    107:111:public void removeAtRange(int,int)
+    236:241:public void setValueAt(int,java.lang.Object)
+    249:253:public int indexOfKey(int)
+    265:273:public int indexOfValue(java.lang.Object)
+    296:323:public void append(int,java.lang.Object)
+android.support.v4.util.TimeUtils
+android.support.v4.view.AccessibilityDelegateCompat
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateIcsImpl
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateIcsImpl$1
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateImpl
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateJellyBeanImpl
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateJellyBeanImpl$1
+android.support.v4.view.AccessibilityDelegateCompat$AccessibilityDelegateStubImpl
+android.support.v4.view.AccessibilityDelegateCompatIcs
+android.support.v4.view.AccessibilityDelegateCompatIcs$1
+android.support.v4.view.AccessibilityDelegateCompatIcs$AccessibilityDelegateBridge
+android.support.v4.view.AccessibilityDelegateCompatJellyBean
+android.support.v4.view.AccessibilityDelegateCompatJellyBean$1
+android.support.v4.view.AccessibilityDelegateCompatJellyBean$AccessibilityDelegateBridgeJellyBean
+android.support.v4.view.KeyEventCompat:
+    25:95:public KeyEventCompat()
+    127:127:public static int normalizeMetaState(int)
+    131:131:public static boolean metaStateHasModifiers(int,int)
+    135:135:public static boolean metaStateHasNoModifiers(int)
+android.support.v4.view.KeyEventCompat$BaseKeyEventVersionImpl:
+    private static final int META_MODIFIER_MASK
+    private static final int META_ALL_MASK
+android.support.v4.view.KeyEventCompat$HoneycombKeyEventVersionImpl:
+    98:98:public int normalizeMetaState(int)
+android.support.v4.view.KeyEventCompat$KeyEventVersionImpl:
+    public abstract int normalizeMetaState(int)
+android.support.v4.view.KeyEventCompatHoneycomb:
+    24:24:KeyEventCompatHoneycomb()
+    26:26:public static int normalizeMetaState(int)
+android.support.v4.view.MenuCompat
+android.support.v4.view.MenuCompat$BaseMenuVersionImpl
+android.support.v4.view.MenuCompat$HoneycombMenuVersionImpl
+android.support.v4.view.MenuCompat$MenuVersionImpl
+android.support.v4.view.MenuItemCompat
+android.support.v4.view.MenuItemCompat$BaseMenuVersionImpl
+android.support.v4.view.MenuItemCompat$HoneycombMenuVersionImpl
+android.support.v4.view.MenuItemCompat$MenuVersionImpl
+android.support.v4.view.MenuItemCompatHoneycomb
+android.support.v4.view.MotionEventCompat:
+    public static final int ACTION_MASK
+    public static final int ACTION_POINTER_DOWN
+    public static final int ACTION_POINTER_UP
+    public static final int ACTION_HOVER_MOVE
+    public static final int ACTION_SCROLL
+    public static final int ACTION_POINTER_INDEX_MASK
+    public static final int ACTION_POINTER_INDEX_SHIFT
+    public static final int ACTION_HOVER_ENTER
+    public static final int ACTION_HOVER_EXIT
+    25:75:public MotionEventCompat()
+    174:174:public static int getActionMasked(android.view.MotionEvent)
+android.support.v4.view.MotionEventCompatEclair:
+    24:24:MotionEventCompatEclair()
+android.support.v4.view.PagerAdapter:
+    public static final int POSITION_UNCHANGED
+    public static final int POSITION_NONE
+    78:79:public PagerAdapter()
+    276:277:public void notifyDataSetChanged()
+    297:297:public java.lang.CharSequence getPageTitle(int)
+android.support.v4.view.PagerTabStrip
+android.support.v4.view.PagerTabStrip$1
+android.support.v4.view.PagerTabStrip$2
+android.support.v4.view.PagerTitleStrip
+android.support.v4.view.PagerTitleStrip$1
+android.support.v4.view.PagerTitleStrip$PageListener
+android.support.v4.view.PagerTitleStrip$PagerTitleStripImpl
+android.support.v4.view.PagerTitleStrip$PagerTitleStripImplBase
+android.support.v4.view.PagerTitleStrip$PagerTitleStripImplIcs
+android.support.v4.view.PagerTitleStripIcs
+android.support.v4.view.PagerTitleStripIcs$SingleLineAllCapsTransform
+android.support.v4.view.VelocityTrackerCompat:
+    25:51:public VelocityTrackerCompat()
+    91:91:public static float getYVelocity(android.view.VelocityTracker,int)
+android.support.v4.view.VelocityTrackerCompat$BaseVelocityTrackerVersionImpl:
+    44:44:public float getYVelocity(android.view.VelocityTracker,int)
+android.support.v4.view.VelocityTrackerCompat$HoneycombVelocityTrackerVersionImpl:
+    58:58:public float getYVelocity(android.view.VelocityTracker,int)
+android.support.v4.view.VelocityTrackerCompat$VelocityTrackerVersionImpl:
+    public abstract float getYVelocity(android.view.VelocityTracker,int)
+android.support.v4.view.VelocityTrackerCompatHoneycomb:
+    24:24:VelocityTrackerCompatHoneycomb()
+    29:29:public static float getYVelocity(android.view.VelocityTracker,int)
+android.support.v4.view.ViewCompat:
+    public static final int OVER_SCROLL_ALWAYS
+    public static final int OVER_SCROLL_IF_CONTENT_SCROLLS
+    public static final int OVER_SCROLL_NEVER
+    private static final long FAKE_FRAME_TIME
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_AUTO
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_YES
+    public static final int IMPORTANT_FOR_ACCESSIBILITY_NO
+    29:186:public ViewCompat()
+    264:264:public static boolean canScrollVertically(android.view.View,int)
+    293:294:public static void setOverScrollMode(android.view.View,int)
+    330:331:public static void onPopulateAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    363:364:public static void onInitializeAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    399:400:public static void onInitializeAccessibilityNodeInfo(android.view.View,android.support.v4.view.accessibility.AccessibilityNodeInfoCompat)
+    414:415:public static void setAccessibilityDelegate(android.view.View,android.support.v4.view.AccessibilityDelegateCompat)
+    426:426:public static boolean hasTransientState(android.view.View)
+    437:438:public static void setHasTransientState(android.view.View,boolean)
+    468:469:public static void postInvalidateOnAnimation(android.view.View,int,int,int,int)
+    482:483:public static void postOnAnimation(android.view.View,java.lang.Runnable)
+    499:500:public static void postOnAnimationDelayed(android.view.View,java.lang.Runnable,long)
+    515:515:public static int getImportantForAccessibility(android.view.View)
+    531:532:public static void setImportantForAccessibility(android.view.View,int)
+    558:558:public static android.support.v4.view.accessibility.AccessibilityNodeProviderCompat getAccessibilityNodeProvider(android.view.View)
+android.support.v4.view.ViewCompat$BaseViewCompatImpl:
+    89:89:public boolean canScrollVertically(android.view.View,int)
+    96:96:public void setOverScrollMode(android.view.View,int)
+    99:99:public void setAccessibilityDelegate(android.view.View,android.support.v4.view.AccessibilityDelegateCompat)
+    102:102:public void onPopulateAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    105:105:public void onInitializeAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    108:108:public void onInitializeAccessibilityNodeInfo(android.view.View,android.support.v4.view.accessibility.AccessibilityNodeInfoCompat)
+    111:111:public boolean hasTransientState(android.view.View)
+    115:115:public void setHasTransientState(android.view.View,boolean)
+    120:121:public void postInvalidateOnAnimation(android.view.View,int,int,int,int)
+    123:124:public void postOnAnimation(android.view.View,java.lang.Runnable)
+    126:127:public void postOnAnimationDelayed(android.view.View,java.lang.Runnable,long)
+    132:132:public int getImportantForAccessibility(android.view.View)
+    136:136:public void setImportantForAccessibility(android.view.View,int)
+    138:138:public android.support.v4.view.accessibility.AccessibilityNodeProviderCompat getAccessibilityNodeProvider(android.view.View)
+android.support.v4.view.ViewCompat$GBViewCompatImpl:
+    149:150:public void setOverScrollMode(android.view.View,int)
+android.support.v4.view.ViewCompat$ICSViewCompatImpl:
+    166:166:public boolean canScrollVertically(android.view.View,int)
+    170:171:public void onPopulateAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    174:175:public void onInitializeAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    178:179:public void onInitializeAccessibilityNodeInfo(android.view.View,android.support.v4.view.accessibility.AccessibilityNodeInfoCompat)
+    182:183:public void setAccessibilityDelegate(android.view.View,android.support.v4.view.AccessibilityDelegateCompat)
+android.support.v4.view.ViewCompat$JBViewCompatImpl:
+    189:189:public boolean hasTransientState(android.view.View)
+    193:194:public void setHasTransientState(android.view.View,boolean)
+    201:202:public void postInvalidateOnAnimation(android.view.View,int,int,int,int)
+    205:206:public void postOnAnimation(android.view.View,java.lang.Runnable)
+    209:210:public void postOnAnimationDelayed(android.view.View,java.lang.Runnable,long)
+    213:213:public int getImportantForAccessibility(android.view.View)
+    217:218:public void setImportantForAccessibility(android.view.View,int)
+    221:225:public android.support.v4.view.accessibility.AccessibilityNodeProviderCompat getAccessibilityNodeProvider(android.view.View)
+android.support.v4.view.ViewCompat$ViewCompatImpl:
+    public abstract boolean canScrollVertically(android.view.View,int)
+    public abstract void setOverScrollMode(android.view.View,int)
+    public abstract void onInitializeAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    public abstract void onPopulateAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    public abstract void onInitializeAccessibilityNodeInfo(android.view.View,android.support.v4.view.accessibility.AccessibilityNodeInfoCompat)
+    public abstract void setAccessibilityDelegate(android.view.View,android.support.v4.view.AccessibilityDelegateCompat)
+    public abstract boolean hasTransientState(android.view.View)
+    public abstract void setHasTransientState(android.view.View,boolean)
+    public abstract void postInvalidateOnAnimation(android.view.View,int,int,int,int)
+    public abstract void postOnAnimation(android.view.View,java.lang.Runnable)
+    public abstract void postOnAnimationDelayed(android.view.View,java.lang.Runnable,long)
+    public abstract int getImportantForAccessibility(android.view.View)
+    public abstract void setImportantForAccessibility(android.view.View,int)
+    public abstract android.support.v4.view.accessibility.AccessibilityNodeProviderCompat getAccessibilityNodeProvider(android.view.View)
+android.support.v4.view.ViewCompatGingerbread:
+    21:21:ViewCompatGingerbread()
+    27:28:public static void setOverScrollMode(android.view.View,int)
+android.support.v4.view.ViewCompatHC:
+    21:21:ViewCompatHC()
+android.support.v4.view.ViewCompatICS:
+    27:27:ViewCompatICS()
+    34:34:public static boolean canScrollVertically(android.view.View,int)
+    38:39:public static void setAccessibilityDelegate(android.view.View,java.lang.Object)
+    42:43:public static void onPopulateAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    46:47:public static void onInitializeAccessibilityEvent(android.view.View,android.view.accessibility.AccessibilityEvent)
+    50:51:public static void onInitializeAccessibilityNodeInfo(android.view.View,java.lang.Object)
+android.support.v4.view.ViewCompatJB:
+    24:24:public ViewCompatJB()
+    27:27:public static boolean hasTransientState(android.view.View)
+    31:32:public static void setHasTransientState(android.view.View,boolean)
+    40:41:public static void postInvalidateOnAnimation(android.view.View,int,int,int,int)
+    44:45:public static void postOnAnimation(android.view.View,java.lang.Runnable)
+    48:49:public static void postOnAnimationDelayed(android.view.View,java.lang.Runnable,long)
+    52:52:public static int getImportantForAccessibility(android.view.View)
+    56:57:public static void setImportantForAccessibility(android.view.View,int)
+    60:60:public static java.lang.Object getAccessibilityNodeProvider(android.view.View)
+android.support.v4.view.ViewConfigurationCompat
+android.support.v4.view.ViewConfigurationCompat$BaseViewConfigurationVersionImpl
+android.support.v4.view.ViewConfigurationCompat$FroyoViewConfigurationVersionImpl
+android.support.v4.view.ViewConfigurationCompat$ViewConfigurationVersionImpl
+android.support.v4.view.ViewConfigurationCompatFroyo
+android.support.v4.view.ViewGroupCompat
+android.support.v4.view.ViewGroupCompat$ViewGroupCompatIcsImpl
+android.support.v4.view.ViewGroupCompat$ViewGroupCompatImpl
+android.support.v4.view.ViewGroupCompat$ViewGroupCompatStubImpl
+android.support.v4.view.ViewGroupCompatIcs
+android.support.v4.view.ViewPager:
+    private static final java.lang.String TAG
+    private static final boolean DEBUG
+    private static final boolean USE_CACHE
+    private static final int DEFAULT_OFFSCREEN_PAGES
+    private static final int MAX_SETTLE_DURATION
+    private static final int MIN_DISTANCE_FOR_FLING
+    private static final int DEFAULT_GUTTER_SIZE
+    private boolean mIgnoreGutter
+    private static final int INVALID_POINTER
+    private static final int CLOSE_ENOUGH
+    private long mFakeDragBeginTime
+    public static final int SCROLL_STATE_IDLE
+    public static final int SCROLL_STATE_DRAGGING
+    public static final int SCROLL_STATE_SETTLING
+    296:298:public ViewPager(android.content.Context)
+    301:303:public ViewPager(android.content.Context,android.util.AttributeSet)
+    306:330:void initViewPager()
+    514:516:android.support.v4.view.ViewPager$OnPageChangeListener setInternalPageChangeListener(android.support.v4.view.ViewPager$OnPageChangeListener)
+    638:639:void smoothScrollTo(int,int)
+    2025:2041:public boolean beginFakeDrag()
+    2051:2072:public void endFakeDrag()
+    2082:2120:public void fakeDragBy(float)
+    2132:2132:public boolean isFakeDragging()
+    82:82:static synthetic android.support.v4.view.PagerAdapter access$100(android.support.v4.view.ViewPager)
+    82:82:static synthetic int access$200(android.support.v4.view.ViewPager)
+android.support.v4.view.ViewPager$MyAccessibilityDelegate
+android.support.v4.view.ViewPager$SimpleOnPageChangeListener
+android.support.v4.view.accessibility.AccessibilityEventCompat
+android.support.v4.view.accessibility.AccessibilityEventCompat$AccessibilityEventIcsImpl
+android.support.v4.view.accessibility.AccessibilityEventCompat$AccessibilityEventStubImpl
+android.support.v4.view.accessibility.AccessibilityEventCompat$AccessibilityEventVersionImpl
+android.support.v4.view.accessibility.AccessibilityEventCompatIcs
+android.support.v4.view.accessibility.AccessibilityManagerCompat
+android.support.v4.view.accessibility.AccessibilityManagerCompat$AccessibilityManagerIcsImpl
+android.support.v4.view.accessibility.AccessibilityManagerCompat$AccessibilityManagerIcsImpl$1
+android.support.v4.view.accessibility.AccessibilityManagerCompat$AccessibilityManagerStubImpl
+android.support.v4.view.accessibility.AccessibilityManagerCompat$AccessibilityManagerVersionImpl
+android.support.v4.view.accessibility.AccessibilityManagerCompat$AccessibilityStateChangeListenerCompat
+android.support.v4.view.accessibility.AccessibilityManagerCompatIcs
+android.support.v4.view.accessibility.AccessibilityManagerCompatIcs$1
+android.support.v4.view.accessibility.AccessibilityManagerCompatIcs$AccessibilityStateChangeListenerBridge
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityNodeInfoIcsImpl
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityNodeInfoImpl
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityNodeInfoJellybeanImpl
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompat$AccessibilityNodeInfoStubImpl
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompatIcs
+android.support.v4.view.accessibility.AccessibilityNodeInfoCompatJellyBean
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompat
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderImpl
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderJellyBeanImpl
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderJellyBeanImpl$1
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompat$AccessibilityNodeProviderStubImpl
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompatJellyBean
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompatJellyBean$1
+android.support.v4.view.accessibility.AccessibilityNodeProviderCompatJellyBean$AccessibilityNodeInfoBridge
+android.support.v4.view.accessibility.AccessibilityRecordCompat
+android.support.v4.view.accessibility.AccessibilityRecordCompat$AccessibilityRecordIcsImpl
+android.support.v4.view.accessibility.AccessibilityRecordCompat$AccessibilityRecordIcsMr1Impl
+android.support.v4.view.accessibility.AccessibilityRecordCompat$AccessibilityRecordImpl
+android.support.v4.view.accessibility.AccessibilityRecordCompat$AccessibilityRecordJellyBeanImpl
+android.support.v4.view.accessibility.AccessibilityRecordCompat$AccessibilityRecordStubImpl
+android.support.v4.view.accessibility.AccessibilityRecordCompatIcs
+android.support.v4.view.accessibility.AccessibilityRecordCompatIcsMr1
+android.support.v4.view.accessibility.AccessibilityRecordCompatJellyBean
+android.support.v4.widget.CursorAdapter
+android.support.v4.widget.CursorAdapter$1
+android.support.v4.widget.CursorAdapter$ChangeObserver
+android.support.v4.widget.CursorAdapter$MyDataSetObserver
+android.support.v4.widget.CursorFilter
+android.support.v4.widget.CursorFilter$CursorFilterClient
+android.support.v4.widget.EdgeEffectCompat:
+    132:134:public EdgeEffectCompat(android.content.Context)
+    204:204:public boolean onAbsorb(int)
+android.support.v4.widget.EdgeEffectCompat$BaseEdgeEffectImpl:
+    60:60:public java.lang.Object newEdgeEffect(android.content.Context)
+    82:82:public boolean onAbsorb(java.lang.Object,int)
+android.support.v4.widget.EdgeEffectCompat$EdgeEffectIcsImpl:
+    92:92:public java.lang.Object newEdgeEffect(android.content.Context)
+    116:116:public boolean onAbsorb(java.lang.Object,int)
+android.support.v4.widget.EdgeEffectCompat$EdgeEffectImpl:
+    public abstract java.lang.Object newEdgeEffect(android.content.Context)
+    public abstract boolean onAbsorb(java.lang.Object,int)
+android.support.v4.widget.EdgeEffectCompatIcs:
+    28:28:EdgeEffectCompatIcs()
+    30:30:public static java.lang.Object newEdgeEffect(android.content.Context)
+    57:58:public static boolean onAbsorb(java.lang.Object,int)
+android.support.v4.widget.ResourceCursorAdapter
+android.support.v4.widget.ScrollerCompat
+android.support.v4.widget.ScrollerCompat$ScrollerCompatImplIcs
+android.support.v4.widget.ScrollerCompatIcs
+android.support.v4.widget.SearchViewCompat
+android.support.v4.widget.SearchViewCompat$OnQueryTextListenerCompat
+android.support.v4.widget.SearchViewCompat$SearchViewCompatHoneycombImpl
+android.support.v4.widget.SearchViewCompat$SearchViewCompatHoneycombImpl$1
+android.support.v4.widget.SearchViewCompat$SearchViewCompatImpl
+android.support.v4.widget.SearchViewCompat$SearchViewCompatStubImpl
+android.support.v4.widget.SearchViewCompatHoneycomb
+android.support.v4.widget.SearchViewCompatHoneycomb$1
+android.support.v4.widget.SearchViewCompatHoneycomb$OnQueryTextListenerCompatBridge
+android.support.v4.widget.SimpleCursorAdapter
+android.support.v4.widget.SimpleCursorAdapter$CursorToStringConverter
+android.support.v4.widget.SimpleCursorAdapter$ViewBinder
+com.evvid.wallpapers.pocketPlane.BuildConfig
+com.evvid.wallpapers.pocketPlane.R
+com.evvid.wallpapers.pocketPlane.R$attr
+com.evvid.wallpapers.pocketPlane.R$drawable
+com.evvid.wallpapers.pocketPlane.R$raw
+com.evvid.wallpapers.pocketPlane.R$string
+com.evvid.wallpapers.pocketPlane.R$xml
+com.evvid.wallpapers.pocketPlane.WallpaperRenderer:
+    232:233:public void onVisibilityChanged(boolean)
+com.evvid.wallpapers.pocketPlane.WallpaperSettings
+fix.android.opengl.GLES20:
+    15:16:private GLES20()
+net.rbgrn.opengl.GLThread:
+    private static final boolean LOG_THREADS
+    public static final int DEBUG_CHECK_GL_ERROR
+    public static final int DEBUG_LOG_GL_CALLS
+    272:272:public int getRenderMode()
+    339:348:public void requestExitAndWait()
+    357:364:public void queueEvent(java.lang.Runnable)
+net.rbgrn.opengl.GLWallpaperService$GLEngine:
+    public static final int RENDERMODE_WHEN_DIRTY
+    public static final int RENDERMODE_CONTINUOUSLY
+    private int mDebugFlags
+    136:137:public void setGLWrapper(android.opengl.GLSurfaceView$GLWrapper)
+    140:141:public void setDebugFlags(int)
+    144:144:public int getDebugFlags()
+    168:170:public void setEGLWindowSurfaceFactory(android.opengl.GLSurfaceView$EGLWindowSurfaceFactory)
+    178:179:public void setEGLConfigChooser(boolean)
+    182:183:public void setEGLConfigChooser(int,int,int,int,int,int)
+    190:190:public int getRenderMode()
+    206:207:public void queueEvent(java.lang.Runnable)
+rajawali.ATransformable3D:
+    protected rajawali.math.Number3D mRotationAxis
+    protected boolean mQuatWasSet
+    57:58:public void setY(float)
+    111:112:public void rotateAround(rajawali.math.Number3D,float)
+    115:122:public void rotateAround(rajawali.math.Number3D,float,boolean)
+    142:144:public void setRotX(float)
+    147:147:public float getRotX()
+    165:165:public float getRotZ()
+    169:169:public rajawali.math.Number3D getRotation()
+    173:175:public void setRotation(rajawali.math.Number3D)
+    190:191:public void setScaleX(float)
+    194:194:public float getScaleX()
+    198:199:public void setScaleY(float)
+    202:202:public float getScaleY()
+    206:207:public void setScaleZ(float)
+    210:210:public float getScaleZ()
+    214:214:public rajawali.math.Number3D getScale()
+    218:219:public void setScale(rajawali.math.Number3D)
+rajawali.BaseObject3D:
+    protected java.lang.String mName
+    82:84:public BaseObject3D(java.lang.String)
+    116:119:public void setData(rajawali.BufferInfo,rajawali.BufferInfo,float[],float[],int[])
+    316:320:protected void rotateM(float[],int,float,float,float,float)
+    349:350:public void removeTexture(rajawali.materials.TextureInfo)
+    354:358:protected void checkGlError(java.lang.String)
+    386:386:public boolean isContainer()
+    399:406:public void setScreenCoordinates(float,float,int,int,float)
+    409:409:public float[] getModelMatrix()
+    413:413:public boolean isDoubleSided()
+    417:417:public boolean isVisible()
+    425:425:public boolean isTransparent()
+    436:440:public void setTransparent(boolean)
+    468:469:public void setLight(rajawali.lights.ALight)
+    476:476:public rajawali.lights.ALight getLight()
+    480:480:public rajawali.lights.ALight getLight(int)
+    484:484:public int getDrawingMode()
+    519:519:public boolean removeChild(rajawali.BaseObject3D)
+    523:523:public int getNumChildren()
+    531:535:public rajawali.BaseObject3D getChildByName(java.lang.String)
+    561:562:public void setName(java.lang.String)
+    565:565:public java.lang.String getName()
+    569:569:public boolean isForcedDepth()
+    573:574:public void setForcedDepth(boolean)
+    577:582:public java.util.ArrayList getTextureInfoList()
+    586:617:public rajawali.SerializedObject3D toSerializedObject3D()
+    638:639:public void setVisible(boolean)
+    650:651:public void setColor(rajawali.math.Number3D)
+    658:666:public void setPickingColor(int)
+    669:670:public void setShowBoundingVolume(boolean)
+    673:673:public float[] getRotationMatrix()
+    677:678:public void setFrustumTest(boolean)
+    681:682:public void accept(rajawali.visitors.INodeVisitor)
+    685:685:public boolean isInFrustum()
+    690:690:public boolean getRenderChildrenAsBatch()
+    695:696:public void setRenderChildrenAsBatch(boolean)
+    700:700:public boolean isPartOfBatch()
+    713:713:public boolean isBlendingEnabled()
+    722:723:public void setDepthTestEnabled(boolean)
+    726:726:public boolean isDepthTestEnabled()
+    730:731:public void setDepthMaskEnabled(boolean)
+    734:734:public boolean isDepthMaskEnabled()
+rajawali.BufferInfo:
+    19:22:public BufferInfo(rajawali.Geometry3D$BufferType,java.nio.Buffer)
+rajawali.Camera:
+    61:65:protected void rotateM(float[],int,float,float,float,float)
+    68:69:public void setRotationMatrix(float[])
+    214:215:public void setUpAxis(float,float,float)
+    218:219:public void setUpAxis(rajawali.math.Number3D)
+    222:228:public void setUpAxis(rajawali.math.Number3D$Axis)
+    239:240:public void setNearPlane(float)
+    255:256:public void setFieldOfView(float)
+    259:259:public boolean getUseRotationMatrix()
+    263:264:public void setUseRotationMatrix(boolean)
+rajawali.Camera2D:
+    19:20:public void setWidth(float)
+    23:23:public float getWidth()
+    27:28:public void setHeight(float)
+    31:31:public float getHeight()
+rajawali.ChaseCamera
+rajawali.Frustum:
+    protected rajawali.primitives.Sphere mVisualSphere
+    55:58:public boolean sphereInFrustum(rajawali.math.Number3D,float)
+    79:83:public boolean pointInFrustum(rajawali.math.Number3D)
+rajawali.Geometry3D:
+    public static final int FLOAT_SIZE_BYTES
+    public static final int INT_SIZE_BYTES
+    public static final int SHORT_SIZE_BYTES
+    180:195:public void setData(rajawali.BufferInfo,rajawali.BufferInfo,float[],float[],int[])
+    210:211:public void setData(float[],float[],float[],float[],int[])
+    365:373:public void createVertexAndNormalBuffersOnly()
+    463:465:public void changeBufferUsage(rajawali.BufferInfo,int)
+    475:476:public void changeBufferData(rajawali.BufferInfo,java.nio.Buffer,int)
+    487:490:public void changeBufferData(rajawali.BufferInfo,java.nio.Buffer,int,int)
+    514:518:public void setVertices(java.nio.FloatBuffer)
+    540:544:public void setNormals(java.nio.FloatBuffer)
+    548:550:public java.nio.FloatBuffer getNormals()
+    566:568:public java.nio.Buffer getIndices()
+    584:586:public java.nio.FloatBuffer getTextureCoords()
+    607:609:public java.nio.FloatBuffer getColors()
+    742:743:public void setVertexBufferInfo(rajawali.BufferInfo)
+    750:751:public void setIndexBufferInfo(rajawali.BufferInfo)
+    758:759:public void setTexCoordBufferInfo(rajawali.BufferInfo)
+    766:767:public void setColorBufferInfo(rajawali.BufferInfo)
+    774:775:public void setNormalBufferInfo(rajawali.BufferInfo)
+    787:787:public int getNumTriangles()
+rajawali.RajawaliActivity
+rajawali.RajawaliActivity$1
+rajawali.RajawaliFragmentActivity
+rajawali.RajawaliFragmentActivity$1
+rajawali.SerializedObject3D:
+    private static final long serialVersionUID
+    protected float[][] mFrameNormals
+    protected float[][] mFrameVertices
+    protected java.lang.String[] mFrameNames
+    17:23:public SerializedObject3D(int,int,int,int,int)
+    29:30:public void setVertices(float[])
+    35:36:public void setNormals(float[])
+    41:42:public void setTextureCoords(float[])
+    47:48:public void setIndices(int[])
+    55:56:public void setColors(float[])
+    59:60:public void setFrameNames(java.lang.String[])
+    63:63:public java.lang.String[] getFrameNames()
+    67:68:public void setFrameVertices(float[][])
+    71:71:public float[][] getFrameVertices()
+    75:76:public void setFrameNormals(float[][])
+    79:79:public float[][] getFrameNormals()
+rajawali.animation.Animation3D:
+    public static final int INFINITE
+    public static final int RESTART
+    public static final int REVERSE
+    protected long mStartOffset
+    136:137:public void addAnimationListener(rajawali.animation.Animation3DListener)
+    144:144:public long getDuration()
+    156:157:public void setInterpolator(android.view.animation.Interpolator)
+    160:160:public android.view.animation.Interpolator getInterpolator()
+    168:168:public int getRepeatCount()
+    172:173:public void setRepeatMode(int)
+    176:176:public int getRepeatMode()
+    180:180:public boolean isHasStarted()
+    188:188:public boolean isHasEnded()
+    196:197:public void setPaused(boolean)
+    200:200:public boolean isPaused()
+    204:204:public long getDelay()
+    208:209:public void setDelay(long)
+    212:212:public long getUpdateRate()
+    216:217:public void setUpdateRate(long)
+rajawali.animation.Animation3DQueue
+rajawali.animation.BezierPath3D
+rajawali.animation.BezierPath3D$CubicBezier3D
+rajawali.animation.CatmullRomPath3D
+rajawali.animation.ISpline:
+    public abstract void setCalculateTangents(boolean)
+rajawali.animation.RotateAnimation3D:
+    18:20:public RotateAnimation3D(rajawali.math.Number3D$Axis,float)
+    23:24:public RotateAnimation3D(rajawali.math.Number3D$Axis,float,float)
+    68:69:public RotateAnimation3D(rajawali.math.Number3D)
+    76:77:public RotateAnimation3D(rajawali.math.Number3D,rajawali.math.Number3D)
+rajawali.animation.RotateAroundAnimation3D
+rajawali.animation.ScaleAnimation3D
+rajawali.animation.TranslateAnimation3D:
+    16:18:public TranslateAnimation3D(rajawali.math.Number3D)
+    27:29:public TranslateAnimation3D(rajawali.animation.ISpline)
+    59:59:public boolean getOrientToPath()
+    63:65:public void setOrientToPath(boolean)
+rajawali.animation.mesh.AAnimationObject3D
+rajawali.animation.mesh.BoneAnimationFrame
+rajawali.animation.mesh.BoneAnimationObject3D
+rajawali.animation.mesh.IAnimationFrame
+rajawali.animation.mesh.Skeleton
+rajawali.animation.mesh.SkeletonJoint
+rajawali.animation.mesh.VertexAnimationFrame
+rajawali.animation.mesh.VertexAnimationObject3D
+rajawali.bounds.BoundingBox:
+    163:163:public rajawali.math.Number3D getMin()
+    167:168:public void setMin(rajawali.math.Number3D)
+    171:171:public rajawali.math.Number3D getMax()
+    175:176:public void setMax(rajawali.math.Number3D)
+    179:179:public rajawali.math.Number3D getTransformedMin()
+    183:183:public rajawali.math.Number3D getTransformedMax()
+    187:194:public boolean intersectsWith(rajawali.bounds.IBoundingVolume)
+rajawali.bounds.BoundingSphere:
+    protected float mDist
+    protected float mMinDist
+    57:70:public void transform(float[])
+    90:90:public float getRadius()
+    94:94:public rajawali.math.Number3D getPosition()
+    98:98:public float getScale()
+    102:111:public boolean intersectsWith(rajawali.bounds.IBoundingVolume)
+rajawali.bounds.IBoundingVolume
+rajawali.filters.IPostProcessingFilter:
+    public abstract void addTexture(rajawali.materials.TextureInfo)
+    public abstract boolean usesDepthBuffer()
+rajawali.filters.SepiaFilter
+rajawali.filters.SwirlFilter
+rajawali.filters.TouchRippleFilter
+rajawali.lights.ALight:
+    public static final int DIRECTIONAL_LIGHT
+    public static final int POINT_LIGHT
+    protected boolean mUseObjectTransform
+    24:27:public void setColor(float,float,float)
+    36:39:public void setColor(rajawali.math.Number3D)
+    54:54:public boolean shouldUseObjectTransform()
+    58:59:public void shouldUseObjectTransform(boolean)
+    66:67:public void setLightType(int)
+rajawali.materials.AAdvancedMaterial:
+    public static final java.lang.String M_FOG_VERTEX_VARS
+    public static final java.lang.String M_FOG_VERTEX_DEPTH
+    public static final java.lang.String M_FOG_FRAGMENT_VARS
+    public static final java.lang.String M_FOG_FRAGMENT_CALC
+    public static final java.lang.String M_FOG_FRAGMENT_COLOR
+    80:81:public AAdvancedMaterial(java.lang.String,java.lang.String)
+    135:136:public void setAmbientColor(float[])
+    139:140:public void setAmbientColor(rajawali.math.Number3D)
+    143:144:public void setAmbientColor(float,float,float,float)
+    147:148:public void setAmbientColor(int)
+    151:152:public void setAmbientIntensity(float[])
+    155:159:public void setAmbientIntensity(float)
+    162:163:public void setAmbientIntensity(float,float,float,float)
+rajawali.materials.AMaterial:
+    public static final int NONE
+    public static final int VERTEX_ANIMATION
+    76:78:public AMaterial(int)
+    247:248:public void setTextureInfoList(java.util.ArrayList)
+    259:260:public void removeTexture(rajawali.materials.TextureInfo)
+    354:356:public void setTextureCoords(int)
+    408:410:public void setInterpolation(float)
+    413:421:public void setNextFrameVertices(int)
+    424:432:public void setNextFrameNormals(int)
+    480:480:public float[] getModelViewMatrix()
+rajawali.materials.AParticleMaterial
+rajawali.materials.BumpmapMaterial
+rajawali.materials.BumpmapPhongMaterial
+rajawali.materials.ColorPickerMaterial:
+    protected static final java.lang.String mVShader
+    protected static final java.lang.String mFShader
+    39:41:public ColorPickerMaterial(java.lang.String,java.lang.String)
+rajawali.materials.CubeMapMaterial
+rajawali.materials.DiffuseMaterial
+rajawali.materials.GouraudMaterial
+rajawali.materials.MaskedMaterial
+rajawali.materials.ParticleMaterial
+rajawali.materials.PhongMaterial:
+    protected static final java.lang.String mVShader
+    protected static final java.lang.String mFShader
+    121:125:public PhongMaterial(float[],float[],float)
+    135:136:public void setSpecularColor(float[])
+    139:143:public void setSpecularColor(rajawali.math.Number3D)
+    146:147:public void setSpecularColor(float,float,float,float)
+    150:151:public void setSpecularColor(int)
+rajawali.materials.SimpleMaterial:
+    protected static final java.lang.String mVShader
+    protected static final java.lang.String mFShader
+    42:44:public SimpleMaterial(java.lang.String,java.lang.String)
+rajawali.materials.SkyboxMaterial
+rajawali.materials.SphereMapMaterial
+rajawali.materials.TextureInfo:
+    protected int mBitmapFormat
+rajawali.materials.TextureManager:
+    private static final int GL_TEXTURE_EXTERNAL_OES
+    75:75:public rajawali.materials.TextureInfo addTexture(android.graphics.Bitmap,rajawali.materials.TextureManager$TextureType,boolean)
+    79:79:public rajawali.materials.TextureInfo addTexture(android.graphics.Bitmap,boolean,boolean)
+    83:83:public rajawali.materials.TextureInfo addTexture(android.graphics.Bitmap,rajawali.materials.TextureManager$TextureType,rajawali.materials.TextureManager$WrapType,rajawali.materials.TextureManager$FilterType)
+    87:87:public rajawali.materials.TextureInfo addTexture(android.graphics.Bitmap,rajawali.materials.TextureManager$TextureType,boolean,boolean)
+    99:99:public rajawali.materials.TextureInfo addTexture(java.nio.ByteBuffer,int,int)
+    235:249:public rajawali.materials.TextureInfo addVideoTexture()
+    253:253:public rajawali.materials.TextureInfo addCubemapTextures(android.graphics.Bitmap[])
+    257:257:public rajawali.materials.TextureInfo addCubemapTextures(android.graphics.Bitmap[],boolean)
+    324:327:public void updateTexture(java.lang.Integer,android.graphics.Bitmap)
+    330:333:public void updateTexture(rajawali.materials.TextureInfo,android.graphics.Bitmap)
+    373:375:public void removeTexture(rajawali.materials.TextureInfo)
+    378:388:public void removeTextures(java.util.ArrayList)
+    391:391:public java.util.ArrayList getTextureInfoList()
+rajawali.materials.ToonMaterial
+rajawali.materials.VideoMaterial
+rajawali.math.AngleAxis:
+    11:14:public AngleAxis(float,rajawali.math.Number3D)
+    17:17:public float getAngle()
+    21:22:public void setAngle(float)
+    25:25:public rajawali.math.Number3D getAxis()
+    29:30:public void setAxis(rajawali.math.Number3D)
+rajawali.math.MathUtil:
+    public static final int PRECISION
+    public static final float PI
+    public static final float TWO_PI
+    public static final float HALF_PI
+    public static final float PRE_PI_DIV_180
+    public static final float PRE_180_DIV_PI
+    private static final float RAD_SLICE
+    private static final float PRECISION_DIV_2PI
+    private static final int PRECISION_S
+    3:3:public MathUtil()
+    34:34:public static float sin(double)
+    38:38:public static float sin(float)
+    42:42:public static float cos(double)
+    46:46:public static float cos(float)
+    50:50:public static float tan(double)
+    62:62:public static float radiansToDegrees(float)
+    66:69:public static boolean realEqual(float,float,float)
+rajawali.math.Matrix4
+rajawali.math.Number3D:
+    public static final int M00
+    public static final int M01
+    public static final int M02
+    public static final int M03
+    public static final int M10
+    public static final int M11
+    public static final int M12
+    public static final int M13
+    public static final int M20
+    public static final int M21
+    public static final int M22
+    public static final int M23
+    public static final int M30
+    public static final int M31
+    public static final int M32
+    public static final int M33
+    51:56:public Number3D(java.lang.String[])
+    71:71:public boolean equals(rajawali.math.Number3D)
+    81:84:public void setAll(double,double,double)
+    117:117:public rajawali.math.Number3D inverse()
+    128:131:public rajawali.math.Number3D add(float,float,float)
+    149:152:public void multiply(rajawali.math.Number3D)
+    162:162:public float distanceTo(rajawali.math.Number3D)
+    174:181:public void rotateX(float)
+    184:191:public void rotateY(float)
+    194:201:public void rotateZ(float)
+    217:217:public static rajawali.math.Number3D add(rajawali.math.Number3D,rajawali.math.Number3D)
+    225:225:public static rajawali.math.Number3D multiply(rajawali.math.Number3D,rajawali.math.Number3D)
+    229:229:public static rajawali.math.Number3D multiply(rajawali.math.Number3D,float)
+    237:241:public rajawali.math.Number3D cross(rajawali.math.Number3D)
+    249:249:public float dot(rajawali.math.Number3D)
+    279:310:public rajawali.math.Quaternion getRotationTo(rajawali.math.Number3D)
+    314:314:public static rajawali.math.Number3D getUpVector()
+    319:323:public static rajawali.math.Number3D lerp(rajawali.math.Number3D,rajawali.math.Number3D,float)
+    337:340:public void lerpSelf(rajawali.math.Number3D,rajawali.math.Number3D,float)
+rajawali.math.Plane:
+    27:29:public Plane(rajawali.math.Number3D,rajawali.math.Number3D,rajawali.math.Number3D)
+    45:47:public void setAll(float,float,float,float)
+    50:50:public float distance(rajawali.math.Number3D)
+    61:62:public boolean isFrontFacing(rajawali.math.Number3D)
+    66:66:public rajawali.math.Number3D getNormal()
+    70:70:public float getD()
+    74:76:public void setAllFrom(rajawali.math.Plane)
+rajawali.math.Quaternion:
+    public static final float F_EPSILON
+    59:60:public rajawali.math.Quaternion fromAngleAxis(float,rajawali.math.Number3D$Axis)
+    77:93:public rajawali.math.Quaternion fromEuler(float,float,float)
+    98:113:public void fromAxes(rajawali.math.Number3D,rajawali.math.Number3D,rajawali.math.Number3D)
+    116:116:public rajawali.math.AngleAxis toAngleAxis()
+    120:134:public rajawali.math.AngleAxis toAngleAxis(rajawali.math.AngleAxis)
+    178:187:public rajawali.math.Number3D getXAxis()
+    191:201:public rajawali.math.Number3D getYAxis()
+    205:215:public rajawali.math.Number3D getZAxis()
+    219:223:public void add(rajawali.math.Quaternion)
+    226:230:public void subtract(rajawali.math.Quaternion)
+    233:237:public void multiply(float)
+    252:261:public rajawali.math.Number3D multiply(rajawali.math.Number3D)
+    265:265:public float dot(rajawali.math.Quaternion)
+    273:278:public rajawali.math.Quaternion inverse()
+    291:291:public rajawali.math.Quaternion unitInverse()
+    295:311:public rajawali.math.Quaternion exp()
+    315:334:public rajawali.math.Quaternion log()
+    338:341:public boolean equals(rajawali.math.Quaternion,float)
+    345:386:public static rajawali.math.Quaternion slerp(float,rajawali.math.Quaternion,rajawali.math.Quaternion,boolean)
+    391:407:public rajawali.math.Quaternion slerpExtraSpins(float,rajawali.math.Quaternion,rajawali.math.Quaternion,int)
+    411:414:public float normalize()
+    418:429:public float getRoll(boolean)
+    434:445:public float getPitch(boolean)
+    450:462:public float getYaw(boolean)
+    467:469:public rajawali.math.Matrix4 toRotationMatrix()
+    473:476:public void toRotationMatrix(rajawali.math.Matrix4)
+    512:521:public void computeW()
+    524:538:public rajawali.math.Quaternion nlerp(float,rajawali.math.Quaternion,rajawali.math.Quaternion,boolean)
+    550:550:public static rajawali.math.Quaternion getIdentity()
+    559:618:public static rajawali.math.Quaternion getRotationTo(rajawali.math.Number3D,rajawali.math.Number3D)
+rajawali.math.Vector2D
+rajawali.parser.AParser
+rajawali.parser.AParser$MaterialDef
+rajawali.parser.IParser
+rajawali.parser.MD2Parser
+rajawali.parser.MD2Parser$MD2Header
+rajawali.parser.MD2Parser$VertexIndices
+rajawali.parser.MD5Parser
+rajawali.parser.MD5Parser$MD5Mesh
+rajawali.parser.MD5Parser$MD5Vert
+rajawali.parser.MD5Parser$MD5Weight
+rajawali.parser.Max3DSParser
+rajawali.parser.ObjParser
+rajawali.parser.ObjParser$MaterialLib
+rajawali.parser.ObjParser$ObjIndexData
+rajawali.parser.fbx.FBXParser
+rajawali.parser.fbx.FBXValues
+rajawali.parser.fbx.FBXValues$Connections
+rajawali.parser.fbx.FBXValues$Connections$Connect
+rajawali.parser.fbx.FBXValues$Definitions
+rajawali.parser.fbx.FBXValues$Definitions$ObjectType
+rajawali.parser.fbx.FBXValues$FBXColor4
+rajawali.parser.fbx.FBXValues$FBXFloatBuffer
+rajawali.parser.fbx.FBXValues$FBXHeaderExtension
+rajawali.parser.fbx.FBXValues$FBXHeaderExtension$CreationTimeStamp
+rajawali.parser.fbx.FBXValues$FBXIntBuffer
+rajawali.parser.fbx.FBXValues$FBXMatrix
+rajawali.parser.fbx.FBXValues$Objects
+rajawali.parser.fbx.FBXValues$Objects$GlobalSettings
+rajawali.parser.fbx.FBXValues$Objects$GlobalSettings$Properties
+rajawali.parser.fbx.FBXValues$Objects$Material
+rajawali.parser.fbx.FBXValues$Objects$Material$Properties
+rajawali.parser.fbx.FBXValues$Objects$Model
+rajawali.parser.fbx.FBXValues$Objects$Model$Layer
+rajawali.parser.fbx.FBXValues$Objects$Model$LayerElement
+rajawali.parser.fbx.FBXValues$Objects$Model$LayerElementMaterial
+rajawali.parser.fbx.FBXValues$Objects$Model$LayerElementNormal
+rajawali.parser.fbx.FBXValues$Objects$Model$LayerElementTexture
+rajawali.parser.fbx.FBXValues$Objects$Model$LayerElementUV
+rajawali.parser.fbx.FBXValues$Objects$Model$Properties
+rajawali.parser.fbx.FBXValues$Objects$Pose
+rajawali.parser.fbx.FBXValues$Objects$Pose$PoseNode
+rajawali.parser.fbx.FBXValues$Objects$Texture
+rajawali.parser.fbx.FBXValues$Objects$Texture$Properties
+rajawali.parser.fbx.FBXValues$Relations
+rajawali.parser.fbx.FBXValues$Relations$Material
+rajawali.parser.fbx.FBXValues$Relations$Model
+rajawali.parser.fbx.FBXValues$Relations$Texture
+rajawali.parser.fbx.FBXValues$Takes
+rajawali.parser.fbx.FBXValues$Version5
+rajawali.parser.fbx.FBXValues$Version5$AmbientRenderSettings
+rajawali.parser.fbx.FBXValues$Version5$FogOptions
+rajawali.parser.fbx.FBXValues$Version5$RendererSetting
+rajawali.parser.fbx.FBXValues$Version5$Settings
+rajawali.preferences.ColorPickerPreference
+rajawali.preferences.ColorPickerView
+rajawali.preferences.SeekbarPreference
+rajawali.primitives.Cube:
+    17:22:public Cube(float,boolean)
+    25:30:public Cube(float,boolean,boolean)
+rajawali.primitives.Line3D
+rajawali.primitives.Particle
+rajawali.primitives.Plane:
+    20:21:public Plane(float,float,int,int)
+rajawali.renderer.PostProcessingRenderer:
+    93:94:public void setFilter(rajawali.filters.IPostProcessingFilter)
+    117:119:public void destroy()
+    151:152:public void setEnabled(boolean)
+    155:156:public void setInitialized(boolean)
+    159:201:public void checkError(java.lang.String,int)
+    204:204:public int getQuadSegments()
+    208:209:public void setQuadSegments(int)
+    212:212:public rajawali.renderer.PostProcessingRenderer$PostProcessingQuality getQuality()
+    216:217:public void setQuality(rajawali.renderer.PostProcessingRenderer$PostProcessingQuality)
+rajawali.renderer.RajawaliRenderer:
+    108:109:public void setCamera(rajawali.Camera)
+    112:112:public rajawali.Camera getCamera()
+    116:117:public void requestColorPickingTexture(rajawali.util.ObjectColorPicker$ColorPickerInfo)
+    307:311:public void onVisibilityChanged(boolean)
+    335:356:public rajawali.math.Number3D unProject(float,float,float)
+    360:360:public float getFrameRate()
+    383:383:public net.rbgrn.opengl.GLWallpaperService$GLEngine getEngine()
+    391:391:public android.opengl.GLSurfaceView getSurfaceView()
+    395:396:public void setSurfaceView(android.opengl.GLSurfaceView)
+    399:399:public android.content.Context getContext()
+    413:416:public void clearChildren()
+    419:425:protected void setSkybox(int)
+    428:442:protected void setSkybox(int,int,int,int,int,int)
+    445:445:public boolean removeChild(rajawali.BaseObject3D)
+    449:449:public int getNumChildren()
+    453:453:public java.util.Stack getChildren()
+    457:457:protected boolean hasChild(rajawali.BaseObject3D)
+    461:466:public void addPostProcessingFilter(rajawali.filters.IPostProcessingFilter)
+    469:473:public void accept(rajawali.visitors.INodeVisitor)
+    476:477:public void removePostProcessingFilter(rajawali.filters.IPostProcessingFilter)
+    480:484:public void clearPostProcessingFilters()
+    495:499:public void setBackgroundColor(float,float,float,float)
+    502:503:public void setBackgroundColor(int)
+    506:506:public boolean getSceneInitialized()
+    510:511:public void setSceneCachingEnabled(boolean)
+    514:514:public boolean getSceneCachingEnabled()
+    535:536:public static void setMaxLights(int)
+    539:540:public void setFPSUpdateListener(rajawali.util.FPSUpdateListener)
+    543:553:public static int checkGLError(java.lang.String)
+    557:562:public int getNumTriangles()
+rajawali.util.BufferUtil:
+    13:13:public BufferUtil()
+rajawali.util.IObjectPicker
+rajawali.util.LittleEndianDataInputStream
+rajawali.util.MeshExporter
+rajawali.util.MeshExporter$ExportType
+rajawali.util.ObjectColorPicker:
+    protected final int FLOAT_SIZE_BYTES
+    26:29:public ObjectColorPicker(rajawali.renderer.RajawaliRenderer)
+    48:49:public void setOnObjectPickedListener(rajawali.util.OnObjectPickedListener)
+    69:72:public void registerObject(rajawali.BaseObject3D)
+    75:87:private int getUniqueColor()
+    91:92:public void getObjectAt(float,float)
+rajawali.util.ObjectColorPicker$ColorPickerInfo:
+    private java.nio.ByteBuffer mColorPickerBuffer
+    final synthetic rajawali.util.ObjectColorPicker this$0
+    126:130:public ObjectColorPicker$ColorPickerInfo(rajawali.util.ObjectColorPicker,float,float,rajawali.util.ObjectColorPicker)
+    145:146:public void setColorPickerBuffer(java.nio.ByteBuffer)
+    149:149:public java.nio.ByteBuffer getColorPickerBuffer()
+rajawali.util.RajLog:
+    public static final java.lang.String TAG
+    5:5:public RajLog()
+    18:29:public static final void d(float[])
+    32:42:public static final varargs void d(java.lang.String[])
+    45:55:public static final void d(int[])
+    62:63:public static final void enableDebug(boolean)
+    66:67:public static final void i(java.lang.String)
+    70:71:public static final void v(java.lang.String)
+    74:75:public static final void w(java.lang.String)
+    78:79:public static final void wtf(java.lang.String)
+rajawali.util.RayPicker
+rajawali.visitors.INode
+rajawali.visitors.INodeVisitor
+rajawali.visitors.RayPickingVisitor
+rajawali.wallpaper.Wallpaper:
+    private static final boolean DEBUG
+    public static final java.lang.String SHARED_PREFS_NAME
+rajawali.wallpaper.Wallpaper$ConfigChooser:
+    private static final int EGL_OPENGL_ES2_BIT
+    private static final int EGL_COVERAGE_BUFFERS_NV
+    private static final int EGL_COVERAGE_SAMPLES_NV
+    176:182:private void printConfigs(javax.microedition.khronos.egl.EGL10,javax.microedition.khronos.egl.EGLDisplay,javax.microedition.khronos.egl.EGLConfig[])
+    186:267:private void printConfig(javax.microedition.khronos.egl.EGL10,javax.microedition.khronos.egl.EGLDisplay,javax.microedition.khronos.egl.EGLConfig)
+rajawali.wallpaper.Wallpaper$WallpaperEngine:
+    286:287:public Wallpaper$WallpaperEngine(rajawali.wallpaper.Wallpaper,android.content.SharedPreferences,android.content.Context,rajawali.renderer.RajawaliRenderer)
+rajawali.wallpaper.WallpaperSettings

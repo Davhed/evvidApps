@@ -1,0 +1,21 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="Aviation 3D Free - Light Plane"
+        android:key="aviation3dsharedprefs">
+	
+    <Preference 
+        android:title="@string/title" 
+        android:summary="@string/summary" 
+        android:selectable="false"/>
+    
+	<Preference 
+	    android:title="@string/buyNow" >
+	    <intent android:action="android.intent.action.VIEW"
+	            android:data="https://play.google.com/store/apps/details?id=com.evvid.wallpapers.aviation3d.lightplane" />
+	</Preference>
+	<Preference 
+	    android:title="@string/feedback" >
+	    <intent android:action="android.intent.action.VIEW"
+	            android:data="mailto:feedback@evvid.com" />
+	</Preference>
+	
+</PreferenceScreen>
