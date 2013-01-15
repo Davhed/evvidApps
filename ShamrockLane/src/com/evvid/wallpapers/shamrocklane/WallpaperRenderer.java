@@ -103,21 +103,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
 
 		waterUVs   = new float[] {   0f, .25f, .25f, .25f,   0f,   0f, .25f,   0f };
-//		tile2  = new float[] { .25f, .25f,  .5f, .25f, .25f,   0f,  .5f,   0f };
-//		tile3  = new float[] {  .5f, .25f, .75f, .25f,  .5f,   0f, .75f,   0f };
-//		tile4  = new float[] { .75f, .25f,   1f, .25f, .75f,   0f,   1f,   0f };
-//		tile5  = new float[] {   0f,  .5f, .25f,  .5f,   0f, .25f, .25f, .25f };
-//		tile6  = new float[] { .25f,  .5f,  .5f,  .5f, .25f, .25f,  .5f, .25f };
-//		tile7  = new float[] {  .5f,  .5f, .75f,  .5f,  .5f, .25f, .75f, .25f };
-//		tile8  = new float[] { .75f,  .5f,   1f,  .5f, .75f, .25f,   1f, .25f };
-//		tile9  = new float[] {   0f, .75f, .25f, .75f,   0f,  .5f, .25f,  .5f };
-//		tile10 = new float[] { .25f, .75f,  .5f, .75f, .25f,  .5f,  .5f,  .5f };
-//		tile11 = new float[] {  .5f, .75f, .75f, .75f,  .5f,  .5f, .75f,  .5f };
-//		tile12 = new float[] { .75f, .75f,   1f, .75f, .75f,  .5f,   1f,  .5f };
-//		tile13 = new float[] {   0f,   1f, .25f,   1f,   0f, .75f, .25f, .75f };
-//		tile14 = new float[] { .25f,   1f,  .5f,   1f, .25f, .75f,  .5f, .75f };
-//		tile15 = new float[] {  .5f,   1f, .75f,   1f,  .5f, .75f, .75f, .75f };
-//		tile16 = new float[] { .75f,   1f,   1f,   1f, .75f, .75f,   1f, .75f };
 	}
 	
 	private void loadObjects(){		
@@ -340,14 +325,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			water2.setPosition(water1.getX()+.5f, water1.getY()+.01f, water1.getZ()-.5f);
 			water2.setBlendingEnabled(true);
 			water2.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-
-
 		} catch (Exception e){
 			e.printStackTrace();
 		}	
 	}
-	
-
 	
 	private void addObjects(){		
 		addChild(skydome);			
@@ -382,25 +363,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		addChild(rbow2);			
 	    
 	    sceneInit = true;
-//	    for(int a = 0; a < 16; a++){
-//	    	if(a%4 == 0) {
-//	    		tile = new float[] {   0f, (.25f+((a/4)*.25f)), .25f, (.25f+((a/4)*.25f)),   0f,   (0f+((a/4)*.25f)), .25f,   (0f+((a/4)*.25f)) };
-//
-//	    	}
-//	    	else{
-//	    		for(int i = 0; i < tile.length; i++) {
-//					if ( i%2 == 0){
-//						tile[i]+=.25f;
-//						if (tile[i] > 1) tile[i]= 0;
-//					}
-//				}
-//	    	}
-//	    }
-
 	}
 	
 	private void setOnPreferenceChange(){
-	
 	}
 	
 	private void setPrefsToLocal(){
@@ -437,6 +402,17 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void recycleTextures(){
 		try{
+			skyTex.recycle();
+			castleTex.recycle();
+			groundTex.recycle();
+			pathTex.recycle();
+			wallStumpTex.recycle();
+			potBowTex.recycle();
+			waterfallrockTex.recycle();
+			doorGateArchTex.recycle();
+			treeTex.recycle();
+			shroomTex.recycle();
+			waterTex.recycle();
 			System.gc();
 		} catch (Exception e){
 			e.printStackTrace();
@@ -452,7 +428,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 		if(sceneInit){
 			if(frameCounter%4 == 0)waterMotion();
-			mCamera.setLookAt(camLookNull.getPosition());
+			cameraControl();
 			frameCounter++;
 		}
 	}
@@ -476,99 +452,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		water1.reload();
 		water2.reload();
     	tileIndex++;
-
-//		if (counter%4 == 0) {
-//			water1.getGeometry().setTextureCoords(tile);
-//			water2.getGeometry().setTextureCoords(tile);
-//			for(int i = 0; i < tile.length; i++) {
-//				if ( i%2 != 0){
-//					tile[i]+=.25f;
-//					if (tile[i] > 1) tile[i]= 0;
-//				}else if (i%2 == 0 && counter%16 == 0){
-//					tile[i]+=.25f;
-//					if (tile[i] > 1) tile[i]= 0;
-//				}
-//			}
-//			if (counter == 64){
-//				counter = 0;
-//				tile   = new float[] {   0f, .25f, .25f, .25f,   0f,   0f, .25f,   0f };
-//				System.out.println(tile[0]+", "+tile[1]+", "+tile[2]+", "+tile[3]+", "+tile[4]+", "+tile[5]+", "+tile[6]+", "+tile[7]);
-//			}
-//			water1.reload();
-//			water2.reload();
-//		}
-//		counter++;
-
-//		switch (counter){
-//		case 0 :
-//			water1.getGeometry().setTextureCoords(tile);
-//			water2.getGeometry().setTextureCoords(tile8);
-//			counter = 60;
-//			break;
-//		case 4 :
-//			water1.getGeometry().setTextureCoords(tile2);
-//			water2.getGeometry().setTextureCoords(tile9);
-//			break;
-//		case 8 :
-//			water1.getGeometry().setTextureCoords(tile3);
-//			water2.getGeometry().setTextureCoords(tile10);
-//			break;
-//		case 12 :
-//			water1.getGeometry().setTextureCoords(tile4);
-//			water2.getGeometry().setTextureCoords(tile11);
-//			break;
-//		case 16 : 
-//			water1.getGeometry().setTextureCoords(tile5);
-//			water2.getGeometry().setTextureCoords(tile12);
-//			break;
-//		case 20 :
-//			water1.getGeometry().setTextureCoords(tile6);
-//			water2.getGeometry().setTextureCoords(tile13);
-//			break;
-//		case 24 :
-//			water1.getGeometry().setTextureCoords(tile7);
-//			water2.getGeometry().setTextureCoords(tile14);
-//			break;
-//		case 28 :
-//			water1.getGeometry().setTextureCoords(tile8);
-//			water2.getGeometry().setTextureCoords(tile15);
-//			break;
-//		case 32 : 
-//			water1.getGeometry().setTextureCoords(tile9);
-//			water2.getGeometry().setTextureCoords(tile16);
-//			break;
-//		case 36 :
-//			water1.getGeometry().setTextureCoords(tile10);
-//			water2.getGeometry().setTextureCoords(tile);
-//			break;
-//		case 40 :
-//			water1.getGeometry().setTextureCoords(tile11);
-//			water2.getGeometry().setTextureCoords(tile2);
-//			break;
-//		case 44 :
-//			water1.getGeometry().setTextureCoords(tile12);
-//			water2.getGeometry().setTextureCoords(tile3);
-//			break;
-//		case 48 : 
-//			water1.getGeometry().setTextureCoords(tile13);
-//			water2.getGeometry().setTextureCoords(tile4);
-//			break;
-//		case 52 :
-//			water1.getGeometry().setTextureCoords(tile14);
-//			water2.getGeometry().setTextureCoords(tile5);
-//			break;
-//		case 56 :
-//			water1.getGeometry().setTextureCoords(tile15);
-//			water2.getGeometry().setTextureCoords(tile6);
-//			break;
-//		case 60 :
-//			water1.getGeometry().setTextureCoords(tile16);
-//			water2.getGeometry().setTextureCoords(tile7);
-//			break;
-//		}
-//		water1.reload();
-//		water2.reload();
-//		counter++;
+	}
+	
+	private void cameraControl(){
+		mCamera.setLookAt(camLookNull.getPosition());		
 	}
 
 	private void cameraTrack(float xOffset, float yOffset, int pointerCount) {
@@ -578,7 +465,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
     	if(pointerCount > 1) {
     		camLookNull.setX((camLookNull.getX() + xOffset/2));
     		if(pointerCount == 2) camLookNull.setY((camLookNull.getY() + yOffset/2));
-    		else camLookNull.setZ((camLookNull.getZ() + yOffset/2));
+    		else mCamera.setZ((mCamera.getZ() + yOffset/2));
     	}
     	else {
     		mCamera.setX((mCamera.getX() + xOffset/2));
