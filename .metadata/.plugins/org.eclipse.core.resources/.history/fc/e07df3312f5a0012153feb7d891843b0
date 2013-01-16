@@ -1,0 +1,141 @@
+package com.example;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import com.example.R;
+
+
+import rajawali.BaseObject3D;
+import rajawali.materials.SimpleMaterial;
+import rajawali.primitives.Plane;
+import rajawali.renderer.RajawaliRenderer;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+
+
+public class WallpaperRenderer extends RajawaliRenderer{
+	
+	private BaseObject3D water;
+	private float[] tile, tile2, tile3, tile4, tile5, tile6, tile7, tile8,
+					tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16;
+	private int counter = 0;
+	
+	public WallpaperRenderer(Context context) {
+		super(context);
+		setFrameRate(4);
+	}
+		
+	public void initScene() {		
+		Bitmap waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
+		water = new Plane(20,20,1,1);
+		water.setMaterial(new SimpleMaterial());
+		water.addTexture(mTextureManager.addTexture(waterTex));
+		water.setRotation(0, 0, -90);
+
+		tile   = new float[] {   0f, .25f, .25f, .25f,   0f,   0f, .25f,   0f };
+		tile2  = new float[] { .25f, .25f,  .5f, .25f, .25f,   0f,  .5f,   0f };
+		tile3  = new float[] {  .5f, .25f, .75f, .25f,  .5f,   0f, .75f,   0f };
+		tile4  = new float[] { .75f, .25f,   1f, .25f, .75f,   0f,   1f,   0f };
+		tile5  = new float[] {   0f,  .5f, .25f,  .5f,   0f, .25f, .25f, .25f };
+		tile6  = new float[] { .25f,  .5f,  .5f,  .5f, .25f, .25f,  .5f, .25f };
+		tile7  = new float[] {  .5f,  .5f, .75f,  .5f,  .5f, .25f, .75f, .25f };
+		tile8  = new float[] { .75f,  .5f,   1f,  .5f, .75f, .25f,   1f, .25f };
+		tile9  = new float[] {   0f, .75f, .25f, .75f,   0f,  .5f, .25f,  .5f };
+		tile10 = new float[] { .25f, .75f,  .5f, .75f, .25f,  .5f,  .5f,  .5f };
+		tile11 = new float[] {  .5f, .75f, .75f, .75f,  .5f,  .5f, .75f,  .5f };
+		tile12 = new float[] { .75f, .75f,   1f, .75f, .75f,  .5f,   1f,  .5f };
+		tile13 = new float[] {   0f,   1f, .25f,   1f,   0f, .75f, .25f, .75f };
+		tile14 = new float[] { .25f,   1f,  .5f,   1f, .25f, .75f,  .5f, .75f };
+		tile15 = new float[] {  .5f,   1f, .75f,   1f,  .5f, .75f, .75f, .75f };
+		tile16 = new float[] { .75f,   1f,   1f,   1f, .75f, .75f,   1f, .75f };
+
+	    addChild(water);
+
+		mCamera.setPosition(0, 0, -20);
+		mCamera.setLookAt(0,0,0);
+	}
+	
+	@Override
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+		super.onSurfaceCreated(gl, config);
+	}
+	
+	@Override
+	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
+		super.onSurfaceChanged(gl, width, height);
+	}
+	
+	@Override
+	public void onSurfaceDestroyed() {
+			super.onSurfaceDestroyed();
+	}
+	
+
+
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+			super.onDrawFrame(glUnused);
+			waterMotion();
+	}
+	
+	private void waterMotion() {
+		switch (counter){
+		case 1 : 
+			water.getGeometry().setTextureCoords(tile);
+			break;
+		case 2 :
+			water.getGeometry().setTextureCoords(tile2);
+			break;
+		case 3 :
+			water.getGeometry().setTextureCoords(tile3);
+			break;
+		case 4 :
+			water.getGeometry().setTextureCoords(tile4);
+			break;
+		case 5 : 
+			water.getGeometry().setTextureCoords(tile5);
+			break;
+		case 6 :
+			water.getGeometry().setTextureCoords(tile6);
+			break;
+		case 7 :
+			water.getGeometry().setTextureCoords(tile7);
+			break;
+		case 8 :
+			water.getGeometry().setTextureCoords(tile8);
+			break;
+		case 9 : 
+			water.getGeometry().setTextureCoords(tile9);
+			break;
+		case 10 :
+			water.getGeometry().setTextureCoords(tile10);
+			break;
+		case 11 :
+			water.getGeometry().setTextureCoords(tile11);
+			break;
+		case 12 :
+			water.getGeometry().setTextureCoords(tile12);
+			break;
+		case 13 : 
+			water.getGeometry().setTextureCoords(tile13);
+			break;
+		case 14 :
+			water.getGeometry().setTextureCoords(tile14);
+			break;
+		case 15 :
+			water.getGeometry().setTextureCoords(tile15);
+			break;
+		case 16 :
+			water.getGeometry().setTextureCoords(tile16);
+			counter = 0;
+			break;
+		}
+		water.reload();
+		counter++;
+	}
+	
+
+}

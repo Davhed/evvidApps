@@ -1,0 +1,100 @@
+package com.example;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import com.example.R;
+
+
+import rajawali.BaseObject3D;
+import rajawali.materials.SimpleMaterial;
+import rajawali.primitives.Plane;
+import rajawali.renderer.RajawaliRenderer;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+
+
+
+public class WallpaperRenderer extends RajawaliRenderer{
+	
+	private BaseObject3D water, water2;
+	private float[] waterUVs;
+	private int tileIndex = 0;
+	
+	public WallpaperRenderer(Context context) {
+		super(context);
+		setFrameRate(30);
+	}
+		
+	public void initScene() {		
+		Bitmap waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
+		water = new Plane(20,20,1,1);
+		water.setMaterial(new SimpleMaterial());
+		water.addTexture(mTextureManager.addTexture(waterTex));
+		water.setRotation(0, 90, -90);
+		water2 = new Plane(20,20,1,1);
+		water2.setMaterial(new SimpleMaterial());
+		water2.addTexture(mTextureManager.addTexture(waterTex));
+		water2.setRotation(0, 90, -90);
+		water2.setPosition(2.5f, .25f, -1);
+		water2.setBlendingEnabled(true);
+		water2.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+
+		waterUVs   = new float[] {   0f, .25f, .25f, .25f,   0f,   0f, .25f,   0f };
+
+	    addChild(water);
+	    addChild(water2);
+
+		mCamera.setPosition(0, 15, -15);
+		mCamera.setLookAt(0,0,0);
+	}
+	
+	@Override
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+		super.onSurfaceCreated(gl, config);
+	}
+	
+	@Override
+	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
+		super.onSurfaceChanged(gl, width, height);
+	}
+	
+	@Override
+	public void onSurfaceDestroyed() {
+			super.onSurfaceDestroyed();
+	}
+	
+
+
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+			super.onDrawFrame(glUnused);
+			waterMotion();
+	}
+	
+	private void waterMotion() {
+    	if(tileIndex < 16){
+    		if(tileIndex%4 == 0) {
+	    		waterUVs = new float[] {   0f, (.25f+((tileIndex/4)*.25f)), .25f, (.25f+((tileIndex/4)*.25f)),   0f,   (0f+((tileIndex/4)*.25f)), .25f,   (0f+((tileIndex/4)*.25f)) };
+	    	}
+	    	else{
+	    		for(int i = 0; i < waterUVs.length; i++) {
+					if ( i%2 == 0){
+						waterUVs[i]+=.25f;
+						if (waterUVs[i] > 1) waterUVs[i]= 0;
+					}
+				}
+	    	}
+    	}else tileIndex = -1;
+		water.getGeometry().setTextureCoords(waterUVs);
+		water2.getGeometry().setTextureCoords(waterUVs);
+		water.reload();
+		water2.reload();
+    	tileIndex++;
+
+	}
+	
+
+}
