@@ -1,6 +1,0 @@
-newmtl pot:Default
-Ka 0.8 0.8 0.8
-Kd 0.8 0.8 0.8
-Ks 0 0 0
-Ns 127
-map_Kd grass2.jpg

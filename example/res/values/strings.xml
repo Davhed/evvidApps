@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FOO</string>
+    <string name="lwp_name">FOO</string>
+    <string name="lwp_desc">FOO</string>
+    <string name="lwp_author">FOO</string>
+    
+    <string name="picker_toast_prefix">Choose \"</string>
+    <string name="picker_toast_suffix">\" from this list.</string>
+    
+    <string name="lwp_settings">FOO Settings</string>
+   
+    
+    </resources>
