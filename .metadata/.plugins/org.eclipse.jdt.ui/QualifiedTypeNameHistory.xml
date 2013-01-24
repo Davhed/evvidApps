@@ -43,4 +43,7 @@
 <fullyQualifiedTypeName name="rajawali.lights.PointLight"/>
 <fullyQualifiedTypeName name="rajawali.materials.PhongMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.TextureInfo"/>
+<fullyQualifiedTypeName name="rajawali.materials.SpecularMaskMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.TextureManager.TextureType"/>
+<fullyQualifiedTypeName name="rajawali.materials.BumpmapMaterial"/>
 </qualifiedTypeNameHistroy>

@@ -62,14 +62,14 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	grass1, grass2, grass3, grass4, grass5, grass6, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2;
 	
 	private float[] waterUVs;
-	private BaseObject3D[] waterTiles, waterfallTiles, branches;
+	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branches;
 
-	private int frameCounter = 0, tileIndex = 0, camSpeed = 20, waveCounter = 0;
+	private int frameCounter = 0, tileIndex = 0, camSpeed = 20;
 
 	private Boolean sceneInit = false, moveCamera = false, moveCameraLook = false, firstTouch = true;;
 	
-	private Bitmap skyTex, castleTex, groundTex, pathTex, wallStumpTex, potBowTex, waterfallrockTex,
-	doorGateArchTex, treeTex, shroomTex, waterTex;
+	private Bitmap  castleTex, pathTex, wallStumpTex, potBowTex, waterfallrockTex,
+	doorGateArchTex, waterTex, splashTex;
 	
 	private Bitmap[] waterfallTex;
 
@@ -126,23 +126,28 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		mCamera.setLookAt(cameraLook[0]);
 		
 		pLight_ground = new PointLight();
-		pLight_ground.setPosition(-6.5f, 18, 18.5f);
-		pLight_ground.setPower(2);
-		pLight_ground.setAttenuation(100, 1, 0, 0);	
+		pLight_ground.setPosition(6.5f, 15, 15f);
+		pLight_ground.setPower(2f);
+		pLight_ground.setAttenuation(50, 1, 0, 0);	
 	}
 	
 	private void loadTextures(){
-		skyTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome);
 		castleTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt);
-		groundTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass);
 		pathTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path);
 		wallStumpTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump);
 		potBowTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot);
 		waterfallrockTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_tex);
 		doorGateArchTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gate_arch);
-		treeTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree);
-		shroomTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mushroom);		
 		waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
+		splashTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas);
+		
+	    waterfallTex = new Bitmap[16];
+
+		for(int i = 0; i <  waterfallTex.length; i++){
+    		int id = mContext.getResources().getIdentifier("wf" + (i+1), "drawable", "com.evvid.wallpapers.shamrocklane");
+    		waterfallTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
+		}
+
 	}
 	
 	private void loadObjects(){		
@@ -153,7 +158,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			SimpleMaterial fernWallMat = new SimpleMaterial();
 			SimpleMaterial bowMat = new SimpleMaterial();
 			SimpleMaterial waterfallrockMat = new SimpleMaterial();
-			SimpleMaterial doorGateArchMat = new SimpleMaterial();
 			SimpleMaterial bigtreeMat = new SimpleMaterial();
 
 			PhongMaterial goldMat = new PhongMaterial();
@@ -169,14 +173,14 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			shroomMat.setShininess(70);
 
 			PhongMaterial groundMat = new PhongMaterial();
-			groundMat.setShininess(80);
+			groundMat.setShininess(100);
 			
 			PhongMaterial wallStumpMat = new PhongMaterial();
 			wallStumpMat.setShininess(80);
+
+			SimpleMaterial doorGateArchMat = new SimpleMaterial();
 			
-			skyMat.addTexture(mTextureManager.addTexture(skyTex));
 			castleBranchDirtMat.addTexture(mTextureManager.addTexture(castleTex));
-			groundMat.addTexture(mTextureManager.addTexture(groundTex));
 			pathMat.addTexture(mTextureManager.addTexture(pathTex));
 			fernWallMat.addTexture(mTextureManager.addTexture(wallStumpTex));
 			wallStumpMat.addTexture(mTextureManager.addTexture(wallStumpTex));
@@ -185,64 +189,17 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			waterfallrockMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
 			goldMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
 			doorGateArchMat.addTexture(mTextureManager.addTexture(doorGateArchTex));
-			bigtreeMat.addTexture(mTextureManager.addTexture(treeTex));
-			treeMat.addTexture(mTextureManager.addTexture(treeTex));
-			shroomMat.addTexture(mTextureManager.addTexture(shroomTex));
-					
-//			objSerializer(R.raw.skydome_obj, "skydome.ser");
-//			objSerializer(R.raw.castleb_obj, "castleb.ser");
-//			objSerializer(R.raw.castle_obj, "castle.ser");
-//			objSerializer(R.raw.ground_obj, "ground.ser");
-//			objSerializer(R.raw.dirt_obj, "dirt.ser");
-//			objSerializer(R.raw.shadows1_obj, "shadows1.ser");
-//			objSerializer(R.raw.shadows2_obj, "shadows2.ser");
-//
-//			objSerializer(R.raw.path_obj, "path.ser");
-//			objSerializer(R.raw.lilys_obj, "lilys.ser");
-//			objSerializer(R.raw.flowers1_obj, "flowers1.ser");
-//			objSerializer(R.raw.flowers2_obj, "flowers2.ser");
-//			objSerializer(R.raw.flowers3_obj, "flowers3.ser");
-//			objSerializer(R.raw.flowers4_obj, "flowers4.ser");
-//			objSerializer(R.raw.flowers5_obj, "flowers5.ser");
-//			objSerializer(R.raw.flowers6_obj, "flowers6.ser");
-//
-//			objSerializer(R.raw.vines1_obj, "vines1.ser");
-//			objSerializer(R.raw.vines2_obj, "vines2.ser");
-//			objSerializer(R.raw.vines3_obj, "vines3.ser");
-//			objSerializer(R.raw.stumpdecal_obj, "stumpdecal.ser");
-//			objSerializer(R.raw.walls_obj, "walls.ser");
-//			objSerializer(R.raw.gate_obj, "gate.ser");
-//			objSerializer(R.raw.arch_obj, "arch.ser");
-//			objSerializer(R.raw.stump_obj, "stump.ser");
-//
-//			objSerializer(R.raw.largestump_obj, "largestump.ser");
-//			objSerializer(R.raw.waterfall_obj, "waterfall.ser");
-//			objSerializer(R.raw.pot_obj, "pot.ser");
-//			objSerializer(R.raw.gold_obj, "gold.ser");
-//			objSerializer(R.raw.rbow1_obj, "rbow1.ser");
-//			objSerializer(R.raw.rbow2_obj, "rbow2.ser");
-//			objSerializer(R.raw.tree_obj, "tree.ser");
-//			objSerializer(R.raw.door_obj, "door.ser");
-//
-//			objSerializer(R.raw.rocks_obj, "rocks.ser");
-//			objSerializer(R.raw.shrooms_obj, "shrooms.ser");
-//			objSerializer(R.raw.shamrocks_obj, "shamrocks.ser");
-//			objSerializer(R.raw.treeferns_obj, "treeferns.ser");
-//			objSerializer(R.raw.pondferns_obj, "pondferns.ser");
-//			objSerializer(R.raw.grass1_obj, "grass1.ser");
-//			objSerializer(R.raw.grass2_obj, "grass2.ser");
-//			objSerializer(R.raw.grass3_obj, "grass3.ser");
-//			objSerializer(R.raw.grass4_obj, "grass4.ser");
-//			objSerializer(R.raw.grass5_obj, "grass5.ser");
-//			objSerializer(R.raw.grass6_obj, "grass6.ser");
-//			objSerializer(R.raw.waterfallsprite_obj, "waterfallsprite.ser");
-//			objSerializer(R.raw.fgtrees_obj, "fgtrees.ser");
-//			objSerializer(R.raw.fgferns_obj, "fgferns.ser");
-
-			
+			groundMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass)));
+			skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
+			treeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
+			bigtreeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
+			shroomMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mushroom)));
+		
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.skydome));
 	    	skydome = new BaseObject3D((SerializedObject3D)ois.readObject());
 			skydome.setMaterial(skyMat);
+			skydome.setY(20);
+			skydome.setRotY(5);
 			skydome.setDoubleSided(true);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.castleb));
@@ -423,6 +380,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.door));
 	    	door = new BaseObject3D((SerializedObject3D)ois.readObject());
 			door.setMaterial(doorGateArchMat);
+			door.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.rocks));
 	    	rocks = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -508,7 +466,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}	
 	}
 
-	private void addObjects(){		
+	private void addObjects(){	
 		addChild(skydome);			
 		addChild(castletowers);			
 		addChild(castle);			
@@ -605,12 +563,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 
 		waterfallTiles = new BaseObject3D [16];
-	    waterfallTex = new Bitmap[16];
-
+		
 		for(int i = 0; i <  waterfallTiles.length; i++){
-    		int identifier = mContext.getResources().getIdentifier("wf" + (i+1), "drawable", "com.evvid.wallpapers.shamrocklane");
-    		waterfallTex[i] = BitmapFactory.decodeResource(mContext.getResources(), identifier);
-    		
 			waterfallTiles[i] = waterfallsprite.clone();
 			waterfallTiles[i].setMaterial(new SimpleMaterial());
 			waterfallTiles[i].addTexture(mTextureManager.addTexture(waterfallTex[i]));
@@ -620,8 +574,63 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			waterfallTiles[i].setVisible(false);
 			addChild(waterfallTiles[i]);
 		}
+		
+		int numRows = 8;
+		float tileWidth  = .125f;
+		float[] splashUVs = new float[32];
+		
+		splashTiles = new BaseObject3D [32];
+		splash2Tiles = new BaseObject3D [32];
+		splash3Tiles = new BaseObject3D [32];
+		
+		for(int i = 0; i <  splashTiles.length; i++){
+    		if(i%numRows == 0) {
+    			splashUVs = new float[] {   0f, (tileWidth+((i/numRows)*tileWidth)), tileWidth, (tileWidth+((i/numRows)*tileWidth)),   0f,   (0f+((i/numRows)*tileWidth)), tileWidth,   (0f+((i/numRows)*tileWidth)) };
+	    	}else{
+	    		for(int j = 0; j < splashUVs.length; j++) {
+					if ( j%2 == 0){
+						splashUVs[j]+=tileWidth;
+						if (splashUVs[j] > 1) splashUVs[j]= 0;
+					}
+				}
+	    	}
+    		
+			splashTiles[i] = new Plane(5f,7f,1,1);
+			splashTiles[i].setMaterial(new SimpleMaterial());
+			splashTiles[i].addTexture(mTextureManager.addTexture(splashTex));
+			splashTiles[i].setRotation(-90, -95, -10);
+			splashTiles[i].setPosition(16f, 0.5f, 11.7f);
+			splashTiles[i].setDoubleSided(true);
+			splashTiles[i].getGeometry().setTextureCoords(splashUVs);
+			splashTiles[i].setBlendingEnabled(true);
+			splashTiles[i].setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			splashTiles[i].setVisible(false);
+			addChild(splashTiles[i]);
 
+			splash2Tiles[i] = new Plane(5,5,1,1);
+			splash2Tiles[i].setMaterial(new SimpleMaterial());
+			splash2Tiles[i].addTexture(mTextureManager.addTexture(splashTex));
+			splash2Tiles[i].setRotation(-90, -90, -25);
+			splash2Tiles[i].setPosition(15.3f, -2f, 14f);
+			splash2Tiles[i].setDoubleSided(true);
+			splash2Tiles[i].getGeometry().setTextureCoords(splashUVs);
+			splash2Tiles[i].setBlendingEnabled(true);
+			splash2Tiles[i].setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			splash2Tiles[i].setVisible(false);
+			addChild(splash2Tiles[i]);
 
+			splash3Tiles[i] = new Plane(5,5,1,1);
+			splash3Tiles[i].setMaterial(new SimpleMaterial());
+			splash3Tiles[i].addTexture(mTextureManager.addTexture(splashTex));
+			splash3Tiles[i].setRotation(-90, -90, 25);
+			splash3Tiles[i].setPosition(15f, -2.8f, 9.5f);
+			splash3Tiles[i].setDoubleSided(true);
+			splash3Tiles[i].getGeometry().setTextureCoords(splashUVs);
+			splash3Tiles[i].setBlendingEnabled(true);
+			splash3Tiles[i].setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			splash3Tiles[i].setVisible(false);
+			addChild(splash3Tiles[i]);
+}
 	}
 	
 	private void addBranches(){
@@ -724,16 +733,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void recycleTextures(){
 		try{
-			skyTex.recycle();
 			castleTex.recycle();
-			groundTex.recycle();
 			pathTex.recycle();
 			wallStumpTex.recycle();
 			potBowTex.recycle();
 			waterfallrockTex.recycle();
 			doorGateArchTex.recycle();
-			treeTex.recycle();
-			shroomTex.recycle();
 			waterTex.recycle();
 			System.gc();
 		} catch (Exception e){
@@ -750,14 +755,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 		if(sceneInit){
 			if(!branches[0].isVisible())showBranches();
-	    	branchMotion();
 			if(frameCounter%4 == 0) {
 				waterMotion();
 			}
 			if(moveCamera)cameraMovement();
 			cameraControl();
 	    	if(frameCounter++ == 64) frameCounter = 0;
-			waveCounter++;
 		}
 	}
 	
@@ -767,22 +770,25 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 	}
 	
-	private void branchMotion(){
-		for(int i = 0; i < branches.length; i++){
-			branches[i].setRotZ((float) (branches[i].getRotZ()+Math.sin(waveCounter)));
-		}
-	}
-	
 	private void waterMotion() {
     	waterTiles[tileIndex].setVisible(true);
     	waterfallTiles[tileIndex].setVisible(true);
+    	splashTiles[tileIndex].setVisible(true);
+    	splash2Tiles[tileIndex].setVisible(true);
+    	splash3Tiles[tileIndex].setVisible(true);
    	
     	if(tileIndex>0){
     		waterTiles[tileIndex-1].setVisible(false);
 			waterfallTiles[tileIndex-1].setVisible(false);
+	    	splashTiles[tileIndex-1].setVisible(false);
+	    	splash2Tiles[tileIndex-1].setVisible(false);
+	    	splash3Tiles[tileIndex-1].setVisible(false);
 		} else {
     		waterTiles[waterTiles.length-1].setVisible(false);
 			waterfallTiles[waterTiles.length-1].setVisible(false);
+	    	splashTiles[splashTiles.length-1].setVisible(false);
+	    	splash2Tiles[splashTiles.length-1].setVisible(false);
+	    	splash3Tiles[splashTiles.length-1].setVisible(false);
 		}
     	
     	if (tileIndex++ == waterTiles.length-1) 
