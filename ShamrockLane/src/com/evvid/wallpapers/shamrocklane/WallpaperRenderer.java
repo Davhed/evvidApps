@@ -59,19 +59,19 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private BaseObject3D camLookNull, skydome, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys,
 	waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
-	grass1, grass2, grass3, grass4, grass5, grass6, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2;
+	grass1, grass2, grass3, grass4, grass5, grass6, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird;
 	
 	private float[] waterUVs;
 	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branches;
 
-	private int frameCounter = 0, tileIndex = 0, camSpeed = 20;
+	private int frameCounter = 0, flapCounter = 0, tileIndex = 0, camSpeed = 20;
 
 	private Boolean sceneInit = false, moveCamera = false, moveCameraLook = false, firstTouch = true;;
 	
 	private Bitmap  castleTex, pathTex, wallStumpTex, potBowTex, waterfallrockTex,
 	doorGateArchTex, waterTex, splashTex;
 	
-	private Bitmap[] waterfallTex;
+	private Bitmap[] waterfallTex, birdTex;
 
 	private PointLight pLight_ground;
 	
@@ -141,8 +141,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
 		splashTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas);
 		
+	    birdTex = new Bitmap[4];
+		for(int i = 0; i <  birdTex.length; i++){
+    		int id = mContext.getResources().getIdentifier("bird_0" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+    		birdTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
+		}
 	    waterfallTex = new Bitmap[16];
-
 		for(int i = 0; i <  waterfallTex.length; i++){
     		int id = mContext.getResources().getIdentifier("wf" + (i+1), "drawable", "com.evvid.wallpapers.shamrocklane");
     		waterfallTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
@@ -467,11 +471,14 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	}
 
 	private void addObjects(){	
-		addChild(skydome);			
+		addChild(skydome);
 		addChild(castletowers);			
 		addChild(castle);			
 		addChild(rbow1);			
 		addChild(ground);			
+
+		addBird();
+
 		addChild(dirt);			
 		addChild(shadows1);			
 		addChild(shadows2);		
@@ -491,10 +498,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		addChild(shrooms);
 		addChild(door);		
 		addChild(vines1);			
-		addChild(vines2);	
-		
-		addWaterFall();
-		
+		addChild(vines2);		
 		addChild(grass1);
 		addChild(grass2);
 		addChild(grass3);
@@ -507,7 +511,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		addChild(flowers4);
 		addChild(flowers5);
 		addChild(flowers6);
-		addChild(vines3);			
+		addChild(vines3);
+
+		addWaterFall();
+
 		addChild(shamrocks);
 		addChild(treeferns);
 		addChild(pondferns);
@@ -519,6 +526,24 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		addBranches();
 
 		sceneInit = true;
+	}
+	
+	private void addBird(){
+		bird = new BaseObject3D();
+		
+		for(int i = 0; i <  birdTex.length; i++){
+			Plane birdFrame = new Plane(1,1,1,1,1);		
+			birdFrame.setMaterial(new SimpleMaterial());
+			birdFrame.addTexture(mTextureManager.addTexture(birdTex[i]));
+			birdFrame.setDoubleSided(true);
+			birdFrame.setBlendingEnabled(true);
+			birdFrame.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			birdFrame.setRotZ(-90);
+			bird.addChild(birdFrame);
+		}
+		
+		bird.setPosition(-50, 7, -7);
+		addChild(bird);
 	}
 	
 	private void addWaterTiles(){
@@ -552,7 +577,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	}
 	
 	private void addWaterFall(){
-		addChild(waterfall);
+		addChild(waterfall);//Add rocky background geometry
 		BaseObject3D waterfallsprite = new BaseObject3D();
     	try {
 			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.waterfallsprite));
@@ -654,46 +679,46 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		branches[1].setPosition(-12.5f, 8.5f, 13f);
 		addChild(branches[1]);
 		
-		branches[2].setPosition(18, 6f, 10);
+		branches[2].setPosition(13, 6f, 10);
 		addChild(branches[2]);
 		
 		branches[3].setPosition(11, 6, 16);
 		addChild(branches[3]);
 		
 		addChild(rbow2);			
-		
-		branches[4].setPosition(-13f, 7f, 18f);
+
+		branches[4].setPosition(13.5f, 5, 20);
 		addChild(branches[4]);
-		
-		branches[5].setPosition(-7.5f, 8, 22);
+
+		branches[5].setPosition(7, 6.5f, 22);
 		addChild(branches[5]);
+
+		branches[6].setPosition(3, 5.5f, 25);
+		addChild(branches[6]);	
 		
-		branches[6].setPosition(-12f, 7, 30);
-		addChild(branches[6]);
-		
-		branches[7].setPosition(0f, 6, 30);
+		branches[7].setPosition(-13f, 7f, 18f);
 		addChild(branches[7]);
 		
-		branches[8].setPosition(-6f, 7.5f, 32);
+		branches[8].setPosition(-7.5f, 8, 22);
 		addChild(branches[8]);
 		
-		branches[9].setPosition(-8f, 7, 33);
+		branches[9].setPosition(-12f, 7, 30);
 		addChild(branches[9]);
 		
-		branches[10].setPosition(-7f, 6, 34);
+		branches[10].setPosition(0f, 6, 30);
 		addChild(branches[10]);
 		
-		branches[11].setPosition(4, 5, 35);
+		branches[11].setPosition(-6f, 7.5f, 32);
 		addChild(branches[11]);
-
-		branches[12].setPosition(13.5f, 5, 20);
+		
+		branches[12].setPosition(-8f, 7, 33);
 		addChild(branches[12]);
-
-		branches[13].setPosition(7, 6.5f, 22);
+		
+		branches[13].setPosition(-7f, 6, 34);
 		addChild(branches[13]);
-
-		branches[14].setPosition(3, 5.5f, 25);
-		addChild(branches[14]);	
+		
+		branches[14].setPosition(4, 5, 35);
+		addChild(branches[14]);
 	}
 	
 	private void setOnPreferenceChange(){
@@ -760,6 +785,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			}
 			if(moveCamera)cameraMovement();
 			cameraControl();
+			birdMovement();
 	    	if(frameCounter++ == 64) frameCounter = 0;
 		}
 	}
@@ -793,6 +819,25 @@ public class WallpaperRenderer extends RajawaliRenderer{
     	
     	if (tileIndex++ == waterTiles.length-1) 
     		tileIndex = 0;
+	}
+	
+	private void birdMovement(){
+		if(frameCounter%2 == 0){
+			bird.getChildAt(flapCounter).setVisible(true);
+			if(flapCounter > 0)
+				bird.getChildAt(flapCounter-1).setVisible(false);
+			else
+				bird.getChildAt(bird.getNumChildren()-1).setVisible(false);
+			
+			if(flapCounter++ == 3) flapCounter = 0;
+		}
+		
+		if(bird.getX() > 50)
+			bird.setX(-50);
+		else
+			bird.setX(bird.getX()+.5f);
+		
+		bird.setLookAt(mCamera.getPosition());
 	}
 	
 	private void cameraControl(){
