@@ -1,0 +1,6 @@
+package rajawali.materials;
+
+
+public class SimpleAlphaMaterial extends SimpleMaterial {
+
+}

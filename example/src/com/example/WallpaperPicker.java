@@ -42,16 +42,16 @@ public class WallpaperPicker extends Activity {
 		
 		Intent intent = new Intent();
 
-		if (Build.VERSION.SDK_INT >= 16) {
-			/*
-			 * Open live wallpaper preview (API Level 16 or greater).
-			 */
-			intent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-			String pkg = WallpaperActivity.class.getPackage().getName();
-			String cls = WallpaperActivity.class.getCanonicalName();
-			intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-					new ComponentName(pkg, cls));
-		} else {
+//		if (Build.VERSION.SDK_INT >= 16) {
+//			/*
+//			 * Open live wallpaper preview (API Level 16 or greater).
+//			 */
+//			intent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+//			String pkg = WallpaperActivity.class.getPackage().getName();
+//			String cls = WallpaperActivity.class.getCanonicalName();
+//			intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+//					new ComponentName(pkg, cls));
+//		} else {
 			/*
 			 * Open live wallpaper picker (API Level 15 or lower).
 			 * 
@@ -64,7 +64,7 @@ public class WallpaperPicker extends Activity {
 					+ res.getString(R.string.picker_toast_suffix);
 			Toast toast = Toast.makeText(this, hint, Toast.LENGTH_LONG);
 			toast.show();
-		}
+//		}
 		startActivityForResult(intent, 0);
 	}
 

@@ -22,7 +22,10 @@
 
 package com.evvid.wallpapers.shamrocklane;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -41,45 +44,47 @@ import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 
 import rajawali.lights.PointLight;
+import rajawali.materials.BumpmapMaterial;
+import rajawali.materials.DiffuseMaterial;
 import rajawali.materials.PhongMaterial;
 import rajawali.materials.SimpleMaterial;
+import rajawali.materials.TextureInfo;
+import rajawali.materials.TextureManager.TextureType;
 import rajawali.math.Number3D;
-//Serializer//
-import rajawali.parser.ObjParser;
 import rajawali.primitives.Plane;
-import rajawali.util.MeshExporter;
-import rajawali.util.MeshExporter.ExportType;
-
+import rajawali.primitives.Sphere;
 
 public class WallpaperRenderer extends RajawaliRenderer{
 			
 	private OnSharedPreferenceChangeListener mListener;
 
 	private float xpos;
+	private float[] waterUVs;
+	
+	private int frameCounter = 0, flapCounter = 0, tileIndex = 0, camSpeed = 10, camIndex, totalCount = 0, scene = 0;
+	
+	private Boolean sceneInit = false, moveCamera = false, moveCameraLook = false, firstTouch = true, birdDone = true;
 	
 	private BaseObject3D camLookNull, skydome, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys,
 	waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
-	grass1, grass2, grass3, grass4, grass5, grass6, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird;
-	
-	private float[] waterUVs;
+	grass1, grass2, grass3, grass4, grass5, grass6, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies;
 	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branches;
 
-	private int frameCounter = 0, flapCounter = 0, tileIndex = 0, camSpeed = 20;
-
-	private Boolean sceneInit = false, moveCamera = false, moveCameraLook = false, firstTouch = true;;
-	
-	private Bitmap  castleTex, pathTex, wallStumpTex, potBowTex, waterfallrockTex,
+	private Bitmap  pathTex, wallStumpTex, potBowTex, waterfallrockTex,
 	doorGateArchTex, waterTex, splashTex;
-	
 	private Bitmap[] waterfallTex, birdTex;
-
-	private PointLight pLight_ground;
 	
-	private int camIndex;
+	DiffuseMaterial castleBranchDirtMat;
+	
+	TextureInfo castleBranchDirtInfo;
+
+	private PointLight pLight_ground, pLight_ground2, pLight_pot;
 
 	private Number3D [] cameraLook, cameraPos;
 
 	private ObjectInputStream ois;
+	private InputStream is;
+	private ByteBuffer buffer;
 	
 	public WallpaperRenderer(Context context) {
 		super(context);
@@ -90,115 +95,294 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	public void initScene() {
 		setOnPreferenceChange();
 		setPrefsToLocal();
-		
-		lightsCam();
-		loadTextures();
-		loadObjects();
-		
-		addObjects();
+		setScene();
 	}
 	
-	private void lightsCam(){
+	///////////////
+	//Scene Config
+	///////////////
+	private void setOnPreferenceChange(){
+	}
+	
+	private void setPrefsToLocal(){
+	}
+
+	private void setScene(){
+		if(scene == 0)
+			loadExterior();
+		else if (scene == 1)
+			loadInterior();
+	}
+
+	@Override
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+		super.onSurfaceCreated(gl, config);
+		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
+		preferences.registerOnSharedPreferenceChangeListener(mListener);
+	}
+
+	@Override
+	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
+		super.onSurfaceChanged(gl, width, height);
+	}
+
+	@Override
+	public void onSurfaceDestroyed() {
+		super.onSurfaceDestroyed();
+		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
+		if(scene == 0){
+//			castleTex.recycle();
+			pathTex.recycle();
+			wallStumpTex.recycle();
+			potBowTex.recycle();
+			waterfallrockTex.recycle();
+			doorGateArchTex.recycle();
+			waterTex.recycle();
+			splashTex.recycle();
+		}else if (scene == 1){
+			
+		}
+		System.gc();
+	}
+
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+		super.onDrawFrame(glUnused);
+		if(sceneInit){
+			cameraControl();
+			cameraMovement();
+//			branches[0].setLookAt(mCamera.getX(), mCamera.getY(), mCamera.getZ()-5);
+			if(scene == 0){
+				waterMovement();
+				birdMovement();
+				fairyMovement();
+			}else if (scene == 1){
+				
+			}
+		}
+	}
+
+	@Override
+	public void onTouchEvent(MotionEvent me) {
+		if (me.getAction() == MotionEvent.ACTION_DOWN) {
+			xpos = me.getX();
+		}
+		if (me.getAction() == MotionEvent.ACTION_MOVE) {
+			float xd = xpos - me.getX(0);
+
+			if(me.getPointerCount()==1 && firstTouch) {
+				if(xd > 8){
+					camIndex--;
+					if(camIndex < 0) camIndex = (cameraLook.length - 1);
+					firstTouch = false;
+				}
+				else if (xd < -8){
+					camIndex++;
+					if(camIndex > (cameraLook.length - 1)) camIndex = 0;
+					firstTouch = false;
+				}
+				if(camIndex >= (cameraPos.length)) camIndex--;
+				else if(camIndex < 0) camIndex++;
+				if(sceneInit)cameraPose();
+			}
+			xpos = me.getX(0);
+		}
+		if (me.getAction() == MotionEvent.ACTION_UP) {
+			firstTouch = true;
+		}
+		try {
+			Thread.sleep(15);
+		} catch (Exception e) {
+		}
+	}
+
+	private void cameraControl(){
+		mCamera.setLookAt(camLookNull.getPosition());
+	}
+
+	private void cameraPose() {
+		if(mCamera.getPosition() != cameraPos[camIndex]){
+			moveCamera = true;
+		}
+		if(camLookNull.getPosition() != cameraLook[camIndex]){
+			moveCameraLook = true;
+		}
+	}
+
+	private void cameraMovement() {
+		if(moveCamera){
+			float xDif = cameraPos[camIndex].x - mCamera.getX();
+			float yDif = cameraPos[camIndex].y - mCamera.getY();
+			float zDif = cameraPos[camIndex].z - mCamera.getZ();
+
+			float newX = mCamera.getX()+(xDif/camSpeed);
+			float newY = mCamera.getY()+(yDif/camSpeed);
+			float newZ = mCamera.getZ()+(zDif/camSpeed);
+
+			float xLookDif = cameraLook[camIndex].x - camLookNull.getX();
+			float yLookDif = cameraLook[camIndex].y - camLookNull.getY();
+			float zLookDif = cameraLook[camIndex].z - camLookNull.getZ();
+
+			float newLookX = camLookNull.getX()+(xLookDif/(camSpeed*2));
+			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2));
+			float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
+
+			camLookNull.setPosition(newLookX, newLookY, newLookZ);
+			mCamera.setPosition(newX, newY, newZ);
+			if(moveCameraLook){
+				if (Math.abs(xLookDif)<.0001f && Math.abs(yLookDif)<.0001f && Math.abs(zLookDif)<.0001f) {
+					camLookNull.setPosition(cameraLook[camIndex]);
+					moveCameraLook = false;
+				}
+			}
+			if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
+				mCamera.setPosition(cameraPos[camIndex]);
+				moveCamera = false;	
+			}
+		}
+		mCamera.setPosition(mCamera.getX()+(float) (Math.sin(totalCount/40)/400), mCamera.getY()+(float) (Math.cos(totalCount/80)/800), mCamera.getZ());
+		totalCount++;
+	}
+	
+	private void loadExterior(){
 		mCamera.setFarPlane(2000);
 		camLookNull = new BaseObject3D();
-		cameraPos = new Number3D [8];
+		cameraPos = new Number3D [7];
 		
 		cameraPos[0] = new Number3D(-19, 3, 37);
 		cameraPos[1] = new Number3D(5, 1, 42);
 		cameraPos[2] = new Number3D(9, 0, 31);
-		cameraPos[3] = new Number3D(6, 2, 21);
+		cameraPos[3] = new Number3D(14, 0, 33);
 		cameraPos[4] = new Number3D(0, 1, 12);
 		cameraPos[5] = new Number3D(-9, 2, 15);
-		cameraPos[6] = new Number3D(-4, 0, 19);
-		cameraPos[7] = new Number3D(-13, 0, 23);
+		cameraPos[6] = new Number3D(-13, 0, 23);
 		
-		cameraLook = new Number3D [8];
+		cameraLook = new Number3D [7];
 		cameraLook[0] = new Number3D(2, 1, -1);
 		cameraLook[1] = new Number3D(-6, 0, 16);
 		cameraLook[2] = new Number3D(13, -1, 14);
-		cameraLook[3] = new Number3D(3, 0, 8);
+		cameraLook[3] = new Number3D(2, -1, 5);
 		cameraLook[4] = new Number3D(-14, -1, 9.5f);
-		cameraLook[5] = new Number3D(-9, 1, 9);
-		cameraLook[6] = new Number3D(3, 0, 9);
-		cameraLook[7] = new Number3D(9, -3, 12);
+		cameraLook[5] = new Number3D(0, 0, 0);
+		cameraLook[6] = new Number3D(9, -3, 12);
 		
 		mCamera.setPosition(cameraPos[0]);
 		mCamera.setLookAt(cameraLook[0]);
 		
 		pLight_ground = new PointLight();
-		pLight_ground.setPosition(6.5f, 15, 15f);
+		pLight_ground.setPosition(6.5f, 7, 15f);
 		pLight_ground.setPower(2f);
-		pLight_ground.setAttenuation(50, 1, 0, 0);	
-	}
-	
-	private void loadTextures(){
-		castleTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt);
-		pathTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path);
-		wallStumpTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump);
-		potBowTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot);
-		waterfallrockTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_tex);
-		doorGateArchTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gate_arch);
-		waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
-		splashTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas);
+		pLight_ground.setColor(0xffff00);
+		pLight_ground.setAttenuation(50, 1, 0, 0);
 		
-	    birdTex = new Bitmap[4];
-		for(int i = 0; i <  birdTex.length; i++){
-    		int id = mContext.getResources().getIdentifier("bird_0" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
-    		birdTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
-		}
-	    waterfallTex = new Bitmap[16];
-		for(int i = 0; i <  waterfallTex.length; i++){
-    		int id = mContext.getResources().getIdentifier("wf" + (i+1), "drawable", "com.evvid.wallpapers.shamrocklane");
-    		waterfallTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
-		}
+		pLight_ground2 = new PointLight();
+		pLight_ground2.setPosition(50f, 15, -100f);
+		pLight_ground2.setPower(2f);
+		pLight_ground2.setAttenuation(50, 1, 0, 0);
+		
+		pLight_pot = new PointLight();
+		pLight_pot.setPosition(-10f, 15, 19f);
+		pLight_pot.setPower(20f);
+		
+		
+		///////////////
+		//Load Textures
+		///////////////
+		castleBranchDirtInfo = null;
+		castleBranchDirtMat = new DiffuseMaterial();
 
-	}
-	
-	private void loadObjects(){		
+			pathTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path);
+			wallStumpTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump);
+			potBowTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot);
+			waterfallrockTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_tex);
+			doorGateArchTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gate_arch);
+			waterTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas);
+			splashTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas);
+			
+		    birdTex = new Bitmap[4];
+			for(int i = 0; i <  birdTex.length; i++){
+	    		int id = mContext.getResources().getIdentifier("bird_0" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+	    		birdTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
+			}
+		    waterfallTex = new Bitmap[16];
+			for(int i = 0; i <  waterfallTex.length; i++){
+	    		int id = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) : "wf" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+	    		waterfallTex[i] = BitmapFactory.decodeResource(mContext.getResources(), id);
+			}
+			
+			castleBranchDirtInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt), TextureType.DIFFUSE);
+			castleBranchDirtMat.addTexture(castleBranchDirtInfo);
+//			castleBranchDirtMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt), TextureType.ALPHA));
+		
+//		}
+//		else if("ATC".equals(this.mCompressionType)){
+//			int texWidth = 1024, texHeight = 1024, headerByteCount = 128;
+//			byte[] bytes = new byte[((texWidth+3)/4) * ((texHeight+3)/4) * 16 + headerByteCount];
+//			is = mContext.getResources().openRawResource(R.raw.castle_branch_dirt);
+//			try {is.read(bytes);} catch (IOException e) {e.printStackTrace();}
+//			buffer = ByteBuffer.wrap(bytes, headerByteCount, bytes.length-headerByteCount);
+//			buffer.position(0);
+//
+//			castleBranchDirtInfo = mTextureManager.addTexture(mTextureManager.addAtcTexture(buffer, 1024, 1024, TextureType.DIFFUSE, TextureManager.AtcFormat.RGBA_INTERPOLATED));
+//
+//		}
+		
+
+		///////////////
+		//Create Materials
+		///////////////
+		
+		SimpleMaterial skyMat = new SimpleMaterial();
+		SimpleMaterial pathMat = new SimpleMaterial();
+		SimpleMaterial fernWallMat = new SimpleMaterial();
+		SimpleMaterial bowMat = new SimpleMaterial();
+		SimpleMaterial doorGateArchMat = new SimpleMaterial();
+
+		BumpmapMaterial waterfallrockMat = new BumpmapMaterial();
+		
+		PhongMaterial goldMat = new PhongMaterial();
+		goldMat.setShininess(92.3f);
+
+		PhongMaterial potMat = new PhongMaterial();
+		potMat.setShininess(92.3f);
+
+		PhongMaterial treeMat = new PhongMaterial();
+		treeMat.setShininess(100);
+		
+		PhongMaterial groundMat = new PhongMaterial();
+		groundMat.setShininess(100);
+		
+		PhongMaterial wallStumpMat = new PhongMaterial();
+		wallStumpMat.setShininess(80);
+
+		PhongMaterial shroomMat = new PhongMaterial();
+		shroomMat.setShininess(70);
+
+		BumpmapMaterial bigtreeMat = new BumpmapMaterial();
+
+
+//		castleBranchDirtMat.addTexture(castleBranchDirtInfo);
+		pathMat.addTexture(mTextureManager.addTexture(pathTex));
+		fernWallMat.addTexture(mTextureManager.addTexture(wallStumpTex));
+		wallStumpMat.addTexture(mTextureManager.addTexture(wallStumpTex));
+		potMat.addTexture(mTextureManager.addTexture(potBowTex));
+		bowMat.addTexture(mTextureManager.addTexture(potBowTex));
+		waterfallrockMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
+		waterfallrockMat.addTexture(mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_tex_norm), TextureType.BUMP));
+		goldMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
+		doorGateArchMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gate_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gate_arch), TextureType.DIFFUSE));
+//		doorGateArchMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gate_arch_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gate_arch), TextureType.ALPHA));
+		bigtreeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree), TextureType.DIFFUSE));
+		bigtreeMat.addTexture(mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree_norm), TextureType.BUMP));
+		groundMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass)));
+		skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
+		treeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
+		shroomMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mushroom)));
+		
+		///////////////
+		// Create Objects
+		///////////////
 		try {	
-			SimpleMaterial skyMat = new SimpleMaterial();
-			SimpleMaterial castleBranchDirtMat = new SimpleMaterial();
-			SimpleMaterial pathMat = new SimpleMaterial();
-			SimpleMaterial fernWallMat = new SimpleMaterial();
-			SimpleMaterial bowMat = new SimpleMaterial();
-			SimpleMaterial waterfallrockMat = new SimpleMaterial();
-			SimpleMaterial bigtreeMat = new SimpleMaterial();
-
-			PhongMaterial goldMat = new PhongMaterial();
-			goldMat.setShininess(92.3f);
-
-			PhongMaterial potMat = new PhongMaterial();
-			potMat.setShininess(92.3f);
-
-			PhongMaterial treeMat = new PhongMaterial();
-			treeMat.setShininess(100);
-			
-			PhongMaterial shroomMat = new PhongMaterial();
-			shroomMat.setShininess(70);
-
-			PhongMaterial groundMat = new PhongMaterial();
-			groundMat.setShininess(100);
-			
-			PhongMaterial wallStumpMat = new PhongMaterial();
-			wallStumpMat.setShininess(80);
-
-			SimpleMaterial doorGateArchMat = new SimpleMaterial();
-			
-			castleBranchDirtMat.addTexture(mTextureManager.addTexture(castleTex));
-			pathMat.addTexture(mTextureManager.addTexture(pathTex));
-			fernWallMat.addTexture(mTextureManager.addTexture(wallStumpTex));
-			wallStumpMat.addTexture(mTextureManager.addTexture(wallStumpTex));
-			potMat.addTexture(mTextureManager.addTexture(potBowTex));
-			bowMat.addTexture(mTextureManager.addTexture(potBowTex));
-			waterfallrockMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
-			goldMat.addTexture(mTextureManager.addTexture(waterfallrockTex));
-			doorGateArchMat.addTexture(mTextureManager.addTexture(doorGateArchTex));
-			groundMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass)));
-			skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
-			treeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
-			bigtreeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
-			shroomMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mushroom)));
-		
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.skydome));
 	    	skydome = new BaseObject3D((SerializedObject3D)ois.readObject());
 			skydome.setMaterial(skyMat);
@@ -214,31 +398,32 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	castle = new BaseObject3D((SerializedObject3D)ois.readObject());
 			castle.setMaterial(castleBranchDirtMat);
 			castle.setBlendingEnabled(true);
-			castle.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			castle.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.ground));
 	    	ground = new BaseObject3D((SerializedObject3D)ois.readObject());
 			ground.setMaterial(groundMat);
 			ground.addLight(pLight_ground);
+			ground.addLight(pLight_ground2);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.dirt));
 	    	dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
 			dirt.setMaterial(castleBranchDirtMat);
 			dirt.setY(.1f);
 			dirt.setBlendingEnabled(true);
-			dirt.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			dirt.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.shadows1));
 	    	shadows1 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			shadows1.setMaterial(pathMat);
 			shadows1.setBlendingEnabled(true);
-			shadows1.setBlendFunc(GLES20.GL_DST_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			shadows1.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.shadows2));
 	    	shadows2 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			shadows2.setMaterial(castleBranchDirtMat);
 			shadows2.setBlendingEnabled(true);
-			shadows2.setBlendFunc(GLES20.GL_DST_COLOR, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			shadows2.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.path));
 	    	path = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -334,33 +519,35 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			gate.setMaterial(doorGateArchMat);
 			gate.setBlendingEnabled(true);
 			gate.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			
+
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.arch));
 	    	arch = new BaseObject3D((SerializedObject3D)ois.readObject());
 			arch.setMaterial(doorGateArchMat);
-			
+
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.stump));
 	    	stump = new BaseObject3D((SerializedObject3D)ois.readObject());
 			stump.setMaterial(wallStumpMat);
 			stump.addLight(pLight_ground);
-			
+
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.largestump));
 	    	largestump = new BaseObject3D((SerializedObject3D)ois.readObject());
 			largestump.setMaterial(bigtreeMat);
+			largestump.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.waterfall));
 	    	waterfall = new BaseObject3D((SerializedObject3D)ois.readObject());
 			waterfall.setMaterial(waterfallrockMat);
+			waterfall.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.pot));
 	    	pot = new BaseObject3D((SerializedObject3D)ois.readObject());
 			pot.setMaterial(potMat);
 			pot.setDoubleSided(true);
-			pot.addLight(pLight_ground);
+			pot.addLight(pLight_pot);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.gold));
 	    	gold = new BaseObject3D((SerializedObject3D)ois.readObject());
-			gold.setMaterial(goldMat);
+			gold.setMaterial(waterfallrockMat);
 			gold.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.rbow1));
@@ -380,6 +567,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.tree));
 	    	tree = new BaseObject3D((SerializedObject3D)ois.readObject());
 			tree.setMaterial(bigtreeMat);
+			tree.addLight(pLight_ground);
 			
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.door));
 	    	door = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -398,9 +586,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.shamrocks));
 	    	shamrocks = new BaseObject3D((SerializedObject3D)ois.readObject());
-			shamrocks.setMaterial(waterfallrockMat);
+			shamrocks.setMaterial(goldMat);
 			shamrocks.setBlendingEnabled(true);
-			shamrocks.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			shamrocks.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+			shamrocks.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.treeferns));
 	    	treeferns = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -463,42 +652,42 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			fgferns.setDoubleSided(true);
 			fgferns.setBlendingEnabled(true);
 			fgferns.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			
+
 			ois.close();
 		} catch (Exception e){
 			e.printStackTrace();
-		}	
-	}
-
-	private void addObjects(){	
+		}
+		/////////////
+		//Add Objects
+		/////////////
 		addChild(skydome);
-		addChild(castletowers);			
-		addChild(castle);			
-		addChild(rbow1);			
-		addChild(ground);			
+		addChild(castletowers);
+		addChild(castle);
+		addChild(rbow1);
+		addChild(ground);
 
 		addBird();
 
-		addChild(dirt);			
-		addChild(shadows1);			
-		addChild(shadows2);		
+		addChild(dirt);
+		addChild(shadows1);
+		addChild(shadows2);
 		addChild(rocks);
 
 		addWaterTiles();
 		
 		addChild(lilys);
-		addChild(path);			
-		addChild(walls);			
-		addChild(gate);			
-		addChild(arch);			
-		addChild(largestump);			
-		addChild(stumpdecal);			
-		addChild(stump);			
+		addChild(path);
+		addChild(walls);
+		addChild(gate);
+		addChild(arch);
+		addChild(largestump);
+		addChild(stumpdecal);
+		addChild(stump);
 		addChild(tree);
 		addChild(shrooms);
-		addChild(door);		
-		addChild(vines1);			
-		addChild(vines2);		
+		addChild(door);
+		addChild(vines1);
+		addChild(vines2);
 		addChild(grass1);
 		addChild(grass2);
 		addChild(grass3);
@@ -515,19 +704,20 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 		addWaterFall();
 
+
 		addChild(shamrocks);
 		addChild(treeferns);
 		addChild(pondferns);
-		addChild(pot);
+		addChild(pot);		
 		addChild(gold);
+		addFairies();
 		addChild(fgtrees);
 		addChild(fgferns);
 		
 		addBranches();
-
 		sceneInit = true;
 	}
-	
+
 	private void addBird(){
 		bird = new BaseObject3D();
 		
@@ -542,7 +732,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			bird.addChild(birdFrame);
 		}
 		
-		bird.setPosition(-50, 7, -7);
+		bird.setPosition(-50, 8, -7);
 		addChild(bird);
 	}
 	
@@ -655,36 +845,38 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			splash3Tiles[i].setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			splash3Tiles[i].setVisible(false);
 			addChild(splash3Tiles[i]);
-}
+		}
 	}
 	
 	private void addBranches(){
 		branches = new BaseObject3D [15];
-		
+		float[] uvCoords =  new float[] {.5f, 1f, .5f, .5f, 0.01f, 1f, 0.01f, .5f};
+
 		for(int i = 0; i < branches.length; i++){
-			branches[i] = new Plane(10,10,1,1);
-			branches[i].getGeometry().setTextureCoords(new float[] {.5f, 1f, .5f, .5f, 0.01f, 1f, 0.01f, .5f});
+			branches[i] = new TexturedPlane(10, 10, 1, 1, 1, uvCoords);
 			branches[i].setDoubleSided(true);
 			branches[i].setBlendingEnabled(true);
-			branches[i].setVisible(false);
-			branches[i].setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			branches[i].setLookAt(mCamera.getPosition());
-			branches[i].setMaterial(new SimpleMaterial());
-			branches[i].addTexture(mTextureManager.addTexture(castleTex));
+			branches[i].addLight(pLight_ground);
+			branches[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			if(i>0)branches[i].setLookAt(mCamera.getPosition());
+			branches[i].setMaterial(castleBranchDirtMat);
+//			branches[i].addTexture(castleBranchDirtInfo);
 		}
-		
-		branches[0].setPosition(-13f, 11f, 4f);
+
+		branches[0].setPosition(-13f, 6.5f, 7f);
+		branches[0].setRotY(-90);
 		addChild(branches[0]);
-		
-		branches[1].setPosition(-12.5f, 8.5f, 13f);
+
+		branches[1].setPosition(-12.5f, 5f, 13f);
+		branches[1].setRotY(90);
 		addChild(branches[1]);
-		
+
 		branches[2].setPosition(13, 6f, 10);
 		addChild(branches[2]);
-		
+
 		branches[3].setPosition(11, 6, 16);
 		addChild(branches[3]);
-		
+
 		addChild(rbow2);			
 
 		branches[4].setPosition(13.5f, 5, 20);
@@ -721,108 +913,59 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		addChild(branches[14]);
 	}
 	
-	private void setOnPreferenceChange(){
-	}
-	
-	private void setPrefsToLocal(){
-	}
-		
-	@Override
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		try{
-			super.onSurfaceCreated(gl, config);
-		}catch (Exception e){
-			e.printStackTrace();
-			initScene();
+	private void waterMovement() {
+		if(frameCounter%4 == 0) {
+	    	waterTiles[tileIndex].setVisible(true);
+	    	waterfallTiles[tileIndex].setVisible(true);
+	    	splashTiles[tileIndex].setVisible(true);
+	    	splash2Tiles[tileIndex].setVisible(true);
+	    	splash3Tiles[tileIndex].setVisible(true);
+	   	
+	    	if(tileIndex>0){
+	    		waterTiles[tileIndex-1].setVisible(false);
+				waterfallTiles[tileIndex-1].setVisible(false);
+		    	splashTiles[tileIndex-1].setVisible(false);
+		    	splash2Tiles[tileIndex-1].setVisible(false);
+		    	splash3Tiles[tileIndex-1].setVisible(false);
+			} else {
+	    		waterTiles[waterTiles.length-1].setVisible(false);
+				waterfallTiles[waterTiles.length-1].setVisible(false);
+		    	splashTiles[splashTiles.length-1].setVisible(false);
+		    	splash2Tiles[splashTiles.length-1].setVisible(false);
+		    	splash3Tiles[splashTiles.length-1].setVisible(false);
+			}
+	    	
+	    	if (tileIndex++ == waterTiles.length-1) 
+	    		tileIndex = 0;
 		}
-        PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
-		preferences.registerOnSharedPreferenceChangeListener(mListener);
-	}
-	
-	@Override
-	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
-		super.onSurfaceChanged(gl, width, height);
-	}
-	
-	@Override
-	public void onSurfaceDestroyed() {
-		clearChildren();
-		try{
-			super.onSurfaceDestroyed();
-		}catch (Exception e){
-			e.printStackTrace();
-		}		
-		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
-		recycleTextures();	
-	}
-	
-	private void recycleTextures(){
-		try{
-			castleTex.recycle();
-			pathTex.recycle();
-			wallStumpTex.recycle();
-			potBowTex.recycle();
-			waterfallrockTex.recycle();
-			doorGateArchTex.recycle();
-			waterTex.recycle();
-			System.gc();
-		} catch (Exception e){
-			e.printStackTrace();
-		}
+    	if(frameCounter++ == 64) frameCounter = 0;
 	}
 
-	@Override
-	public void onDrawFrame(GL10 glUnused) {
-		try{
-			super.onDrawFrame(glUnused);
-		}catch (Exception e) {
-			e.printStackTrace();
+	private void addFairies(){
+		fairies = new BaseObject3D();
+		fairies.setPosition(-6, -.25f, 19.5f);
+		int numChildren = 8;
+
+		SimpleMaterial fairyMat = new SimpleMaterial();
+		fairyMat.addTexture(mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fairy_tex)));
+		
+		for(int i = 0; i < numChildren; ++i){
+			BaseObject3D fairy = new Sphere(.05f, 20,20);
+			fairy.setPosition((float) (Math.random()*2)-1, (float) (Math.random()*2)-1, (float) (Math.random()*2)-1);
+			fairy.setMaterial(fairyMat);
+			fairy.setDoubleSided(true);
+			fairy.setBlendingEnabled(true);
+			fairy.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+			fairy.setScale(0);
+			fairies.addChild(fairy);
 		}
-		if(sceneInit){
-			if(!branches[0].isVisible())showBranches();
-			if(frameCounter%4 == 0) {
-				waterMotion();
-			}
-			if(moveCamera)cameraMovement();
-			cameraControl();
-			birdMovement();
-	    	if(frameCounter++ == 64) frameCounter = 0;
-		}
+		addChild(fairies);
 	}
-	
-	private void showBranches(){
-		for(int i = 0; i < branches.length; i++){
-			branches[i].setVisible(true);
-		}
-	}
-	
-	private void waterMotion() {
-    	waterTiles[tileIndex].setVisible(true);
-    	waterfallTiles[tileIndex].setVisible(true);
-    	splashTiles[tileIndex].setVisible(true);
-    	splash2Tiles[tileIndex].setVisible(true);
-    	splash3Tiles[tileIndex].setVisible(true);
-   	
-    	if(tileIndex>0){
-    		waterTiles[tileIndex-1].setVisible(false);
-			waterfallTiles[tileIndex-1].setVisible(false);
-	    	splashTiles[tileIndex-1].setVisible(false);
-	    	splash2Tiles[tileIndex-1].setVisible(false);
-	    	splash3Tiles[tileIndex-1].setVisible(false);
-		} else {
-    		waterTiles[waterTiles.length-1].setVisible(false);
-			waterfallTiles[waterTiles.length-1].setVisible(false);
-	    	splashTiles[splashTiles.length-1].setVisible(false);
-	    	splash2Tiles[splashTiles.length-1].setVisible(false);
-	    	splash3Tiles[splashTiles.length-1].setVisible(false);
-		}
-    	
-    	if (tileIndex++ == waterTiles.length-1) 
-    		tileIndex = 0;
-	}
-	
+
 	private void birdMovement(){
-		if(frameCounter%2 == 0){
+		if(Math.random() > .75f && totalCount % 300 == 0 ) birdDone = false;
+		
+		if(frameCounter%2 == 0 && !birdDone){
 			bird.getChildAt(flapCounter).setVisible(true);
 			if(flapCounter > 0)
 				bird.getChildAt(flapCounter-1).setVisible(false);
@@ -832,99 +975,96 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			if(flapCounter++ == 3) flapCounter = 0;
 		}
 		
-		if(bird.getX() > 50)
+		if(bird.getX() > 50 && !birdDone){
 			bird.setX(-50);
-		else
+			birdDone = true;
+		}else if(!birdDone)
 			bird.setX(bird.getX()+.5f);
 		
 		bird.setLookAt(mCamera.getPosition());
 	}
 	
-	private void cameraControl(){
-		mCamera.setLookAt(camLookNull.getPosition());		
+	private void fairyMovement(){
+		fairies.setRotation(fairies.getRotation().add(0, .1f, 0));
+		Number3D scaleOffset = new Number3D(Math.sin(totalCount),Math.sin(totalCount),Math.sin(totalCount));
+		
+		for(int i = 0; i < fairies.getNumChildren(); ++i){
+			BaseObject3D objPointer = fairies.getChildAt(i);
+			objPointer.setPosition(
+					(float) (objPointer.getX()+(Math.sin(totalCount*.05)*(Math.random()*(.01*i)))), 
+					(float) (objPointer.getY()+(Math.cos(totalCount*.05)*(Math.random()*(.01*i)))), 
+					(float) (objPointer.getZ()+(Math.sin(totalCount*.05)*(Math.random()*(.01*i))))
+					);
+			objPointer.setRotation((objPointer.getRotation().add((float)(Math.random()*5),(float)(Math.random()*3),(float)(Math.random()*5))));
+			
+			objPointer.setScale(objPointer.getScale().add(scaleOffset));
+		}
+	}
+		
+	private void loadInterior(){
+		mCamera.setFarPlane(2000);
+		camLookNull = new BaseObject3D();
+		cameraPos = new Number3D [8];
+		
+		cameraPos[0] = new Number3D(-19, 3, 37);
+		cameraPos[1] = new Number3D(5, 1, 42);
+		cameraPos[2] = new Number3D(9, 0, 31);
+		cameraPos[3] = new Number3D(6, 2, 21);
+		cameraPos[4] = new Number3D(0, 1, 12);
+		cameraPos[5] = new Number3D(-9, 2, 15);
+		cameraPos[6] = new Number3D(-4, 0, 19);
+		cameraPos[7] = new Number3D(-13, 0, 23);
+		
+		cameraLook = new Number3D [8];
+		cameraLook[0] = new Number3D(2, 1, -1);
+		cameraLook[1] = new Number3D(-6, 0, 16);
+		cameraLook[2] = new Number3D(13, -1, 14);
+		cameraLook[3] = new Number3D(3, 0, 8);
+		cameraLook[4] = new Number3D(-14, -1, 9.5f);
+		cameraLook[5] = new Number3D(-9, 1, 9);
+		cameraLook[6] = new Number3D(3, 0, 9);
+		cameraLook[7] = new Number3D(9, -3, 12);
+		
+		mCamera.setPosition(cameraPos[0]);
+		mCamera.setLookAt(cameraLook[0]);
+		
+		pLight_ground = new PointLight();
+		pLight_ground.setPosition(6.5f, 15, 15f);
+		pLight_ground.setPower(2f);
+		pLight_ground.setAttenuation(50, 1, 0, 0);	
+		
+		///////////////
+		//Load Textures
+		///////////////
+
+		
+		///////////////
+		// Create Materials and Objects
+		///////////////
+		try {	
+			SimpleMaterial skyMat = new SimpleMaterial();
+
+			skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.skydome));
+	    	skydome = new BaseObject3D((SerializedObject3D)ois.readObject());
+			skydome.setMaterial(skyMat);
+			skydome.setY(20);
+			skydome.setRotY(5);
+			skydome.setDoubleSided(true);
+
+
+			ois.close();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		/////////////
+		//Add Objects
+		/////////////
+		addChild(skydome);
+
+		sceneInit = true;
 	}
 	
-	private void cameraPose() {
-		if(mCamera.getPosition() != cameraPos[camIndex]){
-			moveCamera = true;	
-		}
-		if(camLookNull.getPosition() != cameraLook[camIndex]){
-			moveCameraLook = true;	
-		}
-	}
 
-	private void cameraMovement() {
-		float xDif = cameraPos[camIndex].x - mCamera.getX();
-		float yDif = cameraPos[camIndex].y - mCamera.getY();
-		float zDif = cameraPos[camIndex].z - mCamera.getZ();
-		
-		float newX = mCamera.getX()+(xDif/camSpeed);
-		float newY = mCamera.getY()+(yDif/camSpeed);
-		float newZ = mCamera.getZ()+(zDif/camSpeed);
-		
-		float xLookDif = cameraLook[camIndex].x - camLookNull.getX();
-		float yLookDif = cameraLook[camIndex].y - camLookNull.getY();
-		float zLookDif = cameraLook[camIndex].z - camLookNull.getZ();
-		
-		float newLookX = camLookNull.getX()+(xLookDif/(camSpeed*2));
-		float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2));
-		float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
-		
-		camLookNull.setPosition(newLookX, newLookY, newLookZ);
-		mCamera.setPosition(newX, newY, newZ);
-		if(moveCameraLook){
-			if (Math.abs(xLookDif)<.0001f && Math.abs(yLookDif)<.0001f && Math.abs(zLookDif)<.0001f) {
-				camLookNull.setPosition(cameraLook[camIndex]);
-				moveCameraLook = false;
-			}
-		}
-		if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
-			mCamera.setPosition(cameraPos[camIndex]);
-			moveCamera = false;	
-		}
-	}
-
-	@Override //This method moves the camera using direct touch events. Tracking a flick and turning it into a procedural animation for smoothing
-	public void onTouchEvent(MotionEvent me) {
-	       if (me.getAction() == MotionEvent.ACTION_DOWN) {
-	           xpos = me.getX();
-	       }
-	       if (me.getAction() == MotionEvent.ACTION_MOVE) {
-	           float xd = xpos - me.getX(0);
-
-	    	   if(me.getPointerCount()==1 && firstTouch) {
-		    		   if(xd > 8){
-		    			   camIndex--;
-		    			   if(camIndex < 0) camIndex = (cameraLook.length - 1);
-			    		   firstTouch = false;
-		    		   }
-		    		   else if (xd < -8){
-		    			   camIndex++;
-		    			   if(camIndex > (cameraLook.length - 1)) camIndex = 0;		    			   
-			    		   firstTouch = false;
-		    		   }
-			    	   if(camIndex >= (cameraPos.length)) camIndex--;
-			    	   else if(camIndex < 0) camIndex++;
-	    			   if(sceneInit)cameraPose();
-	    	   }
-	    	   xpos = me.getX(0);
-       
-	       }
-	       if (me.getAction() == MotionEvent.ACTION_UP) {
-	    	   firstTouch = true;
-	       }	
-	       try {
-	           Thread.sleep(15);
-	       } catch (Exception e) {
-	       }
-	}
-			
-	@SuppressWarnings("unused")
-	private void objSerializer(int resourceId, String outputName){ //example Resource ID --> R.raw.myShape_Obj
-		ObjParser objParser = new ObjParser(mContext.getResources(), mTextureManager, resourceId);
-		objParser.parse();
-		BaseObject3D serializer = objParser.getParsedObject();
-		MeshExporter exporter = new MeshExporter(serializer);
-		exporter.export(outputName, ExportType.SERIALIZED);	
-	}
 }

@@ -1,0 +1,71 @@
+package rajawali.materials;
+
+import rajawali.lights.ALight;
+import android.graphics.Color;
+import android.opengl.GLES20;
+
+public class GouraudAlphaMaterial extends GouraudMaterial {
+	protected static final String mFShader = 
+		"precision mediump float;\n" +
+
+		"varying vec2 vTextureCoord;\n" +
+		"varying float vSpecularIntensity;\n" +
+		"varying float vDiffuseIntensity;\n" +
+		"varying vec4 vColor;\n" +
+		
+		"uniform sampler2D uDiffuseTexture;\n" +
+		"uniform vec4 uAmbientColor;\n" +
+		"uniform vec4 uAmbientIntensity;\n" + 
+		"uniform vec4 uSpecularColor;\n" +
+		"uniform vec4 uSpecularIntensity;\n" +
+		
+		M_FOG_FRAGMENT_VARS +	
+		"%LIGHT_VARS%" +
+		
+		"void main() {\n" +
+		"#ifdef TEXTURED\n" +
+		"	vec4 texColor = texture2D(uDiffuseTexture, vTextureCoord);\n" +
+		"#else\n" +
+	    "	vec4 texColor = vColor;\n" +
+	    "#endif\n" +
+		"	gl_FragColor = texColor * vDiffuseIntensity + uSpecularColor * vSpecularIntensity * uSpecularIntensity;\n" +
+		"	gl_FragColor.a = texColor.a;\n" +
+		"	gl_FragColor += uAmbientColor * uAmbientIntensity;\n" +
+		M_FOG_FRAGMENT_COLOR +
+		"}";
+	
+	public GouraudAlphaMaterial() {
+		this(false);
+	}
+	
+	public GouraudAlphaMaterial(boolean isAnimated) {
+		super(GouraudMaterial.mVShader, mFShader, isAnimated);
+		mSpecularColor = new float[] { 1.0f, 1.0f, 1.0f, 1.0f };
+		mSpecularIntensity = new float[] { 1f, 1f, 1f, 1.0f };
+	}
+
+	@Override
+	public void setShaders(String vertexShader, String fragmentShader)
+	{
+		StringBuffer sb = new StringBuffer();
+		
+		for(int i=0; i<mLights.size(); ++i) {
+			ALight light = mLights.get(i);
+
+			if(light.getLightType() == ALight.POINT_LIGHT) {
+				sb.append("L = normalize(uLightPosition").append(i).append(" + E);\n");
+				sb.append("dist = distance(-E, uLightPosition").append(i).append(");\n");
+				sb.append("attenuation = 1.0 / (uLightAttenuation").append(i).append("[1] + uLightAttenuation").append(i).append("[2] * dist + uLightAttenuation").append(i).append("[3] * dist * dist);\n");
+			} else if(light.getLightType() == ALight.DIRECTIONAL_LIGHT) {
+				sb.append("L = normalize(-uLightDirection").append(i).append(");");
+			}
+			sb.append("NdotL = max(dot(N, L), 0.1);\n");
+			sb.append("vDiffuseIntensity += NdotL * attenuation * uLightPower").append(i).append(";\n");
+			sb.append("vSpecularIntensity += pow(NdotL, 6.0) * attenuation * uLightPower").append(i).append(";\n");
+		}
+		
+		super.setShaders(vertexShader.replace("%LIGHT_CODE%", sb.toString()), fragmentShader);
+		muSpecularColorHandle = getUniformLocation("uSpecularColor");
+		muSpecularIntensityHandle = getUniformLocation("uSpecularIntensity");
+	}
+}
