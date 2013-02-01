@@ -1,0 +1,55 @@
+package com.example;
+
+import javax.microedition.khronos.opengles.GL10;
+
+import com.example.R;
+
+import rajawali.BaseObject3D;
+import rajawali.materials.ParticleMaterial;
+import rajawali.materials.PhongMaterial;
+import rajawali.materials.SimpleAnimatedMaterial;
+import rajawali.primitives.Cube;
+import rajawali.primitives.Plane;
+import rajawali.renderer.RajawaliRenderer;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+
+public class WallpaperRenderer extends RajawaliRenderer{
+	
+	private Cube cube;
+	private PhongMaterial waterMat;
+
+	private int frameCounter = 0;
+	
+	public WallpaperRenderer(Context context) {
+		super(context);
+		setFrameRate(30);
+		setBackgroundColor(0x666666);
+	}
+		
+	public void initScene() {
+		mCamera.setPosition(0, 15, -15);
+		mCamera.setLookAt(0,0,0);
+		
+
+		waterMat = new PhongMaterial(true);
+		waterMat.setUseColor(true);
+		
+		cube = new Cube(10);
+		cube.setMaterial(waterMat);
+		cube.setColor(0x666666);
+
+	    addChild(cube);
+	}
+	
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+			super.onDrawFrame(glUnused);
+			waterMat.setCurrentFrame(frameCounter);
+	    	if(frameCounter++ >= 15)
+	    		frameCounter = 0;
+	}
+
+}

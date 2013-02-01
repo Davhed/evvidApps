@@ -1,0 +1,79 @@
+package com.evvid.wallpapers.shamrocklane;
+
+import rajawali.materials.AMaterial;
+
+
+public class SimpleGlowMaterial extends AMaterial {
+	protected static final String mVShader = 
+		"uniform mat4 uMVPMatrix;\n" +
+
+		"attribute vec4 aPosition;\n" +
+		"attribute vec2 aTextureCoord;\n" +
+		"attribute vec4 aColor;\n" +
+
+		"varying vec2 vTextureCoord;\n" +
+		"varying vec4 vColor;\n" +		
+		
+		"void main() {\n" +
+		"	gl_Position = uMVPMatrix * aPosition;\n" +
+		"	vTextureCoord = aTextureCoord;\n" +
+		"	vColor = aColor;\n" +
+		"}\n";
+	
+	protected static final String mFShader = 
+		"precision mediump float;\n" +
+
+		"varying vec2 vTextureCoord;\n" +
+		"uniform sampler2D uDiffuseTexture;\n" +
+		"varying vec4 vColor;\n" +
+
+		"void main() {\n" +
+		
+		   // Current texture coordinate
+		"    vec2 texel = vTextureCoord;\n" +
+		     
+		    // Larger constant = bigger glow
+		"    float glow = 4.0 * ((pixelWidth + pixelHeight) / 2.0);\n" +
+		     
+		    // The vector to contain the new, "bloomed" colour values
+		"    vec4 bloom = vec4(0);\n" +
+		     
+		    // Loop over all the pixels on the texture in the area given by the constant in glow
+		"    int count = 0;\n" +
+		"    for(float x = texel.x - glow; x < texel.x + glow; x += pixelWidth)\n" +
+		"    {\n" +
+		"        for(float y = texel.y - glow; y < texel.y + glow; y += pixelHeight)\n" +
+		"        {\n" +
+		            // Add that pixel's value to the bloom vector
+		"            bloom += (texture2D(referenceTex, vec2(x, y)) - 0.4) * 30.0;\n" +
+		            // Add 1 to the number of pixels sampled
+		"            count++;\n" +
+		"        }\n" +
+		"    }\n" +
+		    // Divide by the number of pixels sampled to average out the value
+		    // The constant being multiplied with count here will dim the bloom effect a bit, with higher values
+		    // Clamp the value between a 0.0 to 1.0 range
+		"    bloom = clamp(bloom / (count * 30), 0.0, 1.0);\n" +
+		     
+		
+		
+		
+		
+		
+		"#ifdef TEXTURED\n" +
+		"	gl_FragColor = bloom + texture2D(uDiffuseTexture, vTextureCoord);\n" +
+		"#else\n" +
+		"	gl_FragColor = bloom + vColor;\n" +
+		"#endif\n" +
+		"}\n";
+	
+	public SimpleGlowMaterial() {
+		super(mVShader, mFShader, false);
+		setShaders();
+	}
+	
+	public SimpleGlowMaterial(String vertexShader, String fragmentShader) {
+		super(vertexShader, fragmentShader, false);
+		setShaders();
+	}
+}

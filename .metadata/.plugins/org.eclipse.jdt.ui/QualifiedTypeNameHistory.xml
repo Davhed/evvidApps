@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.lang.Math"/>
-<fullyQualifiedTypeName name="android.view.GestureDetector"/>
-<fullyQualifiedTypeName name="android.view.GestureDetector.OnGestureListener"/>
 <fullyQualifiedTypeName name="rajawali.animation.ScaleAnimation3D"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.aviation3d.helo.R.raw"/>
-<fullyQualifiedTypeName name="rajawali.materials.AAdvancedMaterial"/>
 <fullyQualifiedTypeName name="rajawali.lights.DirectionalLight"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.tiki3d.R.drawable"/>
 <fullyQualifiedTypeName name="android.app.WallpaperManager"/>
@@ -16,7 +12,6 @@
 <fullyQualifiedTypeName name="android.graphics.Paint"/>
 <fullyQualifiedTypeName name="android.graphics.Canvas"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.islandnights.R.raw"/>
-<fullyQualifiedTypeName name="rajawali.materials.SimpleMaterial"/>
 <fullyQualifiedTypeName name="android.view.animation.AccelerateDecelerateInterpolator"/>
 <fullyQualifiedTypeName name="android.view.animation.DecelerateInterpolator"/>
 <fullyQualifiedTypeName name="rajawali.primitives.Plane"/>
@@ -30,8 +25,6 @@
 <fullyQualifiedTypeName name="android.opengl.GLES20"/>
 <fullyQualifiedTypeName name="rajawali.materials.SimpleAnimatedMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.GouraudMaterial"/>
-<fullyQualifiedTypeName name="rajawali.lights.PointLight"/>
-<fullyQualifiedTypeName name="rajawali.materials.PhongMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.SpecularMaskMaterial"/>
 <fullyQualifiedTypeName name="java.nio.ByteBuffer"/>
 <fullyQualifiedTypeName name="java.io.BufferedInputStream"/>
@@ -44,16 +37,27 @@
 <fullyQualifiedTypeName name="rajawali.parser.ObjParser"/>
 <fullyQualifiedTypeName name="android.content.Context"/>
 <fullyQualifiedTypeName name="rajawali.materials.TextureManager"/>
-<fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
-<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
 <fullyQualifiedTypeName name="rajawali.materials.BumpmapMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.BumpmapPhongMaterial"/>
-<fullyQualifiedTypeName name="rajawali.materials.TextureInfo"/>
 <fullyQualifiedTypeName name="android.util.FloatMath"/>
-<fullyQualifiedTypeName name="rajawali.materials.DiffuseMaterial"/>
 <fullyQualifiedTypeName name="android.util.Log"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.drawable"/>
 <fullyQualifiedTypeName name="rajawali.primitives.Sphere"/>
 <fullyQualifiedTypeName name="rajawali.materials.ParticleMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.PhongAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.GouraudAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.BumpmapAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.ToonMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.SimpleAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.TextureInfo"/>
+<fullyQualifiedTypeName name="rajawali.materials.PhongMaterial"/>
+<fullyQualifiedTypeName name="rajawali.lights.PointLight"/>
+<fullyQualifiedTypeName name="rajawali.materials.DiffuseMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.AParticleMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.AAdvancedMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.AMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.SimpleMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.DiffuseAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
+<fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
 </qualifiedTypeNameHistroy>
