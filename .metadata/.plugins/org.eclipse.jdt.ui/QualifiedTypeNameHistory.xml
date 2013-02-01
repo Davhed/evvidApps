@@ -58,6 +58,6 @@
 <fullyQualifiedTypeName name="rajawali.materials.AMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.SimpleMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.DiffuseAlphaMaterial"/>
-<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
+<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
 </qualifiedTypeNameHistroy>

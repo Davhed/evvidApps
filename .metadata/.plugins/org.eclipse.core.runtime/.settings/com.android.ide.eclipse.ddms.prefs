@@ -17,6 +17,7 @@ threadPanel.Col2=72
 threadPanel.Col3=45
 threadPanel.Col4=45
 threadPanel.Col5=280
+threadPanel.sash=564
 threadPanel.stack.col0=130
 threadPanel.stack.col1=112
 threadPanel.stack.col2=317
