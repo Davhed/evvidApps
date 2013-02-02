@@ -34,6 +34,7 @@ import rajawali.BaseObject3D;
 import rajawali.SerializedObject3D;
 import rajawali.animation.Animation3D;
 import rajawali.animation.Animation3DListener;
+import rajawali.animation.RotateAnimation3D;
 import rajawali.animation.ScaleAnimation3D;
 import rajawali.animation.TranslateAnimation3D;
 import rajawali.lights.PointLight;
@@ -66,6 +67,30 @@ import rajawali.util.MeshExporter.ExportType;
 
 public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventListener{
 	
+	//HELO VARS//
+	
+	//int blockWidth = 600;
+	//private int  flashTimer = 0;
+	//private double waveIndex = 0;
+	//private String swipeMode = "manual_swipe";
+	//private Number3D mAccValues = new Number3D();
+	private float xTilt, yTilt, autospeed/*, homeScreenOffset, wave, curZPos, flickStart, xStartPos, xPos, yPos, yDelta, maxY*/;
+	private boolean autolight, altitude, bgClouds/*, useAccel, isPortrait, camDrift, camLock, autopilot*/;
+	
+	private Bitmap heloTex, rotorTex, tailRotorTex, lightTex/*, skyTex, greenTex, redTex, clouddomeTex*/;
+	
+	private Animation3D lightAnim;
+	//private BaseObject3D[] cityArray;
+	private BaseObject3D heloObj, crewObj, heloLightObj, lightSource, 
+	tailLight, lightRaysObj, heloWindowsObj, rotorObj, 
+	tailRotorObj, ground, cityObj, cityObj2, sunObj,
+	fgBuild, bgBuild, tempObj, cityBlock/*, sky, parentObj, smallLight, strobeLight, clouddomeObj*/;
+	
+	//private SensorManager mSensorManager;
+	//private OnSharedPreferenceChangeListener mListener;
+	
+	//end HELO
+	
 	private float homeScreenOffset, wave, tilt, curZPos, xpos, flickStart, maxY, yDelta, yPos, xStartPos = 0;
 	private double waveIndex = 0, seed = Math.random();
 	private int numClouds, flashTimer = 0;
@@ -93,6 +118,8 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 	private SensorManager mSensorManager;
 	private OnSharedPreferenceChangeListener mListener;
 	
+	
+	//same
 	public WallpaperRenderer(Context context) {
 		super(context);
 		setFrameRate(30);
@@ -100,33 +127,66 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		
     }
 		
-	public void initScene() {	
+	public void initScene() {
+		//HELO
+		//mSensorManager = (SensorManager) mContext.getSystemService("sensor");
+		
 		setOnPreferenceChange();
 		setPrefsToLocal();
+		
+		//don't set de lites twice you know///
 		setLights();
+		
 		setScene();
 	}
 	
 	@Override
 	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 		super.onSurfaceCreated(gl, config);
+		
 		mAccValues = new Number3D();
         mSensorManager = (SensorManager) mContext.getSystemService("sensor");
+		
+		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
 		mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
-        PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
 		preferences.registerOnSharedPreferenceChangeListener(mListener);
+		
+		
+		
+        //HELO
+        parentObj.getChildAt(1).getChildAt(0).setRotY(-30); //Init Light Rotation
+		if(!autolight){
+			lightAnim.start();
+		}
+		
 	}
 	
+	//same
 	@Override
 	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
 		super.onSurfaceChanged(gl, width, height);
 		isPortrait = ((width/height)==0);
 	}
 	
+	
 	@Override
 	public void onSurfaceDestroyed() {
-		clearChildren();
-		super.onSurfaceDestroyed();
+		/*clearChildren();
+		super.onSurfaceDestroyed();*/
+		
+		//HELO
+		try{
+			clearChildren();
+			super.onSurfaceDestroyed();
+		} catch (Exception e){
+			e.printStackTrace();
+		}
+		
+		if(!autolight && lightAnim != null){
+			lightAnim.cancel();
+			lightAnim.reset();
+		}
+		//
 
 		mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER));
 		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
@@ -150,20 +210,30 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 //		cloud4Tex.recycle();
 //		cloud5Tex.recycle();
 //		cloud6Tex.recycle();
+		
+		//recycle HELO textures--method not used in HELO
+		heloTex.recycle(); 
+		rotorTex.recycle();
+		tailRotorTex.recycle();
+		lightTex.recycle();
+
 		System.gc();
 	}
 
+	//same
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		super.onDrawFrame(glUnused);
 		frameSyncAnimation();
-		tiltCamera(mAccValues.x, mAccValues.y, mAccValues.z);
+		//tiltCamera(mAccValues.x, mAccValues.y, mAccValues.z);
 	}
 
     @Override  //This method moves the camera using the Android home screen swipe output. It's a better way, but not always supported
     public void onOffsetsChanged(float xOffset, float yOffset, float xStep, float yStep, int xPixels, int yPixels) {
     	if(swipeMode.equals("home_screen_swipe")){
 	    	float zOffset = (50*xOffset)-25;
+	    	
+	    	//different values in HELO
 	    	mCamera.setX(25-(-((curZPos + zOffset)/50)));
 	    	mCamera.setZ(curZPos + zOffset);
     	}
@@ -191,8 +261,10 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 	           Thread.sleep(15);
 	       } catch (Exception e) {
 	       }
-		}
-		if(!autopilot){
+		
+		
+		//removed
+		/*if(!autopilot){
 			if (me.getAction() == MotionEvent.ACTION_DOWN) {
 	    	   yPos = me.getY();
 	    	   planeMoving = true;
@@ -208,6 +280,22 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 	       }
 	       if (me.getAction() == MotionEvent.ACTION_UP) {
 	    	   planeMoving = false;
+	       }*/
+		
+		//HELO
+		if (me.getAction() == MotionEvent.ACTION_DOWN) {
+	    	   yPos = me.getY();
+	       }
+	       if (me.getAction() == MotionEvent.ACTION_MOVE) {
+	    	   yDelta = (me.getY()-yPos)/1000;
+	    	   if (parentObj != null){
+	    		   float newY = parentObj.getY()-yDelta;
+		     	   maxY = 15;
+		    	   if(newY>maxY) newY = maxY;
+		    	   if(newY<-maxY) newY = -maxY;
+		   	       if(altitude){ parentObj.setY(newY);
+		   	       }
+	    	   }
 	       }
 		
 	       try {
@@ -215,15 +303,6 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 	       } catch (Exception e) {
 	       }			
 		}
-	}
-	
-	public void onAccuracyChanged(Sensor sensor, int accuracy) {		
-	}
-
-	public void onSensorChanged(SensorEvent event) {
-		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			setAccelerometerValues(event.values[0],event.values[1],event.values[2]);
-		}		
 	}
 	
 	public void setAccelerometerValues(float x, float y, float z) {
@@ -234,6 +313,19 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		float maxOffsetZ = 25;
 		float nextCamZ = maxOffsetZ/(((maxOffsetZ/homeScreenOffset) - 1) / 2);
 		return nextCamZ;
+	}
+	
+	//changed
+	/*public void onAccuracyChanged(Sensor sensor, int accuracy) {		
+	}*/
+	
+	public void onAccuracyChanged(Sensor arg0, int arg1) {		
+	}
+
+	public void onSensorChanged(SensorEvent event) {
+		if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+			setAccelerometerValues(event.values[0],event.values[1],event.values[2]);
+		}		
 	}
 	
 	private void setOnPreferenceChange(){
@@ -267,25 +359,33 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 				else if ("cam_lock".equals(key))
 				{
 					camLock = sharedPreferences.getBoolean(key, true);
+					//different
 					mCamera.setLookAt(0,0,0);
 				} 
+				//different
 				else if ("foreCloud_pref".equals(key))
 				{
 					foreClouds = sharedPreferences.getBoolean(key, true);
 					if(!foreClouds) resetCloudPositions();
 				} 
+				//different
 				else if ("cloud_num".equals(key))
 				{
 					numClouds = Integer.parseInt(sharedPreferences.getString(key, "2"));
 					resetCloudPositions();
 				} 
+				//different
 				else if ("backCloud_pref".equals(key))
 				{
 					backClouds = sharedPreferences.getBoolean(key, true);
 				}
+				
 				else if ("autopilot_pref".equals(key))
 				{
 					autopilot = sharedPreferences.getBoolean(key, false);
+					
+					//HELO
+					parentObj.getChildAt(1).getChildAt(0).setRotation(0,-30,0);
 				}
 				preferences = sharedPreferences;
 			}
@@ -293,23 +393,33 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 	}
 	
 	private void setPrefsToLocal(){
-		camDrift = preferences.getBoolean("cam_drift", true);
-		camLock = preferences.getBoolean("cam_lock", false);
-		foreClouds = preferences.getBoolean("foreCloud_pref", true);
-		backClouds = preferences.getBoolean("backCloud_pref", true);
-		numClouds = Integer.parseInt(preferences.getString("cloud_num", "2"));
 		homeScreenOffset = Integer.parseInt(preferences.getString("screen_count", "5"));
 		if((preferences.getBoolean("home_screen_swipe", false))&&(!preferences.getBoolean("manual_swipe", true))){
 			swipeMode = "home_screen_swipe";
 		}
-		useAccel = preferences.getBoolean("accel_pref", true);	
+		useAccel = preferences.getBoolean("accel_pref", true);
+		camDrift = preferences.getBoolean("cam_drift", true);
+		camLock = preferences.getBoolean("cam_lock", false);
 		autopilot = preferences.getBoolean("autopilot_pref", false);
+		
+		//different
+		foreClouds = preferences.getBoolean("foreCloud_pref", true);
+		backClouds = preferences.getBoolean("backCloud_pref", true);
+		numClouds = Integer.parseInt(preferences.getString("cloud_num", "2"));
+		
+		//HELO
+		autospeed = ((float)(Integer.parseInt(preferences.getString("autospeed_pref", "2")))*.1f);
+		altitude = preferences.getBoolean("altitude_pref", true);
+		autolight = preferences.getBoolean("autolight_pref", false);
+		
 		
 	}	
 	
 	private void setLights(){
+		//HELO
 		pLight_key = new PointLight();
-		pLight_key.setPower(4);
+		pLight_key.setPower(3);
+		pLight_key.setColor(1,0,0);
 		pLight_key.setPosition(0, 7, 10);
 		
 		pLight_key2 = new PointLight();
@@ -317,20 +427,51 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		pLight_key2.setPosition(0, 7f, -5);
 		
 		pLight_fill = new PointLight();
-		pLight_fill.setPower(1.5f);
+		pLight_fill.setPower(1f);
 		pLight_fill.setPosition(7, -1.5f, -10);
 		
 		pLight_fill2 = new PointLight();
-		pLight_fill2.setPower(1f);
+		pLight_fill2.setPower(.5f);
 		pLight_fill2.setPosition(8, -1.5f, 1);
 		
 		pLight_fill3 = new PointLight();
-		pLight_fill3.setPower(1f);
+		pLight_fill3.setPower(.5f);
 		pLight_fill3.setPosition(0 , 10 , 0);
 
 		pLight_rim = new PointLight();
+		pLight_rim.setPower(.1f);
+		pLight_rim.setPosition(-10, 50, 0);
+		
+		/*pLight_ground = new PointLight();
+		pLight_ground.setPower(2500);
+		pLight_ground.setAttenuation(0, 1000, .09f, .032f);
+		pLight_ground.setPosition(-500, 500, 0);*/
+		
+		//end HELO
+		
+		/*pLight_key = new PointLight();
+		pLight_key.setPower(4);
+		pLight_key.setPosition(0, 7, 10);*/
+		
+		/*pLight_key2 = new PointLight();
+		pLight_key2.setPower(2f);
+		pLight_key2.setPosition(0, 7f, -5);*/
+		
+		/*pLight_fill = new PointLight();
+		pLight_fill.setPower(1.5f);
+		pLight_fill.setPosition(7, -1.5f, -10);*/
+		
+		/*pLight_fill2 = new PointLight();
+		pLight_fill2.setPower(1f);
+		pLight_fill2.setPosition(8, -1.5f, 1);*/
+		
+		/*pLight_fill3 = new PointLight();
+		pLight_fill3.setPower(1f);
+		pLight_fill3.setPosition(0 , 10 , 0);*/
+
+		/*pLight_rim = new PointLight();
 		pLight_rim.setPower(1.5f);
-		pLight_rim.setPosition(-5, 1f, 0);
+		pLight_rim.setPosition(-5, 1f, 0);*/
 		
 		pLight_balloon = new PointLight();
 		pLight_balloon.setPower(3000);
@@ -381,9 +522,50 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
     	sky2.setY(1000);
     	sky2.setRotation(90,0,0);
         addChild(sky2);
+        
+      //HELO
+		
+      		//setLights();
+      		
+//      		mCamera.setFarPlane(20000);
+//      		mCamera.setFogNear(0);
+//      		mCamera.setFogFar(375);
+//      		mCamera.setFogColor(0xf07d42);
+//      		mCamera.setLookAt(0,0,0);
+//      		mCamera.setX(50f);
+      	//	mCamera.setPosition(0, 0, -50); //TODO: Chase cam mode
+      		
+      		//moved into try...
+      		/*PhongMaterial heloMat = new PhongMaterial();
+      		DiffuseMaterial rotorMat = new DiffuseMaterial();
+      		DiffuseMaterial tailRotorMat = new DiffuseMaterial();
+      		SimpleMaterial crewMat = new SimpleMaterial();
+      		SimpleMaterial lightSourceMat = new SimpleMaterial();
+      		SimpleMaterial lightMat = new SimpleMaterial();
+      		SimpleMaterial strobeLightMat = new SimpleMaterial();
+      		SimpleMaterial tailLightMat = new SimpleMaterial();
+      		SimpleMaterial tailLight2Mat = new SimpleMaterial();
+      		SimpleMaterial skyMat = new SimpleMaterial();
+      		SimpleMaterial clouddomeMat = new SimpleMaterial();*/
+
+      		//buildCity();
+      		
+      		//end HELO
 
 		
 		try {
+			
+			//HELO
+			//skyTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.posz);
+			clouddomeTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome_tex);
+			heloTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ec145_tex);
+			rotorTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ec145_rotor_tex);
+			tailRotorTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ec145_tail_rotor_tex);
+			lightTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.lightrays_tex);
+			//greenTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.green_light);
+			//redTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.red_light);
+			//end HELO
+			
 			groundTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ground);
 			clouddomeTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome_tex);
 			cloudBankTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cloudbg);
@@ -395,6 +577,20 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 			whiteTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.white_light);
 			greenTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.green_light);
 			redTex = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.red_light);
+			
+			//HELO
+			PhongMaterial heloMat = new PhongMaterial();
+      		DiffuseMaterial rotorMat = new DiffuseMaterial();
+      		DiffuseMaterial tailRotorMat = new DiffuseMaterial();
+      		SimpleMaterial crewMat = new SimpleMaterial();
+      		SimpleMaterial lightSourceMat = new SimpleMaterial();
+      		SimpleMaterial lightMat = new SimpleMaterial();
+      		//SimpleMaterial strobeLightMat = new SimpleMaterial();
+      		//SimpleMaterial tailLightMat = new SimpleMaterial();
+      		//SimpleMaterial tailLight2Mat = new SimpleMaterial();
+      		//SimpleMaterial skyMat = new SimpleMaterial();
+      		//SimpleMaterial clouddomeMat = new SimpleMaterial();
+      		//end HELO
 			
 			SimpleMaterial cloudBankMat = new SimpleMaterial();
 			SimpleMaterial clouddomeMat = new SimpleMaterial();
@@ -499,17 +695,144 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 			balloonObj.setRotY(90);			
 			addChild(balloonObj);
 			
-			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.cessna));
+			//HELO
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helotailrotor));
+			tailRotorObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			tailRotorMat.addTexture(mTextureManager.addTexture(tailRotorTex));
+			tailRotorObj.setMaterial(tailRotorMat);
+			tailRotorObj.setPosition(1.07161f,7.6472f, 33.1733f);
+			parentObj.addChild(tailRotorObj);
+
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helo));
+			heloObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			heloMat.setAmbientIntensity(.25f);
+			heloMat.setAmbientColor(.9f, .5f, .3f, 1);
+			heloMat.addTexture(mTextureManager.addTexture(heloTex));
+			heloObj.setMaterial(heloMat);
+
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helolight));
+			heloLightObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			heloLightObj.setMaterial(heloMat);
+			
+			smallLight = new Sphere(.45f, 5, 5);
+			strobeLightMat.setUseColor(true);
+			smallLight.setMaterial(strobeLightMat);
+			smallLight.setPosition(1 ,-3.5f, -16.5f);
+			smallLight.setColor(0xaaaaff);
+			smallLight.setBlendingEnabled(true);
+			smallLight.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+			strobeLight = smallLight;
+			strobeLight.setScale(0);
+			heloObj.addChild(smallLight);
+
+			tailLightMat.addTexture(mTextureManager.addTexture(redTex));
+			smallLight = new Sphere(.35f, 5, 5);
+			smallLight.setMaterial(tailLightMat);
+			smallLight.setBlendingEnabled(true);
+			smallLight.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			smallLight.setRotY(90);
+			smallLight.setScale(1.25f);
+			smallLight.setPosition(6.5f, 2.6f, 28f);
+			heloObj.addChild(smallLight);
+
+			smallLight = new Sphere(.4f, 5, 5);
+			smallLight.setMaterial(tailLightMat);
+			smallLight.setBlendingEnabled(true);
+			smallLight.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			smallLight.setRotY(90);
+			smallLight.setPosition(0.5f, 7.6f, 31);
+			tailLight = smallLight;
+			tailLight.setScale(0);
+			heloObj.addChild(smallLight);
+			
+			smallLight = new Sphere(.35f, 5, 5);
+			tailLight2Mat.addTexture(mTextureManager.addTexture(greenTex));
+			smallLight.setMaterial(tailLight2Mat);
+			smallLight.setBlendingEnabled(true);
+			smallLight.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			smallLight.setPosition(-5.3f, 2.4f, 28f);
+			smallLight.setScale(1.25f);
+			smallLight.setRotY(90);
+			smallLight.setColor(0x00ff00);
+			heloObj.addChild(smallLight);
+			
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helocrew));
+			crewObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			crewMat.setUseColor(true);
+			crewObj.setMaterial(crewMat);
+			crewObj.setColor(0x000000);
+			heloObj.addChild(crewObj);
+
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helowindows));
+			heloWindowsObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			heloMat.setUseColor(true);
+			heloWindowsObj.setBlendingEnabled(true);
+			heloWindowsObj.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			heloWindowsObj.setMaterial(heloMat);
+			heloWindowsObj.setColor(0xffffff);
+			heloObj.addChild(heloWindowsObj);
+			parentObj.addChild(heloObj);
+			
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.helorotor));
+			rotorObj = new BaseObject3D((SerializedObject3D)ois.readObject());
+			rotorMat.addTexture(mTextureManager.addTexture(rotorTex));
+			rotorObj.setMaterial(rotorMat);
+			parentObj.addChild(rotorObj);
+			
+			ois.close();
+			
+			parentObj.addLight(pLight_key);
+			parentObj.addLight(pLight_key2);
+			parentObj.addLight(pLight_fill);
+			parentObj.addLight(pLight_fill2);
+//			parentObj.addLight(pLight_fill3);
+			parentObj.addLight(pLight_rim);
+			parentObj.setScale(.3f,.3f,.3f);
+			parentObj.setRotation(0,180,0);
+			addChild(parentObj);
+			
+			} catch (Exception e){
+				e.printStackTrace();
+			}
+				
+			SimpleMaterial sphereMat = new SimpleMaterial();
+			sphereMat.setUseColor(true);
+			
+			sunObj = new Sphere(100, 30, 30);
+			sunObj.setX(-600);
+			sunObj.setY(-70);
+			sunObj.setScale(.05f, 1, 1);
+			sunObj.setMaterial(sphereMat);
+			sunObj.setColor(0x999999);
+			sunObj.setBlendingEnabled(true);
+			sunObj.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			addChild(sunObj);
+			
+			Number3D lightAxis = new Number3D(1, 2, 0);
+			lightAxis.normalize();
+			lightAnim = new RotateAnimation3D(lightAxis, 100);
+			lightAnim.setDuration(24000);
+			lightAnim.setRepeatMode(Animation3D.REVERSE);
+			lightAnim.setRepeatCount(Animation3D.INFINITE);
+			lightAnim.setTransformable3D(parentObj.getChildAt(1).getChildAt(0));
+			if(!autolight){
+				lightAnim.start();
+			}
+			heloLightObj = parentObj.getChildAt(1).getChildAt(0);
+			//end HELO
+			
+			//hide plane
+			/*ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.cessna));
 			planeObj = new BaseObject3D((SerializedObject3D)ois.readObject());
 			planeMat.setShininess(80);
 			planeMat.setAmbientColor(0x6688cb);
 			planeMat.setAmbientIntensity(.15f);
 			planeObj.setMaterial(planeMat);
 			planeObj.addTexture(mTextureManager.addTexture(planeTex));
-			planeObj.setZ(5);
+			planeObj.setZ(5);*/
 			
 			//Nav Lights
-			smallLight = new Sphere(.25f, 5, 5);
+			/*smallLight = new Sphere(.25f, 5, 5);
 			strobeLightMat.addTexture(mTextureManager.addTexture(whiteTex));
 			smallLight.setMaterial(strobeLightMat);
 			smallLight.setPosition(0f, -0.77f, -18.75f);
@@ -604,7 +927,7 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 			
 		} catch (Exception e){
 			e.printStackTrace();
-		}
+		}*/
 
 		spawnCloudlets();
 	}
@@ -703,11 +1026,14 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 
 	
 	private void frameSyncAnimation() {
+		heloMovement();
+		//checkBlockPositions();
+		
 		if(backClouds && cloudBankObj != null) cloudBankObj.setRotY(cloudBankObj.getRotY() + .005f);
 		if(camLock) mCamera.setLookAt(parentObj.getPosition());
 		mountainsObj.setRotY(mountainsObj.getRotY() - .007f);
 		groundObj.setRotY(groundObj.getRotY() - .025f);
-		planeMovement();
+		//planeMovement();
 		balloonMovement();
 		if(foreClouds) {
 			seed = Math.random();			
@@ -716,6 +1042,54 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 			resetCloudPositions();
 		}
 	}
+	
+	//HELO
+	private void heloMovement() {
+			
+			/*if (flashTimer == 60) blink(strobeLight);
+			if (flashTimer == 90) {
+				blink(tailLight);
+				flashTimer = 0;
+			}
+			flashTimer++;*/
+			
+			wave = (float)(5*(Math.sin(waveIndex/100)));
+			parentObj.getChildAt(0).setRotX(parentObj.getChildAt(0).getRotX()-70);
+			parentObj.getChildAt(2).setRotY(parentObj.getChildAt(2).getRotY()+50);
+			parentObj.setRotation(-wave*.5f-10, 180, wave*2);
+			waveIndex++;
+			
+			if(autopilot){
+				if(!altitude)parentObj.setY(wave/2);
+				cityObj.setPosition(cityObj.getX(),cityObj.getY(),(float) (cityObj.getZ()-autospeed));
+				cityObj2.setPosition(cityObj2.getX(),cityObj2.getY(),(float) (cityObj2.getZ()-autospeed));
+			}
+	}
+	
+	/*private void blink(BaseObject3D aLight){
+		Animation3D blinkAnim = new ScaleAnimation3D(new Number3D(1.5f,1.5f,1.5f));
+		blinkAnim.setDuration(50);
+		blinkAnim.setRepeatCount(1);
+		blinkAnim.setRepeatMode(Animation3D.REVERSE);
+		blinkAnim.setTransformable3D(aLight);
+		blinkAnim.setAnimationListener(new Animation3DListener() {
+
+			public void onAnimationEnd(Animation3D anim) {
+				anim.cancel();
+				anim.reset();
+			}
+
+			public void onAnimationRepeat(Animation3D anim) {				
+			}
+
+			public void onAnimationStart(Animation3D anim) {
+			}
+			
+		});
+		blinkAnim.start();
+		
+	}*/
+	//end HELO
 	
 	private void moveClouds(){ 
 	
@@ -797,7 +1171,8 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		}
 	}
 	
-	private void planeMovement() {
+	//disable plane
+	/*private void planeMovement() {
 		if (flashTimer == 60) blink(strobeLight);
 		if (flashTimer == 90) {
 			blink(strobeLight2);
@@ -818,9 +1193,9 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		waveIndex++;
 
 		returnToLevel();
-	}
+	}*/
 	
-	private void blink(final BaseObject3D aLight){
+	/*private void blink(final BaseObject3D aLight){
 		Animation3D blinkAnim = new ScaleAnimation3D(new Number3D(1.5f,1.5f,1.5f));
 		blinkAnim.setDuration(50);
 		blinkAnim.setRepeatCount(1);
@@ -849,7 +1224,7 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		});
 		blinkAnim.start();
 		
-	}
+	}*/
 	
 	private void returnToLevel(){
 		if(!planeMoving){
@@ -872,7 +1247,7 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		balloonObj.getChildAt(2).setY((float) (10*Math.sin(waveIndex/1000))-90);
 	}
 		
-	private void tiltCamera(float xVal, float yVal, float zVal) { //This method moves the camera vertically on tilt
+	/*private void tiltCamera(float xVal, float yVal, float zVal) { //This method moves the camera vertically on tilt
 		if(useAccel){
 			if(!isPortrait) yVal = xVal;
 			
@@ -903,7 +1278,74 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		}else {
 			mCamera.setY(0);
 		}
+	}*/
+	
+	//HELO
+	private void onTilt(float xVal, float yVal, float zVal) { //This method moves the camera vertically and the helo horizontally on tilt
+		boolean checkY = (yVal<0); 
+		if(useAccel){
+			if(!isPortrait){
+				yVal = xVal;
+				xVal = (xVal-9.86f);
+				if(checkY) xVal=-xVal;
+			}else {
+			}
+						
+			//Camera movement calculations
+			int maxCamY = 15;
+			yVal = (float) Math.round(((yVal+yTilt)*.5)*10)/10;
+			
+			if (yVal < 0f) yVal = 0f;
+			
+			yTilt = (float)(yVal)/9.8f;
+			
+			if ((float)zVal < 0) {
+				yTilt = -yTilt;
+				maxCamY = -maxCamY;
+			}
+			
+			float newTiltY;
+			
+			if(camDrift){
+				newTiltY = (float)(Math.sin(yTilt)*-20)+maxCamY+(wave*.4f);
+			}else {
+				newTiltY = (float)(Math.sin(yTilt)*-20)+maxCamY;
+			}
+			
+			//Spotlight movement calculations
+			xVal = (float) Math.round(((xVal+xTilt)*.5)*10)/10;
+			
+			xTilt =(float) (xVal)/9.8f;
+			
+			float newTiltX = (float) (Math.sin(xTilt)*-20);
+			
+			//Spotlight movement
+			if(!autolight){
+				if(mCamera != null)	mCamera.setY(newTiltY);
+			}else {
+//				xVal = (float) Math.round(xVal*10)/10;
+				lightAnim.cancel();
+				lightAnim.reset();
+				heloLightObj.setRotX((-newTiltX*5)+50);
+				heloLightObj.setRotY((-newTiltY*10)+10);				
+			}
+			xTilt = xVal;
+			yTilt = yVal;
+			
+			//Helo movement
+			if(!autopilot){
+				parentObj.setRotX((xVal*2.5f));
+				
+				//Scene motion			
+				cityObj.setPosition(cityObj.getX(),cityObj.getY(),cityObj.getZ()+(xVal/15));
+				cityObj2.setPosition(cityObj2.getX(),cityObj2.getY(),cityObj2.getZ()+(xVal/15));
+			}
+			
+		}else {
+			mCamera.setY(0);
+		}
 	}
+	//end HELO
 
 	private void swipeCamera(float touchOffset) {
        float zOffset = touchOffset/(10*homeScreenOffset);// 20 - 3-screens - 50 5-screens - 100 7-screens

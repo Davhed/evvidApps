@@ -29,25 +29,39 @@ public final class R {
         public static final int cloud3=0x7f020007;
         public static final int cloudbg=0x7f020008;
         public static final int clouddome_tex=0x7f020009;
-        public static final int green_light=0x7f02000a;
-        public static final int ground=0x7f02000b;
-        public static final int icon=0x7f02000c;
-        public static final int red_light=0x7f02000d;
-        public static final int sky_tex=0x7f02000e;
-        public static final int thumbnail=0x7f02000f;
-        public static final int white_light=0x7f020010;
+        public static final int ec145_rotor_tex=0x7f02000a;
+        public static final int ec145_tail_rotor_tex=0x7f02000b;
+        public static final int ec145_tex=0x7f02000c;
+        public static final int green_light=0x7f02000d;
+        public static final int ground=0x7f02000e;
+        public static final int icon=0x7f02000f;
+        public static final int lightrays_tex=0x7f020010;
+        public static final int posz=0x7f020011;
+        public static final int red_light=0x7f020012;
+        public static final int sky_tex=0x7f020013;
+        public static final int thumbnail=0x7f020014;
+        public static final int white_light=0x7f020015;
     }
     public static final class raw {
         public static final int balloon=0x7f040000;
-        public static final int cessna=0x7f040001;
-        public static final int cloud=0x7f040002;
-        public static final int cloudbank=0x7f040003;
-        public static final int clouddome=0x7f040004;
-        public static final int ground=0x7f040005;
-        public static final int mountains=0x7f040006;
-        public static final int pilot=0x7f040007;
-        public static final int prop=0x7f040008;
-        public static final int windows=0x7f040009;
+        public static final int bgbuildings=0x7f040001;
+        public static final int block1=0x7f040002;
+        public static final int cessna=0x7f040003;
+        public static final int cloud=0x7f040004;
+        public static final int cloudbank=0x7f040005;
+        public static final int clouddome=0x7f040006;
+        public static final int ground=0x7f040007;
+        public static final int helo=0x7f040008;
+        public static final int helocrew=0x7f040009;
+        public static final int helolight=0x7f04000a;
+        public static final int helorotor=0x7f04000b;
+        public static final int helotailrotor=0x7f04000c;
+        public static final int helowindows=0x7f04000d;
+        public static final int lightrays=0x7f04000e;
+        public static final int mountains=0x7f04000f;
+        public static final int pilot=0x7f040010;
+        public static final int prop=0x7f040011;
+        public static final int windows=0x7f040012;
     }
     public static final class string {
         public static final int app_name=0x7f050000;
