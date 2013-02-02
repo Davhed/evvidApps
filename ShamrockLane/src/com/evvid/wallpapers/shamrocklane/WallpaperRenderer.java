@@ -32,6 +32,7 @@ import com.evvid.wallpapers.shamrocklane.R;
 import rajawali.BaseObject3D;
 import rajawali.SerializedObject3D;
 import rajawali.renderer.RajawaliRenderer;
+import rajawali.util.MeshExporter;
 import android.content.Context;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.BitmapFactory;
@@ -78,6 +79,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			firstTouch = true, 
 			birdDone = true;
 	
+	//Exterior
+	
 	private BaseObject3D camLookNull, skydome, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys,
 	waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrock, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
 	grass1, grass2, grass3, grass4, grass5, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies;
@@ -93,6 +96,13 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	private ObjectInputStream ois;
 
 	private int fairyTimer;
+
+	//Interior
+	
+	private BaseObject3D int_tree, int_floor, int_door, int_stairs, int_door_window, int_candles, int_coatrack, int_shoes, int_hat, int_buckles, int_window1,
+	int_dirt, int_board, int_arches, int_clovers1, int_clovers2, int_clovers3, int_clovers4, int_clovers5, int_clovers6, int_clovers7, int_chair, int_large_table,
+	int_tablerunner, int_mug, int_pipe, int_gold, int_window2, int_window2_sill, int_vase1, int_clover_table, int_vase2, int_stone_pad, int_stove, int_logs,
+	int_chimneyring, int_shelf, int_books_rocker, int_rug, int_small_table, int_open_book, int_lamp1, int_lamp2, int_tapestry, int_tapestry_rod;
 	
 	public WallpaperRenderer(Context context) {
 		super(context);
@@ -1052,31 +1062,26 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	}	
 	
 	private void loadInterior(){
-		mCamera.setFarPlane(2000);
+		mCamera.setFarPlane(1000);
 		camLookNull = new BaseObject3D();
-		cameraPos = new Number3D [8];
 		
-		cameraPos[0] = new Number3D(-19, 3, 37);
-		cameraPos[1] = new Number3D(5, 1, 42);
-		cameraPos[2] = new Number3D(9, 0, 31);
-		cameraPos[3] = new Number3D(6, 2, 21);
-		cameraPos[4] = new Number3D(0, 1, 12);
-		cameraPos[5] = new Number3D(-9, 2, 15);
-		cameraPos[6] = new Number3D(-4, 0, 19);
-		cameraPos[7] = new Number3D(-13, 0, 23);
-		
-		cameraLook = new Number3D [8];
-		cameraLook[0] = new Number3D(2, 1, -1);
-		cameraLook[1] = new Number3D(-6, 0, 16);
-		cameraLook[2] = new Number3D(13, -1, 14);
-		cameraLook[3] = new Number3D(3, 0, 8);
-		cameraLook[4] = new Number3D(-14, -1, 9.5f);
-		cameraLook[5] = new Number3D(-9, 1, 9);
-		cameraLook[6] = new Number3D(3, 0, 9);
-		cameraLook[7] = new Number3D(9, -3, 12);
-		
+		cameraPos = new Number3D [5];
+		cameraPos[0] = new Number3D( 0, 4, 0);
+		cameraPos[1] = new Number3D( 5f, 3, 8);
+		cameraPos[2] = new Number3D( 10f, 3, 8);
+		cameraPos[3] = new Number3D( 7f, 2, -1);
+		cameraPos[4] = new Number3D( 7f, 2, -1);
+
+		cameraLook = new Number3D [5];
+		cameraLook[0] = new Number3D(15, 1.7f, 3);
+		cameraLook[1] = new Number3D(12, 1.7f, -16);
+		cameraLook[2] = new Number3D(-5, .7f, -9);
+		cameraLook[3] = new Number3D(-10, .78f, 5.7f);
+		cameraLook[4] = new Number3D( -1.5f, .8f, 15);
+
+		camLookNull.setPosition(cameraLook[0]);
 		mCamera.setPosition(cameraPos[0]);
-		mCamera.setLookAt(cameraLook[0]);
+		mCamera.setLookAt(camLookNull.getPosition());
 		
 		pLight_ground = new PointLight();
 		pLight_ground.setPosition(6.5f, 15, 15f);
@@ -1086,31 +1091,308 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		///////////////
 		// Create Materials
 		///////////////
-		SimpleMaterial skyMat = new SimpleMaterial();
-
-		skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
-
+		
+		SimpleAlphaMaterial intAlphaMat = new SimpleAlphaMaterial();
+		intAlphaMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha)));
+		intAlphaMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha), TextureType.ALPHA));
+		
+		SimpleMaterial intWallsFloorMat = new SimpleMaterial();
+		intWallsFloorMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_walls_floor), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_walls_floor)));
+	
+		SimpleMaterial intDoorStoveMat = new SimpleMaterial();
+		intDoorStoveMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_door_stove), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_door_stove)));
+	
+		SimpleMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleMaterial();
+		intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_arch_shelf_obook_step_ws_candle_banner_pole), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_arch_shelf_obook_step_ws_candle_banner_pole)));
+		
+		SimpleMaterial intHatStandBoardShoebuckleMat = new SimpleMaterial();
+		intHatStandBoardShoebuckleMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_hat_stand_board_shoebuckle), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_hat_stand_board_shoebuckle)));
+		
+		SimpleMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleMaterial();
+		intLogTablesRunnerMugPipeCoinMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_log_tables_runner_mug_pipe_coin), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_log_tables_runner_mug_pipe_coin)));
+		
+		SimpleMaterial intChairsBookcaseBooksMat = new SimpleMaterial();
+		intChairsBookcaseBooksMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_chairs_bookcase_books), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_chairs_bookcase_books)));
+		
+		SimpleMaterial vaseMat = new SimpleMaterial();
+		vaseMat.setUseColor(true);
 		
 		///////////////
 		// Create Objects
 		///////////////
 		try {	
 
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.skydome));
-	    	skydome = new BaseObject3D((SerializedObject3D)ois.readObject());
-			skydome.setMaterial(skyMat);
-			skydome.setY(20);
-			skydome.setRotY(5);
-			skydome.setDoubleSided(true);
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tree));
+	    	int_tree = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tree.setMaterial(intWallsFloorMat);
+	    	int_tree.setDoubleSided(true);
+			
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_floor));
+	    	int_floor = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_floor.setMaterial(intWallsFloorMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door));
+	    	int_door = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_door.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door_window));
+	    	int_door_window = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_door_window.setMaterial(intAlphaMat);
+	    	int_door_window.setTransparent(true);
+	    	int_door_window.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stairs));
+	    	int_stairs = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stairs.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_coatrack));
+	    	int_coatrack = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_coatrack.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shoes));
+	    	int_shoes = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_shoes.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_hat));
+	    	int_hat = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_hat.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_buckles));
+	    	int_buckles = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_buckles.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_candles));
+	    	int_candles = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_candles.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window1));
+	    	int_window1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window1.setMaterial(intAlphaMat);
+	    	int_window1.setTransparent(true);
+	    	int_window1.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_dirt));
+	    	int_dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_dirt.setMaterial(intHatStandBoardShoebuckleMat);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers1));
+	    	int_clovers1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers1.setMaterial(intAlphaMat);
+	    	int_clovers1.setTransparent(true);
+	    	int_clovers1.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers2));
+	    	int_clovers2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers2.setMaterial(intAlphaMat);
+	    	int_clovers2.setTransparent(true);
+	    	int_clovers2.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers3));
+	    	int_clovers3 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers3.setMaterial(intAlphaMat);
+	    	int_clovers3.setTransparent(true);
+	    	int_clovers3.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers4));
+	    	int_clovers4 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers4.setMaterial(intAlphaMat);
+	    	int_clovers4.setTransparent(true);
+	    	int_clovers4.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers5));
+	    	int_clovers5 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers5.setMaterial(intAlphaMat);
+	    	int_clovers5.setTransparent(true);
+	    	int_clovers5.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers6));
+	    	int_clovers6 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers6.setMaterial(intAlphaMat);
+	    	int_clovers6.setTransparent(true);
+	    	int_clovers6.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers7));
+	    	int_clovers7 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers7.setMaterial(intAlphaMat);
+	    	int_clovers7.setTransparent(true);
+	    	int_clovers7.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_board));
+	    	int_board = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_board.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_arches));
+	    	int_arches = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_arches.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2));
+	    	int_window2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window2.setMaterial(intAlphaMat);
+	    	int_window2.setTransparent(true);
+	    	int_window2.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2_sill));
+	    	int_window2_sill = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window2_sill.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+	    	int_window2_sill.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shelf));
+	    	int_shelf = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_shelf.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chair));
+	    	int_chair = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_chair.setMaterial(intChairsBookcaseBooksMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_large_table));
+	    	int_large_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_large_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tablerunner));
+	    	int_tablerunner = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tablerunner.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_mug));
+	    	int_mug = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_mug.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_pipe));
+	    	int_pipe = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_pipe.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_gold));
+	    	int_gold = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_gold.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase1));
+	    	int_vase1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_vase1.setMaterial(vaseMat);
+	    	int_vase1.setTransparent(true);
+	    	int_vase1.setColor(0x3366ffcc);
+	    	int_vase1.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clover_table));
+	    	int_clover_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clover_table.setMaterial(intAlphaMat);
+	    	int_clover_table.setTransparent(true);
+	    	int_clover_table.setDoubleSided(true);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase2));
+	    	int_vase2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_vase2.setMaterial(vaseMat);
+	    	int_vase2.setTransparent(true);
+	    	int_vase2.setColor(0x3366ffcc);
+	    	int_vase2.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stone_pad));
+	    	int_stone_pad = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stone_pad.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stove));
+	    	int_stove = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stove.setMaterial(intDoorStoveMat);
+	    	int_stove.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chimneyring));
+	    	int_chimneyring = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_chimneyring.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_logs));
+	    	int_logs = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_logs.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_rug));
+	    	int_rug = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_rug.setMaterial(intAlphaMat);
+	    	int_rug.setTransparent(true);
+	    	int_rug.setDoubleSided(true);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_books_rocker));
+	    	int_books_rocker = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_books_rocker.setMaterial(intChairsBookcaseBooksMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_small_table));
+	    	int_small_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_small_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_open_book));
+	    	int_open_book = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_open_book.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp1));
+	    	int_lamp1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_lamp1.setMaterial(intAlphaMat);
+	    	int_lamp1.setTransparent(true);
+	    	int_lamp1.setDoubleSided(true);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp2));
+	    	int_lamp2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_lamp2.setMaterial(intAlphaMat);
+	    	int_lamp2.setTransparent(true);
+	    	int_lamp2.setDoubleSided(true);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry_rod));
+	    	int_tapestry_rod = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tapestry_rod.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry));
+	    	int_tapestry = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tapestry.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+	    	
 
 			ois.close();
 		} catch (Exception e){
 			e.printStackTrace();
 		}
+		
 		/////////////
 		//Add Objects
 		/////////////
-		addChild(skydome);
+		addChild(int_tree);
+		addChild(int_floor);
+		addChild(int_door);
+		addChild(int_door_window);
+		addChild(int_stairs);
+		addChild(int_coatrack);
+		addChild(int_hat);
+		addChild(int_shoes);
+		addChild(int_buckles);
+		addChild(int_candles);
+		addChild(int_window1);
+		addChild(int_dirt);
+		addChild(int_clovers1);
+		addChild(int_clovers2);
+		addChild(int_clovers3);
+		addChild(int_clovers4);
+		addChild(int_clovers5);
+		addChild(int_clovers6);
+		addChild(int_clovers7);
+		addChild(int_board);
+		addChild(int_arches);
+		addChild(int_window2);
+		addChild(int_window2_sill);
+		addChild(int_shelf);
+		addChild(int_chair);
+		addChild(int_large_table);
+		addChild(int_tablerunner);
+		addChild(int_mug);
+		addChild(int_pipe);
+		addChild(int_gold);
+		addChild(int_vase1);
+		addChild(int_clover_table);
+		addChild(int_vase2);
+		addChild(int_stone_pad);
+		addChild(int_stove);
+		addChild(int_chimneyring);
+		addChild(int_logs);
+		addChild(int_rug);
+		addChild(int_books_rocker);
+		addChild(int_small_table);
+		addChild(int_open_book);
+		addChild(int_lamp1);
+		addChild(int_lamp2);
+		addChild(int_tapestry_rod);
+		addChild(int_tapestry);
 
 		sceneInit = true;
 	}
