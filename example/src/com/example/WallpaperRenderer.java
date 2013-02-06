@@ -5,12 +5,14 @@ import javax.microedition.khronos.opengles.GL10;
 import com.example.R;
 
 import rajawali.BaseObject3D;
+import rajawali.lights.DirectionalLight;
 import rajawali.lights.PointLight;
 import rajawali.materials.DiffuseMaterial;
 import rajawali.materials.ParticleMaterial;
 import rajawali.materials.PhongMaterial;
 import rajawali.primitives.Cube;
 import rajawali.primitives.Plane;
+import rajawali.primitives.Sphere;
 import rajawali.renderer.RajawaliRenderer;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -24,6 +26,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	private int frameCounter = 0;
 	private PointLight pointLight1, pointLight2, pointLight3;
+	private DirectionalLight mLight;
+	private Sphere mSphere;
 	
 	public WallpaperRenderer(Context context) {
 		super(context);
@@ -31,41 +35,24 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		setBackgroundColor(0x666666);
 	}
 		
-	public void initScene() {
-		mCamera.setPosition(0, 15, -15);
-		mCamera.setLookAt(0,0,0);
-		
-		pointLight1 = new PointLight();
-		pointLight1.setPosition(10, 15, -5);
-		pointLight1.setColor(255, 0, 0);
-
-		pointLight2 = new PointLight();
-		pointLight2.setPosition(-10, 15, -5);
-		pointLight2.setColor(0, 0, 255);
-
-		pointLight3 = new PointLight();
-		pointLight3.setPosition(0, 0, -10);
-		pointLight3.setColor(0, 255, 0);
-		pointLight3.setPower(.05f);
-
-		waterMat = new PhongMaterial(true);
-		waterMat.setUseColor(true);
-		
-		cube = new Cube(3);
-		cube.setMaterial(waterMat);
-		cube.setColor(0x666666);
-		cube.addLight(pointLight1);
-		cube.addLight(pointLight2);
-		cube.addLight(pointLight3);
-
-	    addChild(cube);
+	   @Override
+	    public void initScene() {
+	    mLight = new DirectionalLight(0.1f, 0.2f, 1.0f); // set the direction
+	    mLight.setPower(1.5f);
+	    Bitmap bg = BitmapFactory.decodeResource(mContext.getResources(),
+	            R.drawable.earthtruecolor_nasa_big);
+	    mSphere = new Sphere(1, 12, 12);
+	    DiffuseMaterial material = new DiffuseMaterial();
+	    mSphere.setMaterial(material);
+	    mSphere.setLight(mLight);
+	    mSphere.addTexture(mTextureManager.addTexture(bg));
+	    addChild(mSphere);
+	    mCamera.setZ(-4.2f);
 	}
-	
+
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-			super.onDrawFrame(glUnused);
-			cube.setRotation(cube.getRotation().add(.5f, .5f, .5f));
-			frameCounter++;
+	    super.onDrawFrame(glUnused);
+	    mSphere.setRotY(mSphere.getRotY() + 1);
 	}
-
 }

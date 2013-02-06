@@ -1,0 +1,70 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+        android:title="@string/lwp_settings"
+        android:key="shamrocklanesharedprefs">
+
+            <PreferenceCategory 
+            android:title="Camera Settings">
+     	   <ListPreference 
+                android:summary="Set the camera movement speed" 
+                android:key="camSpeed_pref" 
+                android:title="Camera Movement Speed" 
+                android:entries="@array/cam_speed_titles"
+                android:entryValues="@array/cam_speed"/>
+			
+        </PreferenceCategory>
+
+        <PreferenceCategory 
+            android:title="Performance Settings">
+     	   <ListPreference 
+                android:summary="Set the performance mode" 
+                android:key="performance" 
+                android:title="Performance" 
+                android:entries="@array/performance_titles"
+                android:entryValues="@array/performance"/>
+			
+        </PreferenceCategory>
+        
+        <PreferenceCategory 
+            android:title="Environment Settings">
+			<CheckBoxPreference 
+			    android:key="smokePlume_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable Volcano Smoke" 
+			    android:title="Volcano Smoke"/>
+            <CheckBoxPreference 
+			    android:key="torches_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable Tiki Torch Flames" 
+			    android:title="Torch Flames"/>
+            <CheckBoxPreference 
+			    android:key="flicker_pref" 
+			    android:dependency="torches_pref"
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable Flickering Light" 
+			    android:title="Torch Light Flicker"/>
+            <CheckBoxPreference 
+			    android:key="fireflies_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable Fireflies" 
+			    android:title="Fireflies"/>
+            <CheckBoxPreference 
+			    android:key="plants_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable High Density Plants" 
+			    android:title="High Density Foliage"/>
+       		<ListPreference 
+                android:summary="Set the phase of the moon" 
+                android:key="moon_phase" 
+                android:title="Moon Phase" 
+                android:entries="@array/moon_phase_titles"
+                android:entryValues="@array/moon_phase"/>
+     	   <ListPreference 
+                android:summary="Change the shooting star mode" 
+                android:key="shootingstar" 
+                android:title="Shooting Stars" 
+                android:entries="@array/shootingstar_titles"
+                android:entryValues="@array/shootingstar"/>
+			
+        </PreferenceCategory>	       
+    
+</PreferenceScreen>

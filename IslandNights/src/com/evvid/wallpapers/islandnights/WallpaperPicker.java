@@ -1,6 +1,6 @@
 /*
  * 
- * Aviation 3D relies heavily on the Rajawali framework which can be found here:
+ * Island Nights relies heavily on the Rajawali framework which can be found here:
  * 
  * https://github.com/MasDennis/Rajawali
  * 		

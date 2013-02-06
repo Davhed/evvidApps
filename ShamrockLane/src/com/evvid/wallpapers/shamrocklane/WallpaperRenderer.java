@@ -32,8 +32,8 @@ import com.evvid.wallpapers.shamrocklane.R;
 import rajawali.BaseObject3D;
 import rajawali.SerializedObject3D;
 import rajawali.renderer.RajawaliRenderer;
-import rajawali.util.MeshExporter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
@@ -44,10 +44,8 @@ import rajawali.animation.Animation3D;
 import rajawali.animation.Animation3DListener;
 import rajawali.animation.ScaleAnimation3D;
 import rajawali.lights.PointLight;
-import rajawali.materials.BumpmapMaterial;
-import rajawali.materials.DiffuseAlphaMaterial;
+import rajawali.materials.DiffuseMaterial;
 import rajawali.materials.PhongMaterial;
-import rajawali.materials.SimpleAlphaMaterial;
 import rajawali.materials.SimpleMaterial;
 import rajawali.materials.TextureInfo;
 import rajawali.materials.TextureManager.TextureType;
@@ -69,50 +67,64 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			camSpeed = 10, 
 			camIndex = 0, 
 			totalCount = 0, 
-			scene = 1;//TODO: Init at 0
-	
+			scene = 0,
+			performance = 30;
 	
 	private Boolean 
-			sceneInit = false, 
+			sceneInit = false,
+			redrawScene = false,
 			moveCamera = false, 
 			moveCameraLook = false, 
 			firstTouch = true, 
 			birdDone = true;
+
+	private PointLight pLight_ground, pLight_ground2, pLight_pot, pLight_pot2, pLight_branches, pLight_candle1, pLight_candle2, pLight_candle3;
 	
 	//Exterior
 	
-	private BaseObject3D camLookNull, skydome, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys,
-	waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrock, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
+	private BaseObject3D exterior, camLookNull, skydome, sun, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys, water, branches,
+	waterfallrock, waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrock, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
 	grass1, grass2, grass3, grass4, grass5, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies;
-	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branches;
+	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branchTiles;
 
-	private TextureInfo castleBranchDirtInfo, castleBranchDirtAlphaInfo;
+	private TextureInfo skyInfo, sunInfo, sunAlphaInfo, doorGoldArchInfo, waterfallrockTextureInfo, wallStumpRockInfo, pathDirtCloverPlantsInfo, pathDirtCloverPlantsAlphaInfo,
+	potGateFernRainbowTextureInfo, potGateFernRainbowTextureAlphaInfo, castleBranchDirtInfo, castleBranchDirtAlphaInfo, treeInfo, treeBumpInfo, grassInfo,
+	waterInfo, waterAlphaInfo, fairyInfo;
+
 	private TextureInfo[] waterfallTex, birdTex;
 		
-	private PointLight pLight_ground, pLight_ground2, pLight_pot, pLight_pot2, pLight_branches;
 
 	private Number3D [] cameraLook, cameraPos;
 
 	private ObjectInputStream ois;
 
-	private int fairyTimer;
+	private int fairyTimer = 0;
 
 	//Interior
 	
-	private BaseObject3D int_tree, int_floor, int_door, int_stairs, int_door_window, int_candles, int_coatrack, int_shoes, int_hat, int_buckles, int_window1,
+	private BaseObject3D interior, int_tree, int_floor, int_door, int_stairs, int_door_window, int_candles, int_coatrack, int_shoes, int_hat, int_buckles, int_window1,
 	int_dirt, int_board, int_arches, int_clovers1, int_clovers2, int_clovers3, int_clovers4, int_clovers5, int_clovers6, int_clovers7, int_chair, int_large_table,
 	int_tablerunner, int_mug, int_pipe, int_gold, int_window2, int_window2_sill, int_vase1, int_clover_table, int_vase2, int_stone_pad, int_stove, int_logs,
 	int_chimneyring, int_shelf, int_books_rocker, int_rug, int_small_table, int_open_book, int_lamp1, int_lamp2, int_tapestry, int_tapestry_rod;
 	
+	private TextureInfo intAlphaInfo, intAlphaAlphaInfo, intWallsinfo, intFloorInfo, intDoorStoveInfo, intArchShelfOBookStepWsCandleBannerPoleInfo, intHatStandBoardShoebuckleInfo,
+	intLogTablesRunnerMugPipeCoinInfo, intChairsBookcaseBooksInfo;
+	
 	public WallpaperRenderer(Context context) {
 		super(context);
-		setFrameRate(60);
+		setFrameRate(performance);
 		setBackgroundColor(0x2b426e);
     }
 		
 	public void initScene() {
 		setOnPreferenceChange();
 		setPrefsToLocal();
+		
+		loadTextures();
+		loadExterior();
+		loadInterior();
+		addObjects();
+		setUpCamera();
 		setScene();
 	}
 	
@@ -120,160 +132,122 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	//Scene Config
 	///////////////
 	private void setOnPreferenceChange(){
+		mListener = new OnSharedPreferenceChangeListener(){
+			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+				if ("camSpeed_pref".equals(key))
+				{
+					camSpeed = Integer.parseInt(sharedPreferences.getString(key, "5"));
+				} 
+				else if ("performance_pref".equals(key))
+				{
+					performance = Integer.parseInt(sharedPreferences.getString(key, "30"));
+					setFrameRate(performance);
+				} 
+				else if ("scene_pref".equals(key))
+				{
+					int i = Integer.parseInt(sharedPreferences.getString(key, "0"));
+					if(scene != i){
+						scene = i;
+						redrawScene = true;
+						camIndex = 0;
+					}
+				} 
+				else if ("waterfall_pref".equals(key))
+				{
+//					showFalls = sharedPreferences.getBoolean(key, true);
+				}
+				else if ("fairies_pref".equals(key))
+				{
+//					showFairies = sharedPreferences.getBoolean(key, true);
+				}
+				else if ("birds_pref".equals(key))
+				{
+//					showBirds = sharedPreferences.getBoolean(key, true);
+				}
+				preferences = sharedPreferences;
+			}
+		};		
 	}
 	
 	private void setPrefsToLocal(){
+		camSpeed = Integer.parseInt(preferences.getString("camSpeed_pref", "5"));
+		performance = Integer.parseInt(preferences.getString("performance_pref", "30"));
+		scene = Integer.parseInt(preferences.getString("scene_pref", "0"));
 	}
 
 	private void setScene(){
-		if(scene == 0)
-			loadExterior();
-		else if (scene == 1)
-			loadInterior();
-	}
-
-	@Override
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		super.onSurfaceCreated(gl, config);
-		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
-		preferences.registerOnSharedPreferenceChangeListener(mListener);
-	}
-
-	@Override
-	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
-		super.onSurfaceChanged(gl, width, height);
-	}
-
-	@Override
-	public void onSurfaceDestroyed() {
-		super.onSurfaceDestroyed();
-		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
-		System.gc();
-	}
-
-	@Override
-	public void onDrawFrame(GL10 glUnused) {
-		super.onDrawFrame(glUnused);
-		if(sceneInit){
-			cameraControl();
-			cameraMovement();
-			if(scene == 0){
-				waterMovement();
-				birdMovement();
-				fairyMovement();
-			}else if (scene == 1){
-				
-			}
+		if(scene == 0){
+			interior.setVisible(false);
+			setUpCamera();
+			exterior.setVisible(true);
 		}
-	}
-
-	@Override
-	public void onTouchEvent(MotionEvent me) {
-		if (me.getAction() == MotionEvent.ACTION_DOWN) {
-			xpos = me.getX();
+		else if (scene == 1){
+			exterior.setVisible(false);
+			setUpCamera();
+			interior.setVisible(true);
 		}
-		if (me.getAction() == MotionEvent.ACTION_MOVE) {
-			float xd = xpos - me.getX(0);
-
-			if(me.getPointerCount()==1 && firstTouch) {
-				if(xd > 8){
-					camIndex--;
-					if(camIndex < 0) camIndex = (cameraLook.length - 1);
-					firstTouch = false;
-				}
-				else if (xd < -8){
-					camIndex++;
-					if(camIndex > (cameraLook.length - 1)) camIndex = 0;
-					firstTouch = false;
-				}
-				if(camIndex >= (cameraPos.length)) camIndex--;
-				else if(camIndex < 0) camIndex++;
-				if(sceneInit)cameraPose();
-			}
-			xpos = me.getX(0);
-		}
-		if (me.getAction() == MotionEvent.ACTION_UP) {
-			firstTouch = true;
-		}
-		try {
-			Thread.sleep(15);
-		} catch (Exception e) {
-		}
-	}
-
-	private void cameraControl(){
-		mCamera.setLookAt(camLookNull.getPosition());
-	}
-
-	private void cameraPose() {
-		if(mCamera.getPosition() != cameraPos[camIndex]){
-			moveCamera = true;
-		}
-		if(camLookNull.getPosition() != cameraLook[camIndex]){
-			moveCameraLook = true;
-		}
-	}
-
-	private void cameraMovement() {
-		if(moveCamera){
-			float xDif = cameraPos[camIndex].x - mCamera.getX();
-			float yDif = cameraPos[camIndex].y - mCamera.getY();
-			float zDif = cameraPos[camIndex].z - mCamera.getZ();
-
-			float newX = mCamera.getX()+(xDif/camSpeed);
-			float newY = mCamera.getY()+(yDif/camSpeed);
-			float newZ = mCamera.getZ()+(zDif/camSpeed);
-
-			float xLookDif = cameraLook[camIndex].x - camLookNull.getX();
-			float yLookDif = cameraLook[camIndex].y - camLookNull.getY();
-			float zLookDif = cameraLook[camIndex].z - camLookNull.getZ();
-
-			float newLookX = camLookNull.getX()+(xLookDif/(camSpeed*2));
-			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2));
-			float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
-
-			camLookNull.setPosition(newLookX, newLookY, newLookZ);
-			mCamera.setPosition(newX, newY, newZ);
-			if(moveCameraLook){
-				if (Math.abs(xLookDif)<.0001f && Math.abs(yLookDif)<.0001f && Math.abs(zLookDif)<.0001f) {
-					camLookNull.setPosition(cameraLook[camIndex]);
-					moveCameraLook = false;
-				}
-			}
-			if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
-				mCamera.setPosition(cameraPos[camIndex]);
-				moveCamera = false;	
-			}
-		}
-		mCamera.setPosition(mCamera.getX()+(float) (Math.sin(totalCount/40)/400), mCamera.getY()+(float) (Math.cos(totalCount/80)/800), mCamera.getZ());
-		totalCount++;
+		sceneInit = true;
 	}
 	
+	private void checkScene(){
+		if(redrawScene){
+			sceneInit = false;
+			setScene();
+		}
+	}	
+	
+	private void loadTextures(){
+		
+		//EXTERIOR
+		skyInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_tex), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome));
+		sunInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.sun), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sun));
+		sunAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.sun_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sun), TextureType.ALPHA);
+		doorGoldArchInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gold_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gold_arch), TextureType.DIFFUSE));
+		waterfallrockTextureInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.waterfallrock_mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_mushroom), TextureType.DIFFUSE));
+		wallStumpRockInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wall_stump_rock), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump_rock));
+		castleBranchDirtInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt), TextureType.DIFFUSE));
+		castleBranchDirtAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.ALPHA));
+		pathDirtCloverPlantsInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.path_dirt_clover_plants), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.DIFFUSE));
+		pathDirtCloverPlantsAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.path_dirt_clover_plants_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.ALPHA));
+		potGateFernRainbowTextureInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.pot_gate_fern_rainbow), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot_gate_fern_rainbow), TextureType.DIFFUSE));
+		potGateFernRainbowTextureAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.pot_gate_fern_rainbow_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot_gate_fern_rainbow), TextureType.ALPHA));
+		treeInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree));
+		grassInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass));
+		treeBumpInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree_norm), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree_norm), TextureType.BUMP);
+		waterInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas), TextureType.DIFFUSE));
+		waterAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas), TextureType.ALPHA));
+		fairyInfo = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fairy_tex));
+		
+		birdTex = new TextureInfo[8];
+		for(int i = 0; i <  birdTex.length/2; i++){
+    		int etc = mContext.getResources().getIdentifier("bird_0" + (i), "raw", "com.evvid.wallpapers.shamrocklane");
+    		int alph = mContext.getResources().getIdentifier("bird_0" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
+    		int bmp = mContext.getResources().getIdentifier("bird_0" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+    		birdTex[2*i] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(etc), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.DIFFUSE);
+    		birdTex[2*i+1] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(alph), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.ALPHA);
+		}
+	    waterfallTex = new TextureInfo[32];
+		for(int i = 0; i <  waterfallTex.length/2; i++){
+    		int etc = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) : "wf" + (i), "raw", "com.evvid.wallpapers.shamrocklane");
+    		int alph = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) + "_alpha" : "wf" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
+    		int bmp = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) : "wf" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+    		waterfallTex[2*i] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(etc), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.DIFFUSE);
+    		waterfallTex[2*i+1] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(alph), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.ALPHA);
+		}
+		
+		//INTERIOR
+		intAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha));
+		intAlphaAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha), TextureType.ALPHA);
+		intWallsinfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_walls), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_walls));
+		intFloorInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_floor_diff), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_floor));
+		intDoorStoveInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_door_stove), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_door_stove));
+		intArchShelfOBookStepWsCandleBannerPoleInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_arch_shelf_obook_step_ws_candle_banner_pole), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_arch_shelf_obook_step_ws_candle_banner_pole));
+		intHatStandBoardShoebuckleInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_hat_stand_board_shoebuckle), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_hat_stand_board_shoebuckle));
+		intLogTablesRunnerMugPipeCoinInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_log_tables_runner_mug_pipe_coin), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_log_tables_runner_mug_pipe_coin));
+		intChairsBookcaseBooksInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_chairs_bookcase_books), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_chairs_bookcase_books));
+	}
+
 	private void loadExterior(){
-		mCamera.setFarPlane(2000);
-		camLookNull = new BaseObject3D();
-		cameraPos = new Number3D [7];
-		
-		cameraPos[0] = new Number3D(-19, 3, 37);
-		cameraPos[1] = new Number3D(5, 1, 42);
-		cameraPos[2] = new Number3D(9, 0, 31);
-		cameraPos[3] = new Number3D(14, 0, 33);
-		cameraPos[4] = new Number3D(0, 1, 12);
-		cameraPos[5] = new Number3D(-9, 2, 15);
-		cameraPos[6] = new Number3D(-13, 0, 23);
-		
-		cameraLook = new Number3D [7];
-		cameraLook[0] = new Number3D(2, 1, -1);
-		cameraLook[1] = new Number3D(-6, 0, 16);
-		cameraLook[2] = new Number3D(13, -1, 14);
-		cameraLook[3] = new Number3D(2, -1, 5);
-		cameraLook[4] = new Number3D(-14, -1, 9.5f);
-		cameraLook[5] = new Number3D(0, 0, 0);
-		cameraLook[6] = new Number3D(9, -3, 12);
-		
-		mCamera.setPosition(cameraPos[0]);
-		mCamera.setLookAt(cameraLook[0]);
-		
 		pLight_ground = new PointLight();
 		pLight_ground.setPosition(6.5f, 7, 15);
 		pLight_ground.setPower(2f);
@@ -282,7 +256,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			
 		pLight_ground2 = new PointLight();
 		pLight_ground2.setPosition(20, 40, -55);
-		pLight_ground2.setPower(1f);
+		pLight_ground2.setPower(1.25f);
 		pLight_ground2.setAttenuation(50, 1, 0, 0);
 		
 		pLight_branches = new PointLight();
@@ -303,33 +277,31 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		///////////////
 		
 		SimpleMaterial skyMat = new SimpleMaterial();
-			skyMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_tex), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome)));
+			skyMat.addTexture(skyInfo);
 
-		SimpleMaterial doorGoldArchMat = new SimpleMaterial();
-			doorGoldArchMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gold_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gold_arch), TextureType.DIFFUSE)));
+		SimpleMaterial sunMat = new SimpleMaterial();
+		sunMat.addTexture(sunInfo);
+		sunMat.addTexture(sunAlphaInfo);
+
+		SimpleMaterial doorArchMat = new SimpleMaterial();
+			doorArchMat.addTexture(doorGoldArchInfo);
 
 		SimpleMaterial waterfallrockMat = new SimpleMaterial();
-			TextureInfo waterfallrockTextureInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.waterfallrock_mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_mushroom), TextureType.DIFFUSE));
 			waterfallrockMat.addTexture(waterfallrockTextureInfo);
 		
 		SimpleMaterial wallMat = new SimpleMaterial();
-			TextureInfo wallStumpRockInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wall_stump_rock), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump_rock));
 			wallMat.addTexture(wallStumpRockInfo);
 		
-		SimpleAlphaMaterial castleDirtMat = new SimpleAlphaMaterial();
-			castleBranchDirtInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.castle_branch_dirt), TextureType.DIFFUSE));
-			castleBranchDirtAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.castle_branch_dirt_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.ALPHA));
+		SimpleMaterial castleDirtMat = new SimpleMaterial();
 			castleDirtMat.addTexture(castleBranchDirtInfo);
 			castleDirtMat.addTexture(castleBranchDirtAlphaInfo);
 
-		SimpleAlphaMaterial pathDirtCloverPlantsMat = new SimpleAlphaMaterial();
-			pathDirtCloverPlantsMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.path_dirt_clover_plants), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.DIFFUSE)));
-			pathDirtCloverPlantsMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.path_dirt_clover_plants_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.path_dirt_clover_plants), TextureType.ALPHA)));
+		SimpleMaterial pathDirtCloverPlantsMat = new SimpleMaterial();
+			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsInfo);
+			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsAlphaInfo);
 
-		SimpleAlphaMaterial gateFernRainbowMat = new SimpleAlphaMaterial();
-			TextureInfo potGateFernRainbowTextureDiffInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.pot_gate_fern_rainbow), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot_gate_fern_rainbow), TextureType.DIFFUSE));
-			TextureInfo potGateFernRainbowTextureAlphaInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.pot_gate_fern_rainbow_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot_gate_fern_rainbow), TextureType.ALPHA));
-			gateFernRainbowMat.addTexture(potGateFernRainbowTextureDiffInfo);
+		SimpleMaterial gateFernRainbowMat = new SimpleMaterial();
+			gateFernRainbowMat.addTexture(potGateFernRainbowTextureInfo);
 			gateFernRainbowMat.addTexture(potGateFernRainbowTextureAlphaInfo);
 		
 		PhongMaterial shroomMat = new PhongMaterial();
@@ -337,51 +309,29 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			shroomMat.addTexture(waterfallrockTextureInfo);
 
 		SimpleGlowMaterial goldMat = new SimpleGlowMaterial();
-			goldMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gold_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gold_arch), TextureType.DIFFUSE)));
+			goldMat.addTexture(doorGoldArchInfo);
 
 		PhongMaterial potMat = new PhongMaterial();
 			potMat.setShininess(92.3f);
-			potMat.addTexture(potGateFernRainbowTextureDiffInfo);
+			potMat.addTexture(potGateFernRainbowTextureInfo);
 
 		PhongMaterial treeMat = new PhongMaterial();
 			treeMat.setShininess(100.0f);
-			treeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree)));
+			treeMat.addTexture(treeInfo);
 		
 		PhongMaterial grassMat = new PhongMaterial();
 			grassMat.setShininess(100.0f);
-			grassMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass)));
+			grassMat.addTexture(grassInfo);
 		
 		PhongMaterial stumpRockMat = new PhongMaterial();
 			stumpRockMat.setShininess(80.0f);
 			stumpRockMat.addTexture(wallStumpRockInfo);
 			
-		BumpmapMaterial bigtreeMat = new BumpmapMaterial();
-			bigtreeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree), TextureType.DIFFUSE));
-			bigtreeMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree_norm), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree_norm), TextureType.BUMP));
+		DiffuseMaterial bigtreeMat = new DiffuseMaterial();
+			bigtreeMat.addTexture(treeInfo);
+			bigtreeMat.addTexture(treeBumpInfo);
 
 
-		///////////////
-		//Load Additional Textures
-		///////////////
-			
-		    birdTex = new TextureInfo[8];
-			for(int i = 0; i <  birdTex.length/2; i++){
-	    		int etc = mContext.getResources().getIdentifier("bird_0" + (i), "raw", "com.evvid.wallpapers.shamrocklane");
-	    		int alph = mContext.getResources().getIdentifier("bird_0" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
-	    		int bmp = mContext.getResources().getIdentifier("bird_0" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
-	    		birdTex[2*i] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(etc), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.DIFFUSE);
-	    		birdTex[2*i+1] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(alph), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.ALPHA);
-			}
-		    waterfallTex = new TextureInfo[32];
-			for(int i = 0; i <  waterfallTex.length/2; i++){
-	    		int etc = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) : "wf" + (i), "raw", "com.evvid.wallpapers.shamrocklane");
-	    		int alph = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) + "_alpha" : "wf" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
-	    		int bmp = mContext.getResources().getIdentifier(i < 10 ? "wf0" + (i) : "wf" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
-	    		waterfallTex[2*i] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(etc), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.DIFFUSE);
-	    		waterfallTex[2*i+1] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(alph), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.ALPHA);
-			}
-				
-		
 		///////////////
 		// Create Objects
 		///////////////
@@ -392,6 +342,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			skydome.setY(20);
 			skydome.setRotY(5);
 			skydome.setDoubleSided(true);
+			
+			sun = new Plane(30, 30, 1, 1 , 1);
+			sun.setMaterial(sunMat);
+			sun.setPosition(100, 25, -50);
+			sun.setBlendingEnabled(true);
+			sun.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.castle_towers));
 	    	castletowers = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -406,7 +362,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.ground));
 	    	ground = new BaseObject3D((SerializedObject3D)ois.readObject());
 			ground.setMaterial(grassMat);
-			ground.setY(-.2f);
 			ground.addLight(pLight_ground);
 			ground.addLight(pLight_ground2);
 
@@ -434,7 +389,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			path.setMaterial(pathDirtCloverPlantsMat);
 			path.setBlendingEnabled(true);
 			path.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			path.setY(.1f);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.lilys));
 	    	lilys = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -519,7 +473,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.arch));
 	    	arch = new BaseObject3D((SerializedObject3D)ois.readObject());
-			arch.setMaterial(doorGoldArchMat);
+			arch.setMaterial(doorArchMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.stump));
 	    	stump = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -539,9 +493,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			largestump.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.waterfall));
-	    	waterfall = new BaseObject3D((SerializedObject3D)ois.readObject());
-			waterfall.setMaterial(waterfallrockMat);
-			waterfall.addLight(pLight_ground);
+	    	waterfallrock = new BaseObject3D((SerializedObject3D)ois.readObject());
+			waterfallrock.setMaterial(waterfallrockMat);
+			waterfallrock.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.pot));
 	    	pot = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -577,7 +531,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.door));
 	    	door = new BaseObject3D((SerializedObject3D)ois.readObject());
-			door.setMaterial(doorGoldArchMat);
+			door.setMaterial(doorArchMat);
 			door.addLight(pLight_ground);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.rocks));
@@ -661,71 +615,278 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		} catch (Exception e){
 			e.printStackTrace();
 		}
-		/////////////
-		//Add Objects
-		/////////////
-		addChild(skydome);
-		addChild(castletowers);
-		addChild(castle);
-		addChild(rbow1);
-		addChild(ground);
-
-		addBird();
-
-		addChild(dirt);
-		addChild(tree);
-		addChild(shadows1);
-		addChild(shadows2);
-		addChild(rocks);
-
-		addWaterTiles();
 		
-		addChild(lilys);
-		addChild(path);
-		addChild(walls);
-		addChild(gate);
-		addChild(arch);
-		addChild(largestump);
-		addChild(stumpdecal);
-		addChild(stump);
-		addChild(shrooms);
-		addChild(door);
-		addChild(vines1);
-		addChild(vines2);
-		addChild(grass1);
-		addChild(grass2);
-		addChild(grass3);
-		addChild(grass4);
-		addChild(grass5);
-		addChild(flowers1);
-		addChild(flowers2);
-		addChild(flowers3);
-		addChild(flowers4);
-		addChild(flowers5);
-		addChild(flowers6);
-		addChild(vines3);
+		createBird();
+		createWater();
+		createWaterfall();
+		createFairies();
+		createBranches();
+	}	
 
-		addWaterFall();
+	private void loadInterior(){
+		pLight_candle1 = new PointLight();
+		pLight_candle1.setPosition(13.88f, 4.25f, -2.5f);
+		pLight_candle1.setPower(4f);
+		pLight_candle1.setColor(0xfedccc);
 
-		addChild(shamrocks);
-		addChild(treeferns);
-		addChild(pondferns);
-		addChild(pot);		
-		addChild(gold);
-		addFairies();
-		addChild(fgtrees);
-		addChild(fgferns);
+		pLight_candle2 = new PointLight();
+		pLight_candle2.setPosition(2.5f, 4.25f, -10.5f);
+		pLight_candle2.setPower(4f);
+		pLight_candle2.setColor(0xfedccc);
+
+		pLight_candle3 = new PointLight();
+		pLight_candle3.setPosition(-2.5f, 4.25f, 13.5f);
+		pLight_candle3.setPower(4f);
+		pLight_candle3.setColor(0xfedccc);
+				
+		///////////////
+		// Create Materials
+		///////////////
+		PhongMaterial intAlphaMat = new PhongMaterial();
+			intAlphaMat.addTexture(intAlphaInfo);
+			intAlphaMat.addTexture(intAlphaAlphaInfo);
 		
-		addBranches();
-		sceneInit = true;
+		DiffuseMaterial intWallsMat = new DiffuseMaterial();
+			intWallsMat.addTexture(intWallsinfo);
+	
+		DiffuseMaterial intFloorMat = new DiffuseMaterial();
+			intFloorMat.addTexture(intFloorInfo);
+	
+		DiffuseMaterial intDoorStoveMat = new DiffuseMaterial();
+			intDoorStoveMat.addTexture(intDoorStoveInfo);
+	
+		DiffuseMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new DiffuseMaterial();
+			intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(intArchShelfOBookStepWsCandleBannerPoleInfo);
+		
+		DiffuseMaterial intHatStandBoardShoebuckleMat = new DiffuseMaterial();
+			intHatStandBoardShoebuckleMat.addTexture(intHatStandBoardShoebuckleInfo);
+		
+		DiffuseMaterial intLogTablesRunnerMugPipeCoinMat = new DiffuseMaterial();
+			intLogTablesRunnerMugPipeCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
+		
+		DiffuseMaterial intChairsBookcaseBooksMat = new DiffuseMaterial();
+			intChairsBookcaseBooksMat.addTexture(intChairsBookcaseBooksInfo);
+		
+		PhongMaterial vaseMat = new PhongMaterial();
+			vaseMat.setUseColor(true);
+			vaseMat.setShininess(50f);
+				
+		///////////////
+		// Create Objects
+		///////////////
+		try {	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tree));
+	    	int_tree = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tree.setMaterial(intWallsMat);
+			
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_floor));
+	    	int_floor = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_floor.setMaterial(intFloorMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door));
+	    	int_door = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_door.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door_window));
+	    	int_door_window = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_door_window.setMaterial(intAlphaMat);
+	    	int_door_window.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stairs));
+	    	int_stairs = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stairs.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_coatrack));
+	    	int_coatrack = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_coatrack.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shoes));
+	    	int_shoes = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_shoes.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_hat));
+	    	int_hat = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_hat.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_buckles));
+	    	int_buckles = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_buckles.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_candles));
+	    	int_candles = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_candles.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window1));
+	    	int_window1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window1.setMaterial(intAlphaMat);
+	    	int_window1.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_dirt));
+	    	int_dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_dirt.setMaterial(intHatStandBoardShoebuckleMat);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers1));
+	    	int_clovers1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers1.setMaterial(intAlphaMat);
+	    	int_clovers1.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers2));
+	    	int_clovers2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers2.setMaterial(intAlphaMat);
+	    	int_clovers2.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers3));
+	    	int_clovers3 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers3.setMaterial(intAlphaMat);
+	    	int_clovers3.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers4));
+	    	int_clovers4 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers4.setMaterial(intAlphaMat);
+	    	int_clovers4.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers5));
+	    	int_clovers5 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers5.setMaterial(intAlphaMat);
+	    	int_clovers5.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers6));
+	    	int_clovers6 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers6.setMaterial(intAlphaMat);
+	    	int_clovers6.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers7));
+	    	int_clovers7 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clovers7.setMaterial(intAlphaMat);
+	    	int_clovers7.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_board));
+	    	int_board = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_board.setMaterial(intHatStandBoardShoebuckleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_arches));
+	    	int_arches = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_arches.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2));
+	    	int_window2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window2.setMaterial(intAlphaMat);
+	    	int_window2.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2_sill));
+	    	int_window2_sill = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_window2_sill.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+	    	int_window2_sill.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shelf));
+	    	int_shelf = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_shelf.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chair));
+	    	int_chair = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_chair.setMaterial(intChairsBookcaseBooksMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_large_table));
+	    	int_large_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_large_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tablerunner));
+	    	int_tablerunner = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tablerunner.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_mug));
+	    	int_mug = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_mug.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_pipe));
+	    	int_pipe = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_pipe.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_gold));
+	    	int_gold = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_gold.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase1));
+	    	int_vase1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_vase1.setMaterial(vaseMat);
+	    	int_vase1.setTransparent(true);
+	    	int_vase1.setColor(0x3366ff);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clover_table));
+	    	int_clover_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_clover_table.setMaterial(intAlphaMat);
+	    	int_clover_table.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase2));
+	    	int_vase2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_vase2.setMaterial(vaseMat);
+	    	int_vase2.setTransparent(true);
+	    	int_vase2.setColor(0x3366ff);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stone_pad));
+	    	int_stone_pad = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stone_pad.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stove));
+	    	int_stove = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_stove.setMaterial(intDoorStoveMat);
+	    	int_stove.setDoubleSided(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chimneyring));
+	    	int_chimneyring = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_chimneyring.setMaterial(intDoorStoveMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_logs));
+	    	int_logs = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_logs.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_rug));
+	    	int_rug = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_rug.setMaterial(intAlphaMat);
+	    	int_rug.setTransparent(true);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_books_rocker));
+	    	int_books_rocker = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_books_rocker.setMaterial(intChairsBookcaseBooksMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_small_table));
+	    	int_small_table = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_small_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_open_book));
+	    	int_open_book = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_open_book.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+	    	
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp1));
+	    	int_lamp1 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_lamp1.setMaterial(intAlphaMat);
+	    	int_lamp1.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp2));
+	    	int_lamp2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_lamp2.setMaterial(intAlphaMat);
+	    	int_lamp2.setTransparent(true);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry_rod));
+	    	int_tapestry_rod = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tapestry_rod.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry));
+	    	int_tapestry = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	int_tapestry.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
+
+			ois.close();
+		} catch (Exception e){
+			e.printStackTrace();
+		}		
 	}
-
-	private void addBird(){
+	
+	private void createBird(){
 		bird = new BaseObject3D();
 		
 		for(int i = 0; i <  birdTex.length/2; i++){
 			Plane birdFrame = new Plane(1,1,1,1,1);		
-			birdFrame.setMaterial(new SimpleAlphaMaterial());
+			birdFrame.setMaterial(new SimpleMaterial());
 			birdFrame.addTexture(birdTex[2*i]);
 			birdFrame.addTexture(birdTex[2*i+1]);
 			birdFrame.setDoubleSided(true);
@@ -736,15 +897,15 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 		
 		bird.setPosition(-50, 8, -7);
-		addChild(bird);
 	}
 	
-	private void addWaterTiles(){
+	private void createWater(){
 		float tileWidth  = .25f;
+		water = new BaseObject3D();
 		waterTiles = new BaseObject3D [16];
-		SimpleAlphaMaterial waterMat = new SimpleAlphaMaterial();
-		waterMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas), TextureType.DIFFUSE)));
-		waterMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas), TextureType.ALPHA)));
+		SimpleMaterial waterMat = new SimpleMaterial();
+		waterMat.addTexture(waterInfo);
+		waterMat.addTexture(waterAlphaInfo);
 		
 		for(int i = 0; i <  waterTiles.length; i++){
     		if(i%4 == 0) {
@@ -766,13 +927,13 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			waterTiles[i].getGeometry().setTextureCoords(waterUVs);
 			waterTiles[i].setBlendingEnabled(true);
 			waterTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			waterTiles[i].setVisible(false);
-			addChild(waterTiles[i]);
+			if(i > 0 )waterTiles[i].setVisible(false);
+			water.addChild(waterTiles[i]);
     	}
 	}
 	
-	private void addWaterFall(){
-		addChild(waterfall);//Add rocky background geometry
+	private void createWaterfall(){
+		waterfall = new BaseObject3D();
 		BaseObject3D waterfallsprite = new BaseObject3D();
     	try {
 			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.waterfallsprite));
@@ -786,14 +947,14 @@ public class WallpaperRenderer extends RajawaliRenderer{
 				
 		for(int i = 0; i <  waterfallTiles.length; i++){
 			waterfallTiles[i] = waterfallsprite.clone();
-			waterfallTiles[i].setMaterial(new SimpleAlphaMaterial());
+			waterfallTiles[i].setMaterial(new SimpleMaterial());
 			waterfallTiles[i].addTexture(waterfallTex[2*i]);
 			waterfallTiles[i].addTexture(waterfallTex[2*i+1]);
 			waterfallTiles[i].setDoubleSided(true);
 			waterfallTiles[i].setBlendingEnabled(true);
 			waterfallTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			waterfallTiles[i].setVisible(false);
-			addChild(waterfallTiles[i]);
+			if(i > 0 )waterfallTiles[i].setVisible(false);
+			waterfall.addChild(waterfallTiles[i]);
 		}
 		
 		int numRows = 8;
@@ -804,7 +965,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		splash2Tiles = new BaseObject3D [32];
 		splash3Tiles = new BaseObject3D [32];
 		
-		SimpleAlphaMaterial splashMat = new SimpleAlphaMaterial();
+		SimpleMaterial splashMat = new SimpleMaterial();
 		splashMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.DIFFUSE)));
 		splashMat.addTexture(mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.ALPHA)));
 		
@@ -829,7 +990,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			splashTiles[i].setBlendingEnabled(true);
 			splashTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			splashTiles[i].setVisible(false);
-			addChild(splashTiles[i]);
+			waterfall.addChild(splashTiles[i]);
 
 			splash2Tiles[i] = new Plane(5,5,1,1);
 			splash2Tiles[i].setMaterial(splashMat);
@@ -840,7 +1001,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			splash2Tiles[i].setBlendingEnabled(true);
 			splash2Tiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			splash2Tiles[i].setVisible(false);
-			addChild(splash2Tiles[i]);
+			waterfall.addChild(splash2Tiles[i]);
 
 			splash3Tiles[i] = new Plane(5,5,1,1);
 			splash3Tiles[i].setMaterial(splashMat);
@@ -851,77 +1012,283 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			splash3Tiles[i].setBlendingEnabled(true);
 			splash3Tiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			splash3Tiles[i].setVisible(false);
-			addChild(splash3Tiles[i]);
+			waterfall.addChild(splash3Tiles[i]);
+		}
+	}
+
+	private void createFairies(){
+		fairies = new BaseObject3D();
+		fairies.setPosition(-6, -.25f, 19.5f);
+		int numChildren = 16;
+
+		SimpleMaterial fairyMat = new SimpleMaterial();
+		fairyMat.addTexture(fairyInfo);
+		
+		for(int i = 0; i < numChildren; ++i){
+			BaseObject3D fairy = new Sphere(.05f, 20,20);
+			fairy.setPosition((float) (Math.random()*2)-1, (float) (Math.random()*2)-1, (float) (Math.random()*2)-1);
+			fairy.setMaterial(fairyMat);
+			fairy.setDoubleSided(true);
+			fairy.setBlendingEnabled(true);
+			fairy.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
+			fairy.setScale(0);
+			fairies.addChild(fairy);
 		}
 	}
 	
-	private void addBranches(){
-		branches = new BaseObject3D [15];
+	private void createBranches(){
+		branches = new BaseObject3D();
+		branchTiles = new BaseObject3D [15];
 		float[] uvCoords =  new float[] {.5f, 1f, .5f, .5f, 0.01f, 1f, 0.01f, .5f};
 
-		for(int i = 0; i < branches.length; i++){
-			branches[i] = new TexturedPlane(10, 10, 1, 1, 1, uvCoords);
-			branches[i].setDoubleSided(true);
-			branches[i].setBlendingEnabled(true);
-			branches[i].addLight(pLight_ground);
-			branches[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			if(i>0)branches[i].setLookAt(mCamera.getPosition());
-			branches[i].setMaterial(new DiffuseAlphaMaterial());
-			branches[i].addTexture(castleBranchDirtInfo);
-			branches[i].addTexture(castleBranchDirtAlphaInfo);
-			branches[i].addLight(pLight_branches);
+		for(int i = 0; i < branchTiles.length; i++){
+			branchTiles[i] = new TexturedPlane(10, 10, 1, 1, 1, uvCoords);
+			branchTiles[i].setDoubleSided(true);
+			branchTiles[i].setBlendingEnabled(true);
+			branchTiles[i].addLight(pLight_ground);
+			branchTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			if(i > 0)branchTiles[i].setLookAt(new Number3D(-19, 3, 37)); // Point most branches at initial camera position
+			branchTiles[i].setMaterial(new SimpleMaterial());
+			branchTiles[i].addTexture(castleBranchDirtInfo);
+			branchTiles[i].addTexture(castleBranchDirtAlphaInfo);
+			branchTiles[i].addLight(pLight_branches);
 		}
 
-		branches[0].setPosition(-13f, 6.5f, 7f);
-		branches[0].setRotY(-90);
-		addChild(branches[0]);
+		branchTiles[0].setPosition(-13f, 6.5f, 7f); //Far side of tree house
+		branchTiles[0].setRotY(-90);
+		branches.addChild(branchTiles[0]);
 
-		branches[1].setPosition(-12.5f, 5f, 13f);
-		branches[1].setRotY(90);
-		addChild(branches[1]);
+		branchTiles[1].setPosition(-12.5f, 5f, 13f); //Near side of treehouse
+		branchTiles[1].setRotY(90);
+		branches.addChild(branchTiles[1]);
 
-		branches[2].setPosition(13, 6f, 10);
-		addChild(branches[2]);
+		branchTiles[2].setPosition(13, 6f, 10); //Right side of waterfall
+		branches.addChild(branchTiles[2]);
 
-		branches[3].setPosition(11, 6, 16);
-		addChild(branches[3]);
+		branchTiles[3].setPosition(11, 6, 16); //Left Side of waterfall
+		branches.addChild(branchTiles[3]);
 
-		addChild(rbow2);			
+		branches.addChild(rbow2);			// Had to add the rainbow segment to branches because of layering issues
 
-		branches[4].setPosition(13.5f, 5, 20);
-		addChild(branches[4]);
+		branchTiles[4].setPosition(13.5f, 5, 20);
+		branches.addChild(branchTiles[4]);
 
-		branches[5].setPosition(7, 6.5f, 22);
-		addChild(branches[5]);
+		branchTiles[5].setPosition(7, 6.5f, 22);
+		branches.addChild(branchTiles[5]);
 
-		branches[6].setPosition(3, 5.5f, 25);
-		addChild(branches[6]);	
+		branchTiles[6].setPosition(3, 5.5f, 25);
+		branches.addChild(branchTiles[6]);	
 		
-		branches[7].setPosition(-13f, 7f, 18f);
-		addChild(branches[7]);
+		branchTiles[7].setPosition(-13f, 7f, 18f);
+		branches.addChild(branchTiles[7]);
 		
-		branches[8].setPosition(-7.5f, 8, 22);
-		addChild(branches[8]);
+		branchTiles[8].setPosition(-7.5f, 8, 22);
+		branches.addChild(branchTiles[8]);
 		
-		branches[9].setPosition(-12f, 7, 30);
-		addChild(branches[9]);
+		branchTiles[9].setPosition(-12f, 7, 30);
+		branches.addChild(branchTiles[9]);
 		
-		branches[10].setPosition(0f, 6, 30);
-		addChild(branches[10]);
+		branchTiles[10].setPosition(0f, 6, 30);
+		branches.addChild(branchTiles[10]);
 		
-		branches[11].setPosition(-6f, 7.5f, 32);
-		addChild(branches[11]);
+		branchTiles[11].setPosition(-6f, 7.5f, 32);
+		branches.addChild(branchTiles[11]);
 		
-		branches[12].setPosition(-8f, 7, 33);
-		addChild(branches[12]);
+		branchTiles[12].setPosition(-8f, 7, 33);
+		branches.addChild(branchTiles[12]);
 		
-		branches[13].setPosition(-7f, 6, 34);
-		addChild(branches[13]);
+		branchTiles[13].setPosition(-7f, 6, 34);
+		branches.addChild(branchTiles[13]);
 		
-		branches[14].setPosition(4, 5, 35);
-		addChild(branches[14]);
+		branchTiles[14].setPosition(4, 5, 35);
+		branches.addChild(branchTiles[14]);
 	}
 	
+	private void addObjects(){
+		exterior = new BaseObject3D();
+		interior = new BaseObject3D();
+		/////////////
+		//Add Exterior
+		/////////////
+		exterior.addChild(skydome);
+		exterior.addChild(sun);
+		exterior.addChild(castletowers);
+		exterior.addChild(castle);
+		exterior.addChild(rbow1);
+		exterior.addChild(ground);
+		exterior.addChild(path);
+		exterior.addChild(bird);
+		exterior.addChild(dirt);
+		exterior.addChild(tree);
+		exterior.addChild(shadows1);
+		exterior.addChild(shadows2);
+		exterior.addChild(rocks);
+		exterior.addChild(water);
+		exterior.addChild(lilys);
+		exterior.addChild(walls);
+		exterior.addChild(gate);
+		exterior.addChild(arch);
+		exterior.addChild(largestump);
+		exterior.addChild(stumpdecal);
+		exterior.addChild(stump);
+		exterior.addChild(shrooms);
+		exterior.addChild(door);
+		exterior.addChild(vines1);
+		exterior.addChild(vines2);
+		exterior.addChild(grass1);
+		exterior.addChild(grass2);
+		exterior.addChild(grass3);
+		exterior.addChild(grass4);
+		exterior.addChild(grass5);
+		exterior.addChild(flowers1);
+		exterior.addChild(flowers2);
+		exterior.addChild(flowers3);
+		exterior.addChild(flowers4);
+		exterior.addChild(flowers5);
+		exterior.addChild(flowers6);
+		exterior.addChild(vines3);
+		exterior.addChild(waterfallrock);
+		exterior.addChild(waterfall);
+		exterior.addChild(shamrocks);
+		exterior.addChild(treeferns);
+		exterior.addChild(pondferns);
+		exterior.addChild(pot);		
+		exterior.addChild(gold);
+		exterior.addChild(fairies);
+		exterior.addChild(fgtrees);
+		exterior.addChild(fgferns);
+		exterior.addChild(branches);
+		exterior.setVisible(false);
+		addChild(exterior);
+		/////////////
+		//Add Interior
+		/////////////
+		interior.addChild(int_tree);
+		interior.addChild(int_floor);
+		interior.addChild(int_door);
+		interior.addChild(int_door_window);
+		interior.addChild(int_stairs);
+		interior.addChild(int_coatrack);
+		interior.addChild(int_hat);
+		interior.addChild(int_shoes);
+		interior.addChild(int_buckles);
+		interior.addChild(int_candles);
+		interior.addChild(int_window1);
+		interior.addChild(int_dirt);
+		interior.addChild(int_clovers1);
+		interior.addChild(int_clovers2);
+		interior.addChild(int_clovers3);
+		interior.addChild(int_clovers4);
+		interior.addChild(int_clovers5);
+		interior.addChild(int_clovers6);
+		interior.addChild(int_clovers7);
+		interior.addChild(int_board);
+		interior.addChild(int_arches);
+		interior.addChild(int_window2);
+		interior.addChild(int_window2_sill);
+		interior.addChild(int_shelf);
+		interior.addChild(int_chair);
+		interior.addChild(int_large_table);
+		interior.addChild(int_tablerunner);
+		interior.addChild(int_mug);
+		interior.addChild(int_pipe);
+		interior.addChild(int_gold);
+		interior.addChild(int_vase1);
+		interior.addChild(int_clover_table);
+		interior.addChild(int_vase2);
+		interior.addChild(int_stone_pad);
+		interior.addChild(int_stove);
+		interior.addChild(int_chimneyring);
+		interior.addChild(int_logs);
+		interior.addChild(int_rug);
+		interior.addChild(int_books_rocker);
+		interior.addChild(int_small_table);
+		interior.addChild(int_open_book);
+		interior.addChild(int_lamp1);
+		interior.addChild(int_lamp2);
+		interior.addChild(int_tapestry_rod);
+		interior.addChild(int_tapestry);
+		interior.setVisible(false);
+		addChild(interior);
+		interior.addLight(pLight_candle1);
+		interior.addLight(pLight_candle2);
+		interior.addLight(pLight_candle3);
+	}
+	
+	@Override
+	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+		super.onSurfaceCreated(gl, config);
+		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
+		preferences.registerOnSharedPreferenceChangeListener(mListener);
+	}
+
+	@Override
+	public void onSurfaceChanged(GL10 gl, int width, int height) { // Check for screen rotation
+		super.onSurfaceChanged(gl, width, height);
+	}
+
+	@Override
+	public void onSurfaceDestroyed() {
+		super.onSurfaceDestroyed();
+		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
+		System.gc();
+	}
+
+	@Override
+	public void onDrawFrame(GL10 glUnused) {
+		super.onDrawFrame(glUnused);
+		checkScene();
+		if(sceneInit && !redrawScene){
+			cameraControl();
+			cameraMovement();
+			if(scene == 0){
+				sun.setLookAt(mCamera.getPosition());
+				waterMovement();
+				birdMovement();
+				fairyMovement();
+			}else if (scene == 1){
+				//TODO: Pipe Smoke
+				//TODO: Light Rays
+				//TODO: Leprechaun
+			}
+		}
+	}
+	
+	@Override
+	public void onTouchEvent(MotionEvent me) {
+		if (me.getAction() == MotionEvent.ACTION_DOWN) {
+			xpos = me.getX();
+		}
+		if (me.getAction() == MotionEvent.ACTION_MOVE) {
+			float xd = xpos - me.getX(0);
+
+			if(me.getPointerCount()==1 && firstTouch) {
+				if(xd > 8){//If the pointer movement is left->right and of some significance
+					camIndex--;
+					if(camIndex < 0) camIndex = (cameraLook.length - 1); //this creates our camera loop
+					firstTouch = false;// this prevents over calling the camera position function while the pointer is still down
+				}
+				else if (xd < -8){//If the pointer movement is right->left and of some significance
+					camIndex++;
+					if(camIndex > (cameraLook.length - 1)) camIndex = 0;
+					firstTouch = false;
+				}
+				if(sceneInit)cameraPose();
+			}
+			xpos = me.getX(0);
+		}
+		if (me.getAction() == MotionEvent.ACTION_UP) {
+			firstTouch = true;
+		}
+		try {
+			Thread.sleep(15);
+		} catch (Exception e) {
+		}
+	}
+	
+	///////////////
+	/////Animation and Conditionals
+	///////////////
 	private void waterMovement() {
 		if(frameCounter%2 == 0) {
 	    	waterTiles[tileIndex].setVisible(true);
@@ -950,43 +1317,30 @@ public class WallpaperRenderer extends RajawaliRenderer{
     	if(frameCounter++ == 32) frameCounter = 0;
 	}
 
-	private void addFairies(){
-		fairies = new BaseObject3D();
-		fairies.setPosition(-6, -.25f, 19.5f);
-		int numChildren = 8;
-
-		SimpleMaterial fairyMat = new SimpleMaterial();
-		fairyMat.addTexture(mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fairy_tex)));
-		
-		for(int i = 0; i < numChildren; ++i){
-			BaseObject3D fairy = new Sphere(.05f, 20,20);
-			fairy.setPosition((float) (Math.random()*2)-1, (float) (Math.random()*2)-1, (float) (Math.random()*2)-1);
-			fairy.setMaterial(fairyMat);
-			fairy.setDoubleSided(true);
-			fairy.setBlendingEnabled(true);
-			fairy.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE);
-			fairy.setScale(0);
-			fairies.addChild(fairy);
-		}
-		addChild(fairies);
-	}
-
 	private void fairyMovement(){
 		if (fairyTimer == 10) {
 			if(Math.random() > .33) blink(fairies.getChildAt(0));
 			if(Math.random() > .5) blink(fairies.getChildAt(4));
+			if(Math.random() > .7) blink(fairies.getChildAt(8));
+			if(Math.random() > .9) blink(fairies.getChildAt(12));
 		}
 		else if (fairyTimer == 20) {
 			if(Math.random() > .33) blink(fairies.getChildAt(1));
 			if(Math.random() > .5) blink(fairies.getChildAt(5));
+			if(Math.random() > .7) blink(fairies.getChildAt(9));
+			if(Math.random() > .9) blink(fairies.getChildAt(13));
 		}
 		else if (fairyTimer == 30) {
 			if(Math.random() > .33)  blink(fairies.getChildAt(2));
 			if(Math.random() > .5) blink(fairies.getChildAt(6));
+			if(Math.random() > .7) blink(fairies.getChildAt(10));
+			if(Math.random() > .9) blink(fairies.getChildAt(14));
 		}
 		else if (fairyTimer == 40) {
 			if(Math.random() > .33)  blink(fairies.getChildAt(3));
 			if(Math.random() > .5) blink(fairies.getChildAt(7));
+			if(Math.random() > .7) blink(fairies.getChildAt(11));
+			if(Math.random() > .9) blink(fairies.getChildAt(15));
 			fairyTimer = 0;
 		}
 		fairyTimer++;
@@ -1051,351 +1405,110 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			public void onAnimationStart(Animation3D anim) {
 			}
 
-			public void onAnimationUpdate(Animation3D animation,
-					float interpolatedTime) {
-				// TODO Auto-generated method stub
+			public void onAnimationUpdate(Animation3D animation, float interpolatedTime) {
 				
 			}
 			
 		});
 		blinkAnim.start();
-	}	
-	
-	private void loadInterior(){
-		mCamera.setFarPlane(1000);
-		camLookNull = new BaseObject3D();
-		
-		cameraPos = new Number3D [5];
-		cameraPos[0] = new Number3D( 0, 4, 0);
-		cameraPos[1] = new Number3D( 5f, 3, 8);
-		cameraPos[2] = new Number3D( 10f, 3, 8);
-		cameraPos[3] = new Number3D( 7f, 2, -1);
-		cameraPos[4] = new Number3D( 7f, 2, -1);
+	}
 
-		cameraLook = new Number3D [5];
-		cameraLook[0] = new Number3D(15, 1.7f, 3);
-		cameraLook[1] = new Number3D(12, 1.7f, -16);
-		cameraLook[2] = new Number3D(-5, .7f, -9);
-		cameraLook[3] = new Number3D(-10, .78f, 5.7f);
-		cameraLook[4] = new Number3D( -1.5f, .8f, 15);
+	///////////////
+	/////Camera Mechanics
+	///////////////
+	private void setUpCamera(){
+		if(!redrawScene){
+			camLookNull = new BaseObject3D();
+			camLookNull = new BaseObject3D();
+		}
+		if(scene == 0){
+			mCamera.setFarPlane(2000);
+			cameraPos = new Number3D [7];
+			cameraPos[0] = new Number3D(-19, 3, 37);
+			cameraPos[1] = new Number3D(5, 1, 42);
+			cameraPos[2] = new Number3D(9, 0, 31);
+			cameraPos[3] = new Number3D(14, 0, 33);
+			cameraPos[4] = new Number3D(0, 1, 12);
+			cameraPos[5] = new Number3D(-9, 2, 15);
+			cameraPos[6] = new Number3D(-13, 0, 23);
+			
+			cameraLook = new Number3D [7];
+			cameraLook[0] = new Number3D(2, 1, -1);
+			cameraLook[1] = new Number3D(-6, 0, 16);
+			cameraLook[2] = new Number3D(13, -1, 14);
+			cameraLook[3] = new Number3D(2, -1, 5);
+			cameraLook[4] = new Number3D(-14, -1, 9.5f);
+			cameraLook[5] = new Number3D(0, 0, 0);
+			cameraLook[6] = new Number3D(9, -3, 12);			
+		} else {
+			mCamera.setFarPlane(1000);
+			cameraPos = new Number3D [5];
+			cameraPos[0] = new Number3D( 7f, 2, -1);
+			cameraPos[1] = new Number3D( 7f, 2, -1);
+			cameraPos[2] = new Number3D( 2f, 3, 2);
+			cameraPos[3] = new Number3D( 5f, 3, 8);
+			cameraPos[4] = new Number3D( 0, 4, 0);
 
+			cameraLook = new Number3D [5];
+			cameraLook[0] = new Number3D( -1.5f, .8f, 15);
+			cameraLook[1] = new Number3D(-10, .78f, 5.7f);
+			cameraLook[2] = new Number3D(-5, .7f, -13);
+			cameraLook[3] = new Number3D(12, 1.7f, -16);
+			cameraLook[4] = new Number3D(15, 1.7f, 3);
+		}
 		camLookNull.setPosition(cameraLook[0]);
 		mCamera.setPosition(cameraPos[0]);
 		mCamera.setLookAt(camLookNull.getPosition());
-		
-		pLight_ground = new PointLight();
-		pLight_ground.setPosition(6.5f, 15, 15f);
-		pLight_ground.setPower(2f);
-		pLight_ground.setAttenuation(50, 1, 0, 0);	
-		
-		///////////////
-		// Create Materials
-		///////////////
-		
-		SimpleAlphaMaterial intAlphaMat = new SimpleAlphaMaterial();
-		intAlphaMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha)));
-		intAlphaMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_alpha_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_alpha), TextureType.ALPHA));
-		
-		SimpleMaterial intWallsFloorMat = new SimpleMaterial();
-		intWallsFloorMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_walls_floor), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_walls_floor)));
-	
-		SimpleMaterial intDoorStoveMat = new SimpleMaterial();
-		intDoorStoveMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_door_stove), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_door_stove)));
-	
-		SimpleMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleMaterial();
-		intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_arch_shelf_obook_step_ws_candle_banner_pole), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_arch_shelf_obook_step_ws_candle_banner_pole)));
-		
-		SimpleMaterial intHatStandBoardShoebuckleMat = new SimpleMaterial();
-		intHatStandBoardShoebuckleMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_hat_stand_board_shoebuckle), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_hat_stand_board_shoebuckle)));
-		
-		SimpleMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleMaterial();
-		intLogTablesRunnerMugPipeCoinMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_log_tables_runner_mug_pipe_coin), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_log_tables_runner_mug_pipe_coin)));
-		
-		SimpleMaterial intChairsBookcaseBooksMat = new SimpleMaterial();
-		intChairsBookcaseBooksMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_chairs_bookcase_books), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_chairs_bookcase_books)));
-		
-		SimpleMaterial vaseMat = new SimpleMaterial();
-		vaseMat.setUseColor(true);
-		
-		///////////////
-		// Create Objects
-		///////////////
-		try {	
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tree));
-	    	int_tree = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_tree.setMaterial(intWallsFloorMat);
-	    	int_tree.setDoubleSided(true);
-			
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_floor));
-	    	int_floor = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_floor.setMaterial(intWallsFloorMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door));
-	    	int_door = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_door.setMaterial(intDoorStoveMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_door_window));
-	    	int_door_window = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_door_window.setMaterial(intAlphaMat);
-	    	int_door_window.setTransparent(true);
-	    	int_door_window.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stairs));
-	    	int_stairs = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_stairs.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_coatrack));
-	    	int_coatrack = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_coatrack.setMaterial(intHatStandBoardShoebuckleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shoes));
-	    	int_shoes = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_shoes.setMaterial(intHatStandBoardShoebuckleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_hat));
-	    	int_hat = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_hat.setMaterial(intHatStandBoardShoebuckleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_buckles));
-	    	int_buckles = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_buckles.setMaterial(intHatStandBoardShoebuckleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_candles));
-	    	int_candles = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_candles.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window1));
-	    	int_window1 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_window1.setMaterial(intAlphaMat);
-	    	int_window1.setTransparent(true);
-	    	int_window1.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_dirt));
-	    	int_dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_dirt.setMaterial(intHatStandBoardShoebuckleMat);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers1));
-	    	int_clovers1 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers1.setMaterial(intAlphaMat);
-	    	int_clovers1.setTransparent(true);
-	    	int_clovers1.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers2));
-	    	int_clovers2 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers2.setMaterial(intAlphaMat);
-	    	int_clovers2.setTransparent(true);
-	    	int_clovers2.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers3));
-	    	int_clovers3 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers3.setMaterial(intAlphaMat);
-	    	int_clovers3.setTransparent(true);
-	    	int_clovers3.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers4));
-	    	int_clovers4 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers4.setMaterial(intAlphaMat);
-	    	int_clovers4.setTransparent(true);
-	    	int_clovers4.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers5));
-	    	int_clovers5 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers5.setMaterial(intAlphaMat);
-	    	int_clovers5.setTransparent(true);
-	    	int_clovers5.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers6));
-	    	int_clovers6 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers6.setMaterial(intAlphaMat);
-	    	int_clovers6.setTransparent(true);
-	    	int_clovers6.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers7));
-	    	int_clovers7 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clovers7.setMaterial(intAlphaMat);
-	    	int_clovers7.setTransparent(true);
-	    	int_clovers7.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_board));
-	    	int_board = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_board.setMaterial(intHatStandBoardShoebuckleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_arches));
-	    	int_arches = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_arches.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2));
-	    	int_window2 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_window2.setMaterial(intAlphaMat);
-	    	int_window2.setTransparent(true);
-	    	int_window2.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_window2_sill));
-	    	int_window2_sill = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_window2_sill.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-	    	int_window2_sill.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shelf));
-	    	int_shelf = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_shelf.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chair));
-	    	int_chair = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_chair.setMaterial(intChairsBookcaseBooksMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_large_table));
-	    	int_large_table = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_large_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tablerunner));
-	    	int_tablerunner = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_tablerunner.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_mug));
-	    	int_mug = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_mug.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_pipe));
-	    	int_pipe = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_pipe.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_gold));
-	    	int_gold = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_gold.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase1));
-	    	int_vase1 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_vase1.setMaterial(vaseMat);
-	    	int_vase1.setTransparent(true);
-	    	int_vase1.setColor(0x3366ffcc);
-	    	int_vase1.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clover_table));
-	    	int_clover_table = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_clover_table.setMaterial(intAlphaMat);
-	    	int_clover_table.setTransparent(true);
-	    	int_clover_table.setDoubleSided(true);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase2));
-	    	int_vase2 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_vase2.setMaterial(vaseMat);
-	    	int_vase2.setTransparent(true);
-	    	int_vase2.setColor(0x3366ffcc);
-	    	int_vase2.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stone_pad));
-	    	int_stone_pad = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_stone_pad.setMaterial(intDoorStoveMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_stove));
-	    	int_stove = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_stove.setMaterial(intDoorStoveMat);
-	    	int_stove.setDoubleSided(true);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_chimneyring));
-	    	int_chimneyring = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_chimneyring.setMaterial(intDoorStoveMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_logs));
-	    	int_logs = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_logs.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_rug));
-	    	int_rug = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_rug.setMaterial(intAlphaMat);
-	    	int_rug.setTransparent(true);
-	    	int_rug.setDoubleSided(true);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_books_rocker));
-	    	int_books_rocker = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_books_rocker.setMaterial(intChairsBookcaseBooksMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_small_table));
-	    	int_small_table = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_small_table.setMaterial(intLogTablesRunnerMugPipeCoinMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_open_book));
-	    	int_open_book = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_open_book.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp1));
-	    	int_lamp1 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_lamp1.setMaterial(intAlphaMat);
-	    	int_lamp1.setTransparent(true);
-	    	int_lamp1.setDoubleSided(true);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_lamp2));
-	    	int_lamp2 = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_lamp2.setMaterial(intAlphaMat);
-	    	int_lamp2.setTransparent(true);
-	    	int_lamp2.setDoubleSided(true);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry_rod));
-	    	int_tapestry_rod = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_tapestry_rod.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-	    	
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_tapestry));
-	    	int_tapestry = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_tapestry.setMaterial(intArchShelfOBookStepWsCandleBannerPoleMat);
-	    	
-
-			ois.close();
-		} catch (Exception e){
-			e.printStackTrace();
-		}
-		
-		/////////////
-		//Add Objects
-		/////////////
-		addChild(int_tree);
-		addChild(int_floor);
-		addChild(int_door);
-		addChild(int_door_window);
-		addChild(int_stairs);
-		addChild(int_coatrack);
-		addChild(int_hat);
-		addChild(int_shoes);
-		addChild(int_buckles);
-		addChild(int_candles);
-		addChild(int_window1);
-		addChild(int_dirt);
-		addChild(int_clovers1);
-		addChild(int_clovers2);
-		addChild(int_clovers3);
-		addChild(int_clovers4);
-		addChild(int_clovers5);
-		addChild(int_clovers6);
-		addChild(int_clovers7);
-		addChild(int_board);
-		addChild(int_arches);
-		addChild(int_window2);
-		addChild(int_window2_sill);
-		addChild(int_shelf);
-		addChild(int_chair);
-		addChild(int_large_table);
-		addChild(int_tablerunner);
-		addChild(int_mug);
-		addChild(int_pipe);
-		addChild(int_gold);
-		addChild(int_vase1);
-		addChild(int_clover_table);
-		addChild(int_vase2);
-		addChild(int_stone_pad);
-		addChild(int_stove);
-		addChild(int_chimneyring);
-		addChild(int_logs);
-		addChild(int_rug);
-		addChild(int_books_rocker);
-		addChild(int_small_table);
-		addChild(int_open_book);
-		addChild(int_lamp1);
-		addChild(int_lamp2);
-		addChild(int_tapestry_rod);
-		addChild(int_tapestry);
-
-		sceneInit = true;
+		redrawScene = false;
 	}
-	
 
+	private void cameraControl(){
+		mCamera.setLookAt(camLookNull.getPosition());
+	}
+
+	private void cameraPose() {
+		if(mCamera.getPosition() != cameraPos[camIndex]){
+			moveCamera = true;
+		}
+		if(camLookNull.getPosition() != cameraLook[camIndex]){
+			moveCameraLook = true;
+		}
+	}
+
+	private void cameraMovement() {
+		if(moveCamera){// When onTouchEvent reports a touch "moveCamera" is set to true
+			float xDif = cameraPos[camIndex].x - mCamera.getX();  //Use the next camera position as a target, and find the current distance from it
+			float yDif = cameraPos[camIndex].y - mCamera.getY();
+			float zDif = cameraPos[camIndex].z - mCamera.getZ();
+
+			float newX = mCamera.getX()+(xDif/camSpeed); //set a new coordinate that becomes smaller as the camera gets closer to the target
+			float newY = mCamera.getY()+(yDif/camSpeed); //gives a trade mark easing effect
+			float newZ = mCamera.getZ()+(zDif/camSpeed);
+
+			float xLookDif = cameraLook[camIndex].x - camLookNull.getX(); //same thing for the "look at null"
+			float yLookDif = cameraLook[camIndex].y - camLookNull.getY();
+			float zLookDif = cameraLook[camIndex].z - camLookNull.getZ();
+
+			float newLookX = camLookNull.getX()+(xLookDif/(camSpeed*2)); //but at half of the speed of the position
+			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2)); //provides a feeling of animated follow through motion
+			float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
+
+			camLookNull.setPosition(newLookX, newLookY, newLookZ); //Set new Camera and Look locations
+			mCamera.setPosition(newX, newY, newZ);
+			
+			//Because the above easing equation will calculate infinitely we set some limits
+			if(moveCameraLook){
+				if (Math.abs(xLookDif)<.0001f && Math.abs(yLookDif)<.0001f && Math.abs(zLookDif)<.0001f) {
+					camLookNull.setPosition(cameraLook[camIndex]); //Once teh limit is reached set the values explicitly
+					moveCameraLook = false;//Disallow animation 
+				}
+			}
+			if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
+				mCamera.setPosition(cameraPos[camIndex]);
+				moveCamera = false;	
+			}
+		}
+		mCamera.setPosition(mCamera.getX()+(float) (Math.sin(totalCount/40)/400), mCamera.getY()+(float) (Math.cos(totalCount/80)/800), mCamera.getZ()); // Wiggle the camera view
+		totalCount++;
+	}
 }

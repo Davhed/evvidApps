@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Shamrock Lane</string>
+    <string name="lwp_name">Shamrock Lane</string>
+    <string name="lwp_desc">Aye te tie ta tee ta tooo!</string>
+    <string name="lwp_author">Evvid</string>
+    
+    <string name="picker_toast_prefix">Choose \"</string>
+    <string name="picker_toast_suffix">\" from this list.</string>
+    
+    <string name="lwp_settings">Shamrock Lane Settings</string>
+
+    <string-array name="cam_speed_titles">
+        <item >Slow</item>
+        <item >Medium</item>
+        <item >Fast</item>
+    </string-array>
+    
+    <string-array name="cam_speed">
+        <item>20</item>
+        <item>10</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="performance_titles">
+        <item >Economy</item>
+        <item >Balanced</item>
+        <item >High</item>
+        </string-array>
+    
+    <string-array name="performance">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        </string-array>
+    
+    <string-array name="moon_phase_titles">
+        <item >New</item>
+        <item >Sliver</item>
+        <item >Crescent</item>
+        <item >Quarter</item>
+        <item >Full</item>
+        </string-array>
+    
+    <string-array name="moon_phase">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
+        <item >3</item>
+        <item >4</item>
+    </string-array>
+    
+    <string-array name="shootingstar_titles">
+        <item >None</item>
+        <item >Shooting Star</item>
+        <item >Meteor Shower</item>
+        </string-array>
+    
+    <string-array name="shootingstar">
+        <item >0</item>
+        <item >1</item>
+        <item >2</item>
+    </string-array>    
+    
+    </resources>

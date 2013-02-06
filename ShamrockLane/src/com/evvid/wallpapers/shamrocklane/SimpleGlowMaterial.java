@@ -33,7 +33,7 @@ public class SimpleGlowMaterial extends AMaterial {
 		"    float x = texel.x;\n" +
 		"    float y = texel.y;\n" +
 		
-		"    float glow = 8.0 * ((1.0 + 1.0) / 2.0);\n" +
+		"    float glow = 4.0 * ((0.5 + 0.5) / 2.0);\n" +
 		     
 		"    vec4 bloom = vec4(0);\n" +
 		     

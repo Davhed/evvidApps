@@ -2,7 +2,6 @@
 <qualifiedTypeNameHistroy>
 <fullyQualifiedTypeName name="rajawali.animation.ScaleAnimation3D"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.aviation3d.helo.R.raw"/>
-<fullyQualifiedTypeName name="rajawali.lights.DirectionalLight"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.tiki3d.R.drawable"/>
 <fullyQualifiedTypeName name="android.app.WallpaperManager"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.tiki3d.R.raw"/>
@@ -42,9 +41,7 @@
 <fullyQualifiedTypeName name="android.util.FloatMath"/>
 <fullyQualifiedTypeName name="android.util.Log"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.drawable"/>
-<fullyQualifiedTypeName name="rajawali.primitives.Sphere"/>
 <fullyQualifiedTypeName name="rajawali.materials.ParticleMaterial"/>
-<fullyQualifiedTypeName name="rajawali.materials.PhongAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.GouraudAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.BumpmapAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.ToonMaterial"/>
@@ -52,7 +49,6 @@
 <fullyQualifiedTypeName name="rajawali.materials.TextureInfo"/>
 <fullyQualifiedTypeName name="rajawali.materials.PhongMaterial"/>
 <fullyQualifiedTypeName name="rajawali.lights.PointLight"/>
-<fullyQualifiedTypeName name="rajawali.materials.DiffuseMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.AParticleMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.AAdvancedMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.AMaterial"/>
@@ -60,4 +56,8 @@
 <fullyQualifiedTypeName name="rajawali.materials.DiffuseAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
+<fullyQualifiedTypeName name="rajawali.materials.DiffuseMaterial"/>
+<fullyQualifiedTypeName name="rajawali.materials.PhongAlphaMaterial"/>
+<fullyQualifiedTypeName name="rajawali.lights.DirectionalLight"/>
+<fullyQualifiedTypeName name="rajawali.primitives.Sphere"/>
 </qualifiedTypeNameHistroy>

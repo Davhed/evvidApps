@@ -1,7 +1,0 @@
-package com.evvid.wallpapers.shamrocklane;
-
-import rajawali.primitives.Plane;
-
-public class TexturedPlane extends Plane {
-
-}

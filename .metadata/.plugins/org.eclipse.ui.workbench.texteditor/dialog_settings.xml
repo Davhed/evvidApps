@@ -2,34 +2,39 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="257" key="DIALOG_WIDTH"/>
-		<item value="108" key="DIALOG_Y_ORIGIN"/>
+		<item value="125" key="DIALOG_Y_ORIGIN"/>
 		<item value="380" key="DIALOG_HEIGHT"/>
-		<item value="1050" key="DIALOG_X_ORIGIN"/>
+		<item value="1261" key="DIALOG_X_ORIGIN"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
 		<item value="false" key="isRegEx"/>
-		<item value="false" key="casesensitive"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="g" key="selection"/>
+		<item value="SimpleAlphaMaterial" key="selection"/>
 		<list key="findhistory">
-			<item value="g"/>
-			<item value="mProgram"/>
-			<item value="maTextureHandle"/>
-			<item value="textureCoordBufferHandle"/>
-			<item value="aTextureCoord"/>
-			<item value="uLightColor"/>
-			<item value="uLight"/>
-			<item value="Ks"/>
+			<item value="SimpleAlphaMaterial"/>
+			<item value="E"/>
+			<item value="dist"/>
+			<item value="uAlphaTexture"/>
+			<item value="intAlphaMat"/>
+			<item value="SPECULAR"/>
+			<item value="queryMaxTextures"/>
+			<item value="mMaxTextures"/>
 		</list>
 		<list key="replacehistory">
+			<item value="SimpleMaterial"/>
 			<item value="objPointer"/>
 			<item value="i"/>
 			<item value=""/>
 			<item value=" "/>
 			<item value=" = new BaseObject3D((SerializedObject3D)ois.readObject());"/>
 		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
+		<item value="409" key="DIALOG_Y_ORIGIN"/>
+		<item value="729" key="DIALOG_X_ORIGIN"/>
 	</section>
 </section>

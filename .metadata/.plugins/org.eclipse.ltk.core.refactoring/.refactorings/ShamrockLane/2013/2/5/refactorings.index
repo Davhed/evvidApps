@@ -28,3 +28,10 @@
 1359790016688	Rename field 'int_pad'
 1359790064732	Rename local variable 'doorStoveMat'
 1359790078820	Rename local variable 'wallsFloorMat'
+1359841612559	Rename resource 'int_walls_floor.png'
+1359841641583	Rename resource 'int_walls_floor.pkm'
+1359843987975	Rename resource 'floor.png'
+1359844692541	Delete elements
+1359845622191	Delete elements
+1359845846626	Rename resource 'floor.pkm'
+1359845876095	Rename resource 'int_floor.pkm'
