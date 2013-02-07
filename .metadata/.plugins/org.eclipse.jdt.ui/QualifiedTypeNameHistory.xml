@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="rajawali.animation.ScaleAnimation3D"/>
-<fullyQualifiedTypeName name="com.evvid.wallpapers.aviation3d.helo.R.raw"/>
-<fullyQualifiedTypeName name="com.evvid.wallpapers.tiki3d.R.drawable"/>
-<fullyQualifiedTypeName name="android.app.WallpaperManager"/>
-<fullyQualifiedTypeName name="com.evvid.wallpapers.tiki3d.R.raw"/>
 <fullyQualifiedTypeName name="android.view.animation.AccelerateInterpolator"/>
 <fullyQualifiedTypeName name="android.view.animation.LinearInterpolator"/>
 <fullyQualifiedTypeName name="rajawali.animation.RotateAnimation3D"/>
@@ -12,7 +7,6 @@
 <fullyQualifiedTypeName name="android.graphics.Canvas"/>
 <fullyQualifiedTypeName name="com.evvid.wallpapers.islandnights.R.raw"/>
 <fullyQualifiedTypeName name="android.view.animation.AccelerateDecelerateInterpolator"/>
-<fullyQualifiedTypeName name="android.view.animation.DecelerateInterpolator"/>
 <fullyQualifiedTypeName name="rajawali.primitives.Plane"/>
 <fullyQualifiedTypeName name="android.graphics.Bitmap"/>
 <fullyQualifiedTypeName name="android.graphics.BitmapFactory"/>
@@ -60,4 +54,10 @@
 <fullyQualifiedTypeName name="rajawali.materials.PhongAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.lights.DirectionalLight"/>
 <fullyQualifiedTypeName name="rajawali.primitives.Sphere"/>
+<fullyQualifiedTypeName name="android.graphics.Interpolator"/>
+<fullyQualifiedTypeName name="android.R.interpolator"/>
+<fullyQualifiedTypeName name="android.view.animation.DecelerateInterpolator"/>
+<fullyQualifiedTypeName name="rajawali.animation.CatmullRomPath3D"/>
+<fullyQualifiedTypeName name="rajawali.animation.TranslateAnimation3D"/>
+<fullyQualifiedTypeName name="rajawali.animation.RotationAnimation3D"/>
 </qualifiedTypeNameHistroy>

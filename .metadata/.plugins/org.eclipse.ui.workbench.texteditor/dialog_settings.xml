@@ -13,16 +13,16 @@
 		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="SimpleAlphaMaterial" key="selection"/>
+		<item value="mDirection" key="selection"/>
 		<list key="findhistory">
+			<item value="mDirection"/>
+			<item value="bumpnormal"/>
 			<item value="SimpleAlphaMaterial"/>
 			<item value="E"/>
 			<item value="dist"/>
 			<item value="uAlphaTexture"/>
 			<item value="intAlphaMat"/>
 			<item value="SPECULAR"/>
-			<item value="queryMaxTextures"/>
-			<item value="mMaxTextures"/>
 		</list>
 		<list key="replacehistory">
 			<item value="SimpleMaterial"/>

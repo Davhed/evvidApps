@@ -42,7 +42,10 @@ import android.view.MotionEvent;
 
 import rajawali.animation.Animation3D;
 import rajawali.animation.Animation3DListener;
+import rajawali.animation.CatmullRomPath3D;
+import rajawali.animation.RotationAnimation3D;
 import rajawali.animation.ScaleAnimation3D;
+import rajawali.animation.TranslateAnimation3D;
 import rajawali.lights.PointLight;
 import rajawali.materials.DiffuseMaterial;
 import rajawali.materials.PhongMaterial;
@@ -61,9 +64,11 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	private float[] waterUVs;
 	
 	private int 
-			frameCounter = 0, 
+			waterCounter = 0,
 			flapCounter = 0, 
-			tileIndex = 0, 
+			waterIndex = 0,
+			flameCounter = 0,
+			flameIndex = 0,			
 			camSpeed = 10, 
 			camIndex = 0, 
 			totalCount = 0, 
@@ -76,24 +81,26 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			moveCamera = false, 
 			moveCameraLook = false, 
 			firstTouch = true, 
-			birdDone = true;
+			birdDone = true,
+			timerRun = true;
 
 	private PointLight pLight_ground, pLight_ground2, pLight_pot, pLight_pot2, pLight_branches, pLight_candle1, pLight_candle2, pLight_candle3;
 	
 	//Exterior
 	
-	private BaseObject3D exterior, camLookNull, skydome, sun, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys, water, branches,
+	private BaseObject3D exterior, camLookNull, skydome, clouddome, sun, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys, water, branches,
 	waterfallrock, waterfall, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrock, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
 	grass1, grass2, grass3, grass4, grass5, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies;
 	private BaseObject3D[] waterTiles, waterfallTiles, splashTiles, splash2Tiles, splash3Tiles, branchTiles;
 
-	private TextureInfo skyInfo, sunInfo, sunAlphaInfo, doorGoldArchInfo, waterfallrockTextureInfo, wallStumpRockInfo, pathDirtCloverPlantsInfo, pathDirtCloverPlantsAlphaInfo,
+	private TextureInfo skyInfo, sunInfo, sunAlphaInfo, clouddomeInfo, clouddomeAlphaInfo, doorGoldArchInfo, waterfallrockTextureInfo, wallStumpRockInfo, pathDirtCloverPlantsInfo, pathDirtCloverPlantsAlphaInfo,
 	potGateFernRainbowTextureInfo, potGateFernRainbowTextureAlphaInfo, castleBranchDirtInfo, castleBranchDirtAlphaInfo, treeInfo, treeBumpInfo, grassInfo,
 	waterInfo, waterAlphaInfo, fairyInfo;
 
-	private TextureInfo[] waterfallTex, birdTex;
+	private TextureInfo[] waterfallTex, birdTex, intCandleTex;
 		
-
+	private RotationAnimation3D timer;
+	
 	private Number3D [] cameraLook, cameraPos;
 
 	private ObjectInputStream ois;
@@ -104,16 +111,18 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private BaseObject3D interior, int_tree, int_floor, int_door, int_stairs, int_door_window, int_candles, int_coatrack, int_shoes, int_hat, int_buckles, int_window1,
 	int_dirt, int_board, int_arches, int_clovers1, int_clovers2, int_clovers3, int_clovers4, int_clovers5, int_clovers6, int_clovers7, int_chair, int_large_table,
-	int_tablerunner, int_mug, int_pipe, int_gold, int_window2, int_window2_sill, int_vase1, int_clover_table, int_vase2, int_stone_pad, int_stove, int_logs,
-	int_chimneyring, int_shelf, int_books_rocker, int_rug, int_small_table, int_open_book, int_lamp1, int_lamp2, int_tapestry, int_tapestry_rod;
+	int_tablerunner, int_mug, int_pipe, int_gold, int_window2, int_window2_sill, int_vase1, int_clover_table, int_vase2, int_stone_pad, int_stove, int_logs, timerNull,
+	int_chimneyring, int_shelf, int_books_rocker, int_rug, int_small_table, int_open_book, int_lamp1, int_lamp2, int_tapestry, int_tapestry_rod, int_candleFlame1, int_candleFlame2, int_candleFlame3;
 	
 	private TextureInfo intAlphaInfo, intAlphaAlphaInfo, intWallsinfo, intFloorInfo, intDoorStoveInfo, intArchShelfOBookStepWsCandleBannerPoleInfo, intHatStandBoardShoebuckleInfo,
 	intLogTablesRunnerMugPipeCoinInfo, intChairsBookcaseBooksInfo;
+
+	private CatmullRomPath3D birdPath1;
 	
 	public WallpaperRenderer(Context context) {
 		super(context);
 		setFrameRate(performance);
-		setBackgroundColor(0x2b426e);
+		setFogEnabled(true);
     }
 		
 	public void initScene() {
@@ -124,6 +133,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		loadExterior();
 		loadInterior();
 		addObjects();
+		initTimer();
 		setUpCamera();
 		setScene();
 	}
@@ -202,6 +212,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		skyInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.skydome_tex), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.skydome));
 		sunInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.sun), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sun));
 		sunAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.sun_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sun), TextureType.ALPHA);
+		clouddomeInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.clouddome), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome));
+		clouddomeAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.clouddome_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome), TextureType.ALPHA);
 		doorGoldArchInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gold_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gold_arch), TextureType.DIFFUSE));
 		waterfallrockTextureInfo = mTextureManager.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.waterfallrock_mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_mushroom), TextureType.DIFFUSE));
 		wallStumpRockInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wall_stump_rock), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wall_stump_rock));
@@ -245,6 +257,15 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		intHatStandBoardShoebuckleInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_hat_stand_board_shoebuckle), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_hat_stand_board_shoebuckle));
 		intLogTablesRunnerMugPipeCoinInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_log_tables_runner_mug_pipe_coin), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_log_tables_runner_mug_pipe_coin));
 		intChairsBookcaseBooksInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.int_chairs_bookcase_books), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.int_chairs_bookcase_books));
+
+		intCandleTex = new TextureInfo[32];
+		for(int i = 0; i < intCandleTex.length/2; i++){
+    		int etc = mContext.getResources().getIdentifier(i < 10 ? "cf0" + (i) : "cf" + (i), "raw", "com.evvid.wallpapers.shamrocklane");
+    		int alph = mContext.getResources().getIdentifier(i < 10 ? "cf0" + (i) + "_alpha" : "cf" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
+    		int bmp = mContext.getResources().getIdentifier(i < 10 ? "cf0" + (i) : "cf" + (i), "drawable", "com.evvid.wallpapers.shamrocklane");
+    		intCandleTex[2*i] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(etc), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.DIFFUSE);
+    		intCandleTex[2*i+1] = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(alph), BitmapFactory.decodeResource(mContext.getResources(), bmp), TextureType.ALPHA);
+		}
 	}
 
 	private void loadExterior(){
@@ -280,8 +301,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			skyMat.addTexture(skyInfo);
 
 		SimpleMaterial sunMat = new SimpleMaterial();
-		sunMat.addTexture(sunInfo);
-		sunMat.addTexture(sunAlphaInfo);
+			sunMat.addTexture(sunInfo);
+			sunMat.addTexture(sunAlphaInfo);
+
+		SimpleMaterial clouddomeMat = new SimpleMaterial();
+			clouddomeMat.addTexture(clouddomeInfo);
+			clouddomeMat.addTexture(clouddomeAlphaInfo);
 
 		SimpleMaterial doorArchMat = new SimpleMaterial();
 			doorArchMat.addTexture(doorGoldArchInfo);
@@ -341,11 +366,22 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			skydome.setMaterial(skyMat);
 			skydome.setY(20);
 			skydome.setRotY(5);
+			skydome.setScale(1.25f);
 			skydome.setDoubleSided(true);
+
+	    	clouddome = skydome.clone(false);
+	    	clouddome.setMaterial(clouddomeMat);
+	    	clouddome.setPosition(0, 10, 0);
+	    	clouddome.setRotY(5);
+	    	clouddome.setScale(.50f);
+	    	clouddome.setDoubleSided(true);
+	    	clouddome.setBlendingEnabled(true);
+	    	clouddome.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			
-			sun = new Plane(30, 30, 1, 1 , 1);
+			sun = new Plane(50, 50, 1, 1 , 1);
 			sun.setMaterial(sunMat);
-			sun.setPosition(100, 25, -50);
+			sun.setPosition(200, 50, -100);
+			sun.setRotation(0, 100, 0);
 			sun.setBlendingEnabled(true);
 			sun.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
@@ -642,29 +678,38 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		///////////////
 		// Create Materials
 		///////////////
-		PhongMaterial intAlphaMat = new PhongMaterial();
+		SimpleMaterial intAlphaMat = new SimpleMaterial();
 			intAlphaMat.addTexture(intAlphaInfo);
 			intAlphaMat.addTexture(intAlphaAlphaInfo);
 		
 		DiffuseMaterial intWallsMat = new DiffuseMaterial();
 			intWallsMat.addTexture(intWallsinfo);
 	
-		DiffuseMaterial intFloorMat = new DiffuseMaterial();
+		SimpleMaterial intFloorMat = new SimpleMaterial();
 			intFloorMat.addTexture(intFloorInfo);
 	
-		DiffuseMaterial intDoorStoveMat = new DiffuseMaterial();
+		SimpleMaterial intDoorStoveMat = new SimpleMaterial();
 			intDoorStoveMat.addTexture(intDoorStoveInfo);
 	
 		DiffuseMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new DiffuseMaterial();
 			intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(intArchShelfOBookStepWsCandleBannerPoleInfo);
 		
-		DiffuseMaterial intHatStandBoardShoebuckleMat = new DiffuseMaterial();
-			intHatStandBoardShoebuckleMat.addTexture(intHatStandBoardShoebuckleInfo);
+		SimpleMaterial intBoardMat = new SimpleMaterial();
+			intBoardMat.addTexture(intHatStandBoardShoebuckleInfo);
+			
+		DiffuseMaterial intHatStandMat = new DiffuseMaterial();
+			intHatStandMat.addTexture(intHatStandBoardShoebuckleInfo);
+			
+		PhongMaterial intShoebuckleMat = new PhongMaterial();
+			intShoebuckleMat.addTexture(intHatStandBoardShoebuckleInfo);
 		
-		DiffuseMaterial intLogTablesRunnerMugPipeCoinMat = new DiffuseMaterial();
+		SimpleMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleMaterial();
 			intLogTablesRunnerMugPipeCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
-		
-		DiffuseMaterial intChairsBookcaseBooksMat = new DiffuseMaterial();
+	
+		SimpleGlowMaterial intCoinMat = new SimpleGlowMaterial();
+			intCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
+	
+			SimpleMaterial intChairsBookcaseBooksMat = new SimpleMaterial();
 			intChairsBookcaseBooksMat.addTexture(intChairsBookcaseBooksInfo);
 		
 		PhongMaterial vaseMat = new PhongMaterial();
@@ -698,19 +743,19 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_coatrack));
 	    	int_coatrack = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_coatrack.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_coatrack.setMaterial(intHatStandMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_shoes));
 	    	int_shoes = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_shoes.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_shoes.setMaterial(intShoebuckleMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_hat));
 	    	int_hat = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_hat.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_hat.setMaterial(intHatStandMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_buckles));
 	    	int_buckles = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_buckles.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_buckles.setMaterial(intShoebuckleMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_candles));
 	    	int_candles = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -723,7 +768,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_dirt));
 	    	int_dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_dirt.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_dirt.setMaterial(intWallsMat);
 	    	
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_clovers1));
 	    	int_clovers1 = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -762,7 +807,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_board));
 	    	int_board = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_board.setMaterial(intHatStandBoardShoebuckleMat);
+	    	int_board.setMaterial(intBoardMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_arches));
 	    	int_arches = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -804,7 +849,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_gold));
 	    	int_gold = new BaseObject3D((SerializedObject3D)ois.readObject());
-	    	int_gold.setMaterial(intLogTablesRunnerMugPipeCoinMat);
+	    	int_gold.setMaterial(intCoinMat);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.int_vase1));
 	    	int_vase1 = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -878,7 +923,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			ois.close();
 		} catch (Exception e){
 			e.printStackTrace();
-		}		
+		}
+		
+		createFlames();
 	}
 	
 	private void createBird(){
@@ -897,8 +944,43 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 		
 		bird.setPosition(-50, 8, -7);
+		bird.setVisible(false);
+		
+		birdPath1 = new CatmullRomPath3D();
+		birdPath1.addPoint(new Number3D(-111, 50, -30));
+		birdPath1.addPoint(new Number3D(-63, 24, -56));
+		birdPath1.addPoint(new Number3D(8, 14.5f, -45.5f));
+		birdPath1.addPoint(new Number3D(64.5f, 25.5f, -29));
+		birdPath1.addPoint(new Number3D(90.5f, 28, 20.5f));
+		birdPath1.addPoint(new Number3D(80, 12, 69));
+		birdPath1.addPoint(new Number3D(103.5f, 1.5f, 109.5f));
 	}
-	
+
+	private void createFlames(){
+		int_candleFlame1 = new BaseObject3D();
+		int_candleFlame3 = new BaseObject3D();
+		int_candleFlame2 = new BaseObject3D();
+		
+		for(int i = 0; i <  intCandleTex.length/2; i++){
+			Plane flameFrame = new Plane(1,1,1,1,1, true);		
+			flameFrame.setMaterial(new SimpleMaterial());
+			flameFrame.addTexture(intCandleTex[2*i]);
+			flameFrame.addTexture(intCandleTex[2*i+1]);
+			flameFrame.setDoubleSided(true);
+			flameFrame.setBlendingEnabled(true);
+			flameFrame.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			flameFrame.setLookAt(mCamera.getPosition());
+			flameFrame.setScale(.75f);
+			int_candleFlame1.addChild(flameFrame);
+			int_candleFlame2.addChild(flameFrame);
+			int_candleFlame3.addChild(flameFrame);
+		}
+		
+		int_candleFlame1.setPosition(-2.95f, 4.5f, 14f);
+		int_candleFlame2.setPosition(14.888f, 4.5f, -3.127f);
+		int_candleFlame3.setPosition(2.744f, 4.5f, -11.28f);
+	}
+
 	private void createWater(){
 		float tileWidth  = .25f;
 		water = new BaseObject3D();
@@ -1021,7 +1103,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		fairies.setPosition(-6, -.25f, 19.5f);
 		int numChildren = 16;
 
-		SimpleMaterial fairyMat = new SimpleMaterial();
+		SimpleGlowMaterial fairyMat = new SimpleGlowMaterial();
 		fairyMat.addTexture(fairyInfo);
 		
 		for(int i = 0; i < numChildren; ++i){
@@ -1112,9 +1194,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		/////////////
 		exterior.addChild(skydome);
 		exterior.addChild(sun);
+		exterior.addChild(clouddome);
+		exterior.addChild(rbow1);
 		exterior.addChild(castletowers);
 		exterior.addChild(castle);
-		exterior.addChild(rbow1);
 		exterior.addChild(ground);
 		exterior.addChild(path);
 		exterior.addChild(bird);
@@ -1208,6 +1291,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		interior.addChild(int_lamp2);
 		interior.addChild(int_tapestry_rod);
 		interior.addChild(int_tapestry);
+		interior.addChild(int_candleFlame1);
+		interior.addChild(int_candleFlame2);
+		interior.addChild(int_candleFlame3);
 		interior.setVisible(false);
 		addChild(interior);
 		interior.addLight(pLight_candle1);
@@ -1220,6 +1306,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		super.onSurfaceCreated(gl, config);
 		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);
 		preferences.registerOnSharedPreferenceChangeListener(mListener);
+        if(timer != null)timer.start();
 	}
 
 	@Override
@@ -1231,20 +1318,28 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	public void onSurfaceDestroyed() {
 		super.onSurfaceDestroyed();
 		preferences.unregisterOnSharedPreferenceChangeListener(mListener);
-		System.gc();
+		timer.cancel();
 	}
+	
+	@Override
+    public void onVisibilityChanged(boolean visible) {
+        super.onVisibilityChanged(visible);
+        if(!visible)
+        {
+            if(timer != null)timer.cancel();
+        }else if(visible){
+            if(timer != null)timer.start();
+        }
+    }
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
 		super.onDrawFrame(glUnused);
 		checkScene();
 		if(sceneInit && !redrawScene){
-			cameraControl();
-			cameraMovement();
 			if(scene == 0){
-				sun.setLookAt(mCamera.getPosition());
-				waterMovement();
-				birdMovement();
+				if(Math.random() > .75f && totalCount % 300 == 0 && birdDone) 
+					birdMovement();
 				fairyMovement();
 			}else if (scene == 1){
 				//TODO: Pipe Smoke
@@ -1252,6 +1347,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 				//TODO: Leprechaun
 			}
 		}
+		totalCount++;
 	}
 	
 	@Override
@@ -1265,12 +1361,12 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			if(me.getPointerCount()==1 && firstTouch) {
 				if(xd > 8){//If the pointer movement is left->right and of some significance
 					camIndex--;
-					if(camIndex < 0) camIndex = (cameraLook.length - 1); //this creates our camera loop
+					if(camIndex < 0) camIndex = (cameraLook.length - 1); //this creates our camera loop in the negative direction
 					firstTouch = false;// this prevents over calling the camera position function while the pointer is still down
 				}
 				else if (xd < -8){//If the pointer movement is right->left and of some significance
 					camIndex++;
-					if(camIndex > (cameraLook.length - 1)) camIndex = 0;
+					if(camIndex > (cameraLook.length - 1)) camIndex = 0;//this creates our camera loop in the positive direction
 					firstTouch = false;
 				}
 				if(sceneInit)cameraPose();
@@ -1289,20 +1385,59 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	///////////////
 	/////Animation and Conditionals
 	///////////////
-	private void waterMovement() {
-		if(frameCounter%2 == 0) {
-	    	waterTiles[tileIndex].setVisible(true);
-	    	waterfallTiles[tileIndex].setVisible(true);
-	    	splashTiles[tileIndex].setVisible(true);
-	    	splash2Tiles[tileIndex].setVisible(true);
-	    	splash3Tiles[tileIndex].setVisible(true);
+	private void initTimer() {
+		timerNull = new BaseObject3D();
+
+		timer = new RotationAnimation3D(0, 1, 0);
+		timer.setDuration(1000);
+		timer.setRepeatCount(Animation3D.INFINITE);
+		timer.setRepeatMode(Animation3D.RESTART);
+		timer.setTransformable3D(timerNull);
+		timer.setAnimationListener(new Animation3DListener(){
+
+			public void onAnimationEnd(Animation3D anim) {
+			}
+
+			public void onAnimationRepeat(Animation3D anim) {				
+			}
+
+			public void onAnimationStart(Animation3D anim) {
+			}
+
+			public void onAnimationUpdate(Animation3D animation, float interpolatedTime) {
+				onTimerTick();
+			}
+		});
+		timer.start();
+	}
+
+	private void onTimerTick() {
+		if(sceneInit){
+			cameraControl();
+			cameraMovement();
+			if(scene == 0){
+				waterMovement();
+			}else if(scene == 1){
+				flameMovement();
+			}
+		}
+	}
+	
+	private void waterMovement(){
+		int speed = 8;
+		if(waterCounter%speed == 0) {
+	    	waterTiles[waterIndex].setVisible(true);
+	    	waterfallTiles[waterIndex].setVisible(true);
+	    	splashTiles[waterIndex].setVisible(true);
+	    	splash2Tiles[waterIndex].setVisible(true);
+	    	splash3Tiles[waterIndex].setVisible(true);
 	   	
-	    	if(tileIndex>0){
-	    		waterTiles[tileIndex-1].setVisible(false);
-				waterfallTiles[tileIndex-1].setVisible(false);
-		    	splashTiles[tileIndex-1].setVisible(false);
-		    	splash2Tiles[tileIndex-1].setVisible(false);
-		    	splash3Tiles[tileIndex-1].setVisible(false);
+	    	if(waterIndex>0){
+	    		waterTiles[waterIndex-1].setVisible(false);
+				waterfallTiles[waterIndex-1].setVisible(false);
+		    	splashTiles[waterIndex-1].setVisible(false);
+		    	splash2Tiles[waterIndex-1].setVisible(false);
+		    	splash3Tiles[waterIndex-1].setVisible(false);
 			} else {
 	    		waterTiles[waterTiles.length-1].setVisible(false);
 				waterfallTiles[waterTiles.length-1].setVisible(false);
@@ -1311,10 +1446,32 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		    	splash3Tiles[splashTiles.length-1].setVisible(false);
 			}
 	    	
-	    	if (tileIndex++ == waterTiles.length-1) 
-	    		tileIndex = 0;
+	    	if (waterIndex++ == waterTiles.length-1) 
+	    		waterIndex = 0;
 		}
-    	if(frameCounter++ == 32) frameCounter = 0;
+    	if(waterCounter++ == speed*16) waterCounter = 0;
+	}
+	
+	private void flameMovement(){
+		if(flameCounter%4 == 0) {
+	    	int_candleFlame1.getChildAt(flameIndex).setVisible(true);
+	    	int_candleFlame2.getChildAt(flameIndex).setVisible(true);
+	    	int_candleFlame3.getChildAt(flameIndex).setVisible(true);
+	   	
+	    	if(flameIndex>0){
+	    		int_candleFlame1.getChildAt(flameIndex-1).setVisible(false);
+	    		int_candleFlame2.getChildAt(flameIndex-1).setVisible(false);
+	    		int_candleFlame3.getChildAt(flameIndex-1).setVisible(false);
+			} else {
+				int_candleFlame1.getChildAt(int_candleFlame1.getNumChildren()-1).setVisible(false);
+				int_candleFlame2.getChildAt(int_candleFlame2.getNumChildren()-1).setVisible(false);
+				int_candleFlame3.getChildAt(int_candleFlame3.getNumChildren()-1).setVisible(false);
+			}
+	    	
+	    	if (flameIndex++ == int_candleFlame1.getNumChildren()-1) 
+	    		flameIndex = 0;
+		}
+    	if(flameCounter++ == 64) flameCounter = 0;
 	}
 
 	private void fairyMovement(){
@@ -1364,25 +1521,59 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	}
 
 	private void birdMovement(){
-		if(Math.random() > .75f && totalCount % 300 == 0 ) birdDone = false;
-		
-		if(frameCounter%2 == 0 && !birdDone){
-			bird.getChildAt(flapCounter).setVisible(true);
-			if(flapCounter > 0)
-				bird.getChildAt(flapCounter-1).setVisible(false);
-			else
-				bird.getChildAt(bird.getNumChildren()-1).setVisible(false);
+		TranslateAnimation3D birdFlight = new TranslateAnimation3D(birdPath1);
+		birdFlight.setDuration(8000);
+		birdFlight.setOrientToPath(true);
+		birdFlight.setTransformable3D(bird);
+		birdFlight.setAnimationListener(new Animation3DListener(){
+
+			public void onAnimationEnd(Animation3D anim) {
+				anim.cancel();
+				anim.reset();
+				birdDone = true;
+				bird.setVisible(false);
+			}
+
+			public void onAnimationRepeat(Animation3D anim) {				
+			}
+
+			public void onAnimationStart(Animation3D anim) {
+				birdDone = false;
+				bird.setVisible(true);
+			}
+
+			public void onAnimationUpdate(Animation3D animation, float interpolatedTime) {
+				bird.getChildAt(flapCounter).setVisible(true);
+				if(flapCounter > 0)
+					bird.getChildAt(flapCounter-1).setVisible(false);
+				else
+					bird.getChildAt(bird.getNumChildren()-1).setVisible(false);
+				bird.setLookAt(mCamera.getPosition());			
+				if(flapCounter++ == 3) flapCounter = 0;
+				}
 			
-			if(flapCounter++ == 3) flapCounter = 0;
-		}
-		
-		if(bird.getX() > 50 && !birdDone){
-			bird.setX(-50);
-			birdDone = true;
-		}else if(!birdDone)
-			bird.setX(bird.getX()+.5f);
-		
-		bird.setLookAt(mCamera.getPosition());
+		});
+		birdFlight.start();
+//		if(Math.random() > .75f && totalCount % 300 == 0 ) birdDone = false;
+//		
+//		if(frameCounter%2 == 0 && !birdDone){
+//			bird.setVisible(true);
+//			bird.getChildAt(flapCounter).setVisible(true);
+//			if(flapCounter > 0)
+//				bird.getChildAt(flapCounter-1).setVisible(false);
+//			else
+//				bird.getChildAt(bird.getNumChildren()-1).setVisible(false);
+//			bird.setLookAt(mCamera.getPosition());			
+//			if(flapCounter++ == 3) flapCounter = 0;
+//		}
+//		
+//		if(bird.getX() > 50 && !birdDone){
+//			bird.setX(-50);
+//			bird.setVisible(false);
+//			birdDone = true;
+//		}else if(!birdDone){
+//			bird.setX(bird.getX()+.5f);
+//		}
 	}
 		
 	private void blink(final BaseObject3D blinkerObj){
@@ -1423,6 +1614,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		}
 		if(scene == 0){
 			mCamera.setFarPlane(2000);
+			mCamera.setFogEnabled(true);
+			mCamera.setFogColor(0x7d98da);
+			mCamera.setFogFar(200);
+			mCamera.setFogNear(20);
 			cameraPos = new Number3D [7];
 			cameraPos[0] = new Number3D(-19, 3, 37);
 			cameraPos[1] = new Number3D(5, 1, 42);
@@ -1442,19 +1637,20 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			cameraLook[6] = new Number3D(9, -3, 12);			
 		} else {
 			mCamera.setFarPlane(1000);
+			mCamera.setFogEnabled(false);
 			cameraPos = new Number3D [5];
-			cameraPos[0] = new Number3D( 7f, 2, -1);
-			cameraPos[1] = new Number3D( 7f, 2, -1);
+			cameraPos[4] = new Number3D( 7f, 2, -1);
+			cameraPos[3] = new Number3D( 7f, 2, -1);
 			cameraPos[2] = new Number3D( 2f, 3, 2);
-			cameraPos[3] = new Number3D( 5f, 3, 8);
-			cameraPos[4] = new Number3D( 0, 4, 0);
+			cameraPos[1] = new Number3D( 5f, 3, 8);
+			cameraPos[0] = new Number3D( 0, 4, 0);
 
 			cameraLook = new Number3D [5];
-			cameraLook[0] = new Number3D( -1.5f, .8f, 15);
-			cameraLook[1] = new Number3D(-10, .78f, 5.7f);
+			cameraLook[4] = new Number3D( -1.5f, .8f, 15);
+			cameraLook[3] = new Number3D(-10, .78f, 5.7f);
 			cameraLook[2] = new Number3D(-5, .7f, -13);
-			cameraLook[3] = new Number3D(12, 1.7f, -16);
-			cameraLook[4] = new Number3D(15, 1.7f, 3);
+			cameraLook[1] = new Number3D(12, 1.7f, -16);
+			cameraLook[0] = new Number3D(15, 1.7f, 3);
 		}
 		camLookNull.setPosition(cameraLook[0]);
 		mCamera.setPosition(cameraPos[0]);
@@ -1493,22 +1689,21 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2)); //provides a feeling of animated follow through motion
 			float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
 
-			camLookNull.setPosition(newLookX, newLookY, newLookZ); //Set new Camera and Look locations
 			mCamera.setPosition(newX, newY, newZ);
+			camLookNull.setPosition(newLookX, newLookY, newLookZ); //Set new Camera and Look locations
 			
 			//Because the above easing equation will calculate infinitely we set some limits
+			if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
+				mCamera.setPosition(cameraPos[camIndex]);
+				moveCamera = false;	
+			}
 			if(moveCameraLook){
 				if (Math.abs(xLookDif)<.0001f && Math.abs(yLookDif)<.0001f && Math.abs(zLookDif)<.0001f) {
 					camLookNull.setPosition(cameraLook[camIndex]); //Once teh limit is reached set the values explicitly
 					moveCameraLook = false;//Disallow animation 
 				}
 			}
-			if (moveCamera && Math.abs(xDif)<.001f && Math.abs(yDif)<.001f && Math.abs(zDif)<.001f) {
-				mCamera.setPosition(cameraPos[camIndex]);
-				moveCamera = false;	
-			}
 		}
-		mCamera.setPosition(mCamera.getX()+(float) (Math.sin(totalCount/40)/400), mCamera.getY()+(float) (Math.cos(totalCount/80)/800), mCamera.getZ()); // Wiggle the camera view
-		totalCount++;
+//		mCamera.setPosition(mCamera.getX()+(float) (Math.sin(totalCount/40)/400), mCamera.getY()+(float) (Math.cos(totalCount/80)/800), mCamera.getZ()); // Wiggle the camera view
 	}
 }
