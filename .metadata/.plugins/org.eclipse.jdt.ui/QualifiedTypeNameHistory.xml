@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="android.view.animation.AccelerateInterpolator"/>
 <fullyQualifiedTypeName name="android.view.animation.LinearInterpolator"/>
 <fullyQualifiedTypeName name="rajawali.animation.RotateAnimation3D"/>
 <fullyQualifiedTypeName name="android.graphics.Paint"/>
@@ -17,7 +16,6 @@
 <fullyQualifiedTypeName name="rajawali.math.Number3D"/>
 <fullyQualifiedTypeName name="android.opengl.GLES20"/>
 <fullyQualifiedTypeName name="rajawali.materials.SimpleAnimatedMaterial"/>
-<fullyQualifiedTypeName name="rajawali.materials.GouraudMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.SpecularMaskMaterial"/>
 <fullyQualifiedTypeName name="java.nio.ByteBuffer"/>
 <fullyQualifiedTypeName name="java.io.BufferedInputStream"/>
@@ -48,8 +46,6 @@
 <fullyQualifiedTypeName name="rajawali.materials.AMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.SimpleMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.DiffuseAlphaMaterial"/>
-<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
-<fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
 <fullyQualifiedTypeName name="rajawali.materials.DiffuseMaterial"/>
 <fullyQualifiedTypeName name="rajawali.materials.PhongAlphaMaterial"/>
 <fullyQualifiedTypeName name="rajawali.lights.DirectionalLight"/>
@@ -60,4 +56,8 @@
 <fullyQualifiedTypeName name="rajawali.animation.CatmullRomPath3D"/>
 <fullyQualifiedTypeName name="rajawali.animation.TranslateAnimation3D"/>
 <fullyQualifiedTypeName name="rajawali.animation.RotationAnimation3D"/>
+<fullyQualifiedTypeName name="rajawali.util.MeshExporter"/>
+<fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.string"/>
+<fullyQualifiedTypeName name="com.evvid.wallpapers.shamrocklane.R.raw"/>
+<fullyQualifiedTypeName name="rajawali.materials.GouraudMaterial"/>
 </qualifiedTypeNameHistroy>

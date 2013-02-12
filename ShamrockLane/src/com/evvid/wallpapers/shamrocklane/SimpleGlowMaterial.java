@@ -33,7 +33,7 @@ public class SimpleGlowMaterial extends AMaterial {
 		"    float x = texel.x;\n" +
 		"    float y = texel.y;\n" +
 		
-		"    float glow = 4.0 * ((0.5 + 0.5) / 2.0);\n" +
+		"    float glow = 2.0 * ((0.5 + 0.5) / 2.0);\n" +
 		     
 		"    vec4 bloom = vec4(0);\n" +
 		     
@@ -54,7 +54,7 @@ public class SimpleGlowMaterial extends AMaterial {
 		"            count += 1.0;\n" +
 		"            y += 1.0;\n" +
 		"    bloom = clamp(bloom / (count * 30.0), 0.0, 1.0);\n" +
-		     
+		
 		"#ifdef TEXTURED\n" +
 		"	gl_FragColor = bloom + texture2D(uDiffuseTexture, vTextureCoord);\n" +
 		"#else\n" +

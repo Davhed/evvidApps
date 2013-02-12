@@ -42,7 +42,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    Bitmap bg = BitmapFactory.decodeResource(mContext.getResources(),
 	            R.drawable.earthtruecolor_nasa_big);
 	    mSphere = new Sphere(1, 12, 12);
-	    DiffuseMaterial material = new DiffuseMaterial();
+	    TestMaterial material = new TestMaterial();
 	    mSphere.setMaterial(material);
 	    mSphere.setLight(mLight);
 	    mSphere.addTexture(mTextureManager.addTexture(bg));
