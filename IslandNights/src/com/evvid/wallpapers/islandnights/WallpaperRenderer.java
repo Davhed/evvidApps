@@ -23,6 +23,8 @@
 package com.evvid.wallpapers.islandnights;
 
 import java.io.ObjectInputStream;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -48,7 +50,9 @@ import rajawali.animation.Animation3DListener;
 import rajawali.animation.ScaleAnimation3D;
 import rajawali.animation.TranslateAnimation3D;
 import rajawali.lights.DirectionalLight;
+import rajawali.materials.PhongMaterial;
 import rajawali.materials.SimpleMaterial;
+import rajawali.materials.TextureInfo;
 import rajawali.math.Number3D;
 //Serializer//
 import rajawali.parser.ObjParser;
@@ -60,37 +64,57 @@ import rajawali.util.MeshExporter.ExportType;
 
 public class WallpaperRenderer extends RajawaliRenderer{
 	
-	private float xpos, ypos, sWave, cWave, camWave, worldRot;
-	private int flyTimer = 0, starTimer = 0, flameCounter = 0, smokeCounter = 0, camIndex = 0, worldIndex = 0;
-	private double waveIndex = 0, camWaveIndex = 0,  lastDistance;
-	private boolean shooting =  false, sceneInit = false, firstTouch = true, moveCamera = false, moveCameraLook = false, freeMove = false;
+	private float 
+		xpos, 
+		ypos, 
+		sWave, 
+		cWave, 
+		camWave,
+		worldRot;
+	
+	private int 
+		flyTimer = 0, 
+		starTimer = 0, 
+		flameCounter = 0, 
+		smokeCounter = 0, 
+		camIndex = 0, 
+		worldIndex = 0;
+	
+	private double 
+		waveIndex = 0, 
+		camWaveIndex = 0, 
+		lastDistance;
+	
+	private boolean 
+		isVisible = false,
+		shooting = false, 
+		sceneInit = false, 
+		firstTouch = true, 
+		moveCamera = false, 
+		moveCameraLook = false, 
+		freeMove = false;
+	
 	private Number3D [] cameraLook, worldPos;
 	
 	private DirectionalLight dLight_amb;
 	
 	private ObjectInputStream ois;
 	
-	private Plane flame1, flame2, flame3, flame4, flame5, flame6, flame7;
-	
+	private Timer timer = new Timer();
+		
 	private BaseObject3D parentObj, skydome, moon, ground, god, godlight, crater, volcano, mountains, water1, water2,
 	trees1, trees2, trees3, bush1, bush2, bush3, bush4, bush5, bigplants, bigplants2, bigplants3, fgplants1, fgplants2, grass, totems, boat,
 	interiors, castLight1, castLight2, castLight3, castLight4, castLight5, castLight6, dock, lilypads, mask,
 	castLight7, castLight8, castLight9, castLight10,lodge, lodgeRoof, hut, hutRoof, fruit, torches, palm1, palm2, palm3, palm4, palm5,
-	firefly, firefly2, firefly3, firefly4, firefly5, firefly6, flySwarm, flySwarm2, shootingStar,
-	torch1, torch2, torch3, torch4, torch5, torch6, torch7, torch8, torch9, torch10, shadows, depthShadow,
-	smoke1, smoke2, smoke3, smoke4, smoke5, smoke6, smoke7, smoke8, smoke9, smoke10, smoke11, smoke12,
-	smoke13, smoke14, smoke15, smoke16, smoke17, smoke18, smoke19, smoke20, smokePlume, bbq, net1, cameraLookNull;
+	flySwarm, flySwarm2, shootingStar, flames, torch1, torch2, torch3, torch4, torch5, torch6, torch7, torch8, torch9, torch10, shadows, depthShadow,
+	smokePlume, bbq, net1, cameraLookNull;
 	
 	private Bitmap moonTex, moon2Tex, moon3Tex, moon4Tex, moon5Tex, shootingStarTex, fireflyTex, skydomeTex, groundTex, mntVolTreesTex, lightingTex, waterDockTex,
-	hutTotemTex, interPropTex, lodgeTorchTex, plantsTex, godTex, flameTex1, flameTex2, flameTex3, flameTex4, flameTex5, flameTex6, flameTex7,
-	smokeTex1, smokeTex2, smokeTex3, smokeTex4, smokeTex5, smokeTex6, smokeTex7, smokeTex8, smokeTex9, smokeTex10, smokeTex11, smokeTex12,
-	smokeTex13, smokeTex14, smokeTex15, smokeTex16, smokeTex17, smokeTex18, smokeTex19, smokeTex20, netTex;
+	hutTotemTex, interPropTex, lodgeTorchTex, plantsTex, godTex, netTex;
 	
+	private TextureInfo[] flameInfo, smokeInfo;
 	
-	private SimpleMaterial flameMat1, flameMat2, flameMat3, flameMat4, flameMat5, flameMat6, flameMat7,
-	smokeMat1, smokeMat2, smokeMat3, smokeMat4, smokeMat5, smokeMat6, smokeMat7, smokeMat8, smokeMat9,
-	smokeMat10, smokeMat11, smokeMat12, smokeMat13, smokeMat14, smokeMat15, smokeMat16, smokeMat17, smokeMat18,
-	smokeMat19, smokeMat20, moonMat, moon2Mat, moon3Mat, moon4Mat, moon5Mat; 
+	private SimpleMaterial moonMat, moon2Mat, moon3Mat, moon4Mat, moon5Mat; 
 	
 	private OnSharedPreferenceChangeListener mListener;
 	private int performance = 30, starMode = 1, moonPhase = 2, camSpeed = 5;
@@ -102,9 +126,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
     }
 		
 	public void initScene() {
-			
 		setOnPreferenceChange();
 		setPrefsToLocal();
+		initTimer();
 		
 		lightsCam();
 		loadTextures();
@@ -173,19 +197,20 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void loadObjects(){		
 		try {	
-			SimpleMaterial skydomeMat = new SimpleMaterial();
+			SimpleGlowMaterial skydomeMat = new SimpleGlowMaterial();
+			SimpleGlowMaterial bbqMat = new SimpleGlowMaterial();
 			SimpleMaterial waterDockMat = new SimpleMaterial();
 			SimpleMaterial shootingStarMat = new SimpleMaterial();
 			SimpleMaterial groundMat = new SimpleMaterial();
-			SimpleMaterial mntVolTreesMat = new SimpleMaterial();
-			SimpleMaterial lightingMat = new SimpleMaterial();
+			SimpleGlowMaterial mntVolTreesMat = new SimpleGlowMaterial();
+			SimpleGlowMaterial lightingMat = new SimpleGlowMaterial();
 			SimpleMaterial shadowMat = new SimpleMaterial();
 			SimpleMaterial hutTotemMat = new SimpleMaterial();
 			SimpleMaterial interPropMat = new SimpleMaterial();
 			SimpleMaterial lodgeTorchMat = new SimpleMaterial();
 			SimpleMaterial palmMat = new SimpleMaterial();
 			SimpleMaterial netMat = new SimpleMaterial();
-			MyPhongMaterial godMat = new MyPhongMaterial();
+			PhongGlowMaterial godMat = new PhongGlowMaterial();
 			MyPhongMaterial plantsMat = new MyPhongMaterial();
 			moonMat = new SimpleMaterial();
 			moon2Mat = new SimpleMaterial();
@@ -208,6 +233,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			shadowMat.addTexture(mTextureManager.addTexture(lightingTex));			
 			hutTotemMat.addTexture(mTextureManager.addTexture(hutTotemTex));			
 			interPropMat.addTexture(mTextureManager.addTexture(interPropTex));			
+			bbqMat.addTexture(mTextureManager.addTexture(interPropTex));			
 			lodgeTorchMat.addTexture(mTextureManager.addTexture(lodgeTorchTex));			
 			palmMat.addTexture(mTextureManager.addTexture(lodgeTorchTex));
 			netMat.addTexture(mTextureManager.addTexture(netTex));
@@ -225,7 +251,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			skydome.setMaterial(skydomeMat);
 			
 			moon = new Plane(400, 400, 1, 1);
-			moon.setRotation(-90, -90, 0);
 			moon.setPosition(-2500, 700, 500);
 			switch(moonPhase){
 				case 0 :
@@ -498,7 +523,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 					
 			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.bbq));
 			bbq = new BaseObject3D((SerializedObject3D)ois.readObject());
-			bbq.setMaterial(interPropMat);
+			bbq.setMaterial(bbqMat);
 			bbq.setDoubleSided(true);
 			bbq.setBlendingEnabled(true);
 			bbq.setPosition(1, -1, 2);
@@ -636,140 +661,67 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	private void createFlySwarms(){
 		
 		flySwarm = new BaseObject3D();
-		
+		flySwarm2 = new BaseObject3D();
+		int numChildren = 16;
+
 		SimpleMaterial fireflyMat = new SimpleMaterial();
 		fireflyMat.addTexture(mTextureManager.addTexture(fireflyTex));
 		
-		firefly = new Sphere(.3f, 5, 5);
-		firefly.setPosition(-20, 12, 0);
-		firefly.setMaterial(fireflyMat);
-		firefly.setBlendingEnabled(true);
-		firefly.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly);
-		
-		firefly2 = new Sphere(.3f, 5, 5);
-		firefly2.setPosition(-35, 13, 10);
-		firefly2.setMaterial(fireflyMat);
-		firefly2.setBlendingEnabled(true);
-		firefly2.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly2);
-		
-		firefly3 = new Sphere(.3f, 5, 5);
-		firefly3.setPosition(-20, 9, -8);
-		firefly3.setMaterial(fireflyMat);
-		firefly3.setBlendingEnabled(true);
-		firefly3.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly3);
-		
-		firefly4 = new Sphere(.3f, 5, 5);
-		firefly4.setPosition(-40, 10, 5);
-		firefly4.setMaterial(fireflyMat);
-		firefly4.setBlendingEnabled(true);
-		firefly4.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly4);
-		
-		firefly5 = new Sphere(.3f, 5, 5);
-		firefly5.setPosition(-60, 11, 15);
-		firefly5.setMaterial(fireflyMat);
-		firefly5.setBlendingEnabled(true);
-		firefly5.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly5);
-		
-		firefly6 = new Sphere(.3f, 5, 5);
-		firefly6.setPosition(-30, 8, -16);
-		firefly6.setMaterial(fireflyMat);
-		firefly6.setBlendingEnabled(true);
-		firefly6.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		flySwarm.addChild(firefly6);
-		
-		flySwarm.setPosition(-90, 0, -12);
-		
-		flySwarm2 = new BaseObject3D();
-		
-		for (int i = 0; i < (flySwarm.getNumChildren()); i++){	
-			flySwarm.getChildAt(i).setScale(0,0,0);
-			flySwarm2.addChild(flySwarm.getChildAt(i));
+		for(int i = 0; i < numChildren*2; ++i){
+			BaseObject3D fly = new Plane(.25f, .25f, 1, 1);
+			fly = new Sphere(.3f, 5, 5);
+			fly.setMaterial(fireflyMat);
+			fly.setBlendingEnabled(true);
+			fly.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			fly.setScale(0);
+			if(i < numChildren)
+				flySwarm.addChild(fly);
+			else
+				flySwarm2.addChild(fly);
 		}
-		flySwarm2.setPosition(-30, 5, 25);
-		flySwarm2.setScale(-1);
-	
-		firefly .setScale(0,0,0);
-		firefly2.setScale(0,0,0);
-		firefly3.setScale(0,0,0);
-		firefly4.setScale(0,0,0);
-		firefly5.setScale(0,0,0);
-		firefly6.setScale(0,0,0);
+		
+		flySwarm.getChildAt(0).setPosition(-20,  12,  0);
+		flySwarm.getChildAt(1).setPosition(-35, 13, 10);
+		flySwarm.getChildAt(2).setPosition(-20, 9, -8);
+		flySwarm.getChildAt(3).setPosition(-40, 10, 5);
+		flySwarm.getChildAt(4).setPosition(-60, 11, 15);
+		flySwarm.getChildAt(5).setPosition(-30, 8, -16);
+		
+		flySwarm2.getChildAt(0).setPosition(-20,  12,  0);
+		flySwarm2.getChildAt(1).setPosition(-35, 13, 10);
+		flySwarm2.getChildAt(2).setPosition(-20, 9, -8);
+		flySwarm2.getChildAt(3).setPosition(-40, 10, 5);
+		flySwarm2.getChildAt(4).setPosition(-60, 11, 15);
+		flySwarm2.getChildAt(5).setPosition(-30, 8, -16);
+				
+		flySwarm.setPosition(-30, 20, 20);
+		flySwarm2.setPosition(5, 25, 40);
+//		flySwarm2.setScale(-1, 0, -1);
 	}
 	
 	private void createTorchFlames() {
-		
-		flameMat1 = new SimpleMaterial();
-		flameMat2 = new SimpleMaterial();
-		flameMat3 = new SimpleMaterial();
-		flameMat4 = new SimpleMaterial();
-		flameMat5 = new SimpleMaterial();
-		flameMat6 = new SimpleMaterial();
-		flameMat7 = new SimpleMaterial();
+		flames = new BaseObject3D();
+		flameInfo = new TextureInfo[7];
 
-		flameTex1 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fa);
-		flameTex2 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fb);
-		flameTex3 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fc);
-		flameTex4 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fd);
-		flameTex5 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fe);
-		flameTex6 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ff);
-		flameTex7 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fg);
+		flameInfo[0] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fa));
+		flameInfo[1] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fb));
+		flameInfo[2] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fc));
+		flameInfo[3] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fd));
+		flameInfo[4] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fe));
+		flameInfo[5] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ff));
+		flameInfo[6] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fg));
 		
+		for(int i = 0; i < flameInfo.length; i++){
+			BaseObject3D flame = new Plane(2, 2, 1, 1);
+			flame.setMaterial(new SimpleGlowMaterial());
+			flame.addTexture(flameInfo[i]);
+			flame.setBlendingEnabled(true);
+			flame.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
+			flame.setVisible(false);
+			flames.addChild(flame);
+		}
+				
 		torch1 = new BaseObject3D();
-		
-		flame1 = new Plane(2, 2, 1, 1);
-		flameMat1.addTexture(mTextureManager.addTexture(flameTex1));
-		flame1.setMaterial(flameMat1);
-		flame1.setBlendingEnabled(true);
-		flame1.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame1);
-		
-		flame2 = new Plane(2, 2, 1, 1);
-		flameMat2.addTexture(mTextureManager.addTexture(flameTex2));
-		flame2.setMaterial(flameMat2);
-		flame2.setBlendingEnabled(true);
-		flame2.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame2);
-		
-		flame3 = new Plane(2, 2, 1, 1);
-		flameMat3.addTexture(mTextureManager.addTexture(flameTex3));
-		flame3.setMaterial(flameMat3);
-		flame3.setBlendingEnabled(true);
-		flame3.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame3);
-		
-		flame4 = new Plane(2, 2, 1, 1);
-		flameMat4.addTexture(mTextureManager.addTexture(flameTex4));
-		flame4.setMaterial(flameMat4);
-		flame4.setBlendingEnabled(true);
-		flame4.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame4);
-		
-		flame5 = new Plane(2, 2, 1, 1);
-		flameMat5.addTexture(mTextureManager.addTexture(flameTex5));
-		flame5.setMaterial(flameMat5);
-		flame5.setBlendingEnabled(true);
-		flame5.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame5);
-		
-		flame6 = new Plane(2, 2, 1, 1);
-		flameMat6.addTexture(mTextureManager.addTexture(flameTex6));
-		flame6.setMaterial(flameMat6);
-		flame6.setBlendingEnabled(true);
-		flame6.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame6);
-		
-		flame7 = new Plane(2, 2, 1, 1);
-		flameMat7.addTexture(mTextureManager.addTexture(flameTex7));
-		flame7.setMaterial(flameMat7);
-		flame7.setBlendingEnabled(true);
-		flame7.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_COLOR);
-		torch1.addChild(flame7);
-
 		torch2 = new BaseObject3D();
 		torch3 = new BaseObject3D();
 		torch4 = new BaseObject3D();
@@ -779,18 +731,17 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		torch8 = new BaseObject3D();
 		torch9 = new BaseObject3D();
 		torch10 = new BaseObject3D();
-		
-		for (int i = 0; i < (torch1.getNumChildren()); i++){
-			torch2.addChild(torch1.getChildAt(i));
-			torch3.addChild(torch1.getChildAt(i));
-			torch4.addChild(torch1.getChildAt(i));
-			torch5.addChild(torch1.getChildAt(i));
-			torch6.addChild(torch1.getChildAt(i));
-			torch7.addChild(torch1.getChildAt(i));
-			torch8.addChild(torch1.getChildAt(i));
-			torch9.addChild(torch1.getChildAt(i));
-			torch10.addChild(torch1.getChildAt(i));
-		}
+	
+		torch1.addChild(flames);
+		torch2.addChild(flames);
+		torch3.addChild(flames);
+		torch4.addChild(flames);
+		torch5.addChild(flames);
+		torch6.addChild(flames);
+		torch7.addChild(flames);
+		torch8.addChild(flames);
+		torch9.addChild(flames);
+		torch10.addChild(flames);
 				
 		torch1.setPosition(-38.1272f, 12.2953f+1, 30.236f);
 		torch2.setPosition(-39.1312f, 11.0866f+1, 29.7689f);
@@ -818,192 +769,39 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	private void createSmokePlume(){
 		smokePlume = new BaseObject3D();
-		smokeMat1 = new SimpleMaterial();
-		smokeMat2 = new SimpleMaterial();
-		smokeMat3 = new SimpleMaterial();
-		smokeMat4 = new SimpleMaterial();
-		smokeMat5 = new SimpleMaterial();
-		smokeMat6 = new SimpleMaterial();
-		smokeMat7 = new SimpleMaterial();
-		smokeMat8 = new SimpleMaterial();
-		smokeMat9 = new SimpleMaterial();
-		smokeMat10 = new SimpleMaterial();
-		smokeMat11 = new SimpleMaterial();
-		smokeMat12 = new SimpleMaterial();
-		smokeMat13 = new SimpleMaterial();
-		smokeMat14 = new SimpleMaterial();
-		smokeMat15 = new SimpleMaterial();
-		smokeMat16 = new SimpleMaterial();
-		smokeMat17 = new SimpleMaterial();
-		smokeMat18 = new SimpleMaterial();
-		smokeMat19 = new SimpleMaterial();
-		smokeMat20 = new SimpleMaterial();
+		smokeInfo = new TextureInfo[20];
 		
-		smokeTex1 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sa);
-		smokeTex2 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sb);
-		smokeTex3 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sc);
-		smokeTex4 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sd);
-		smokeTex5 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.se);
-		smokeTex6 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sf);
-		smokeTex7 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sg);
-		smokeTex8 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sh);
-		smokeTex9 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.si);
-		smokeTex10 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sj);
-		smokeTex11 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sk);
-		smokeTex12 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sl);
-		smokeTex13 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sm);
-		smokeTex14 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sn);
-		smokeTex15 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.so);
-		smokeTex16 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sp);
-		smokeTex17 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sq);
-		smokeTex18 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sr);
-		smokeTex19 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ss);
-		smokeTex20 = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.st);
+		smokeInfo[0] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sa));
+		smokeInfo[1] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sb));
+		smokeInfo[2] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sc));
+		smokeInfo[3] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sd));
+		smokeInfo[4] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.se));
+		smokeInfo[5] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sf));
+		smokeInfo[6] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sg));
+		smokeInfo[7] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sh));
+		smokeInfo[8] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.si));
+		smokeInfo[9] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sj));
+		smokeInfo[10] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sk));
+		smokeInfo[11] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sl));
+		smokeInfo[12] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sm));
+		smokeInfo[13] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sn));
+		smokeInfo[14] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.so));
+		smokeInfo[15] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sp));
+		smokeInfo[16] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sq));
+		smokeInfo[17] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sr));
+		smokeInfo[18] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.ss));
+		smokeInfo[19] = mTextureManager.addTexture(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.st));
 		
-		float pW = 190;
-		float pH = 190;
-		
-		smoke1 = new Plane(pW, pH, 1, 1);
-		smokeMat1.addTexture(mTextureManager.addTexture(smokeTex1));
-		smoke1.setMaterial(smokeMat1);
-		smoke1.setBlendingEnabled(true);
-		smoke1.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke1);
-		
-		smoke2 = new Plane(pW, pH, 1, 1);
-		smokeMat2.addTexture(mTextureManager.addTexture(smokeTex2));
-		smoke2.setMaterial(smokeMat2);
-		smoke2.setBlendingEnabled(true);
-		smoke2.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke2);
-		
-		smoke3 = new Plane(pW, pH, 1, 1);
-		smokeMat3.addTexture(mTextureManager.addTexture(smokeTex3));
-		smoke3.setMaterial(smokeMat3);
-		smoke3.setBlendingEnabled(true);
-		smoke3.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke3);
-		
-		smoke4 = new Plane(pW, pH, 1, 1);
-		smokeMat4.addTexture(mTextureManager.addTexture(smokeTex4));
-		smoke4.setMaterial(smokeMat4);
-		smoke4.setBlendingEnabled(true);
-		smoke4.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke4);
-		
-		smoke5 = new Plane(pW, pH, 1, 1);
-		smokeMat5.addTexture(mTextureManager.addTexture(smokeTex5));
-		smoke5.setMaterial(smokeMat5);
-		smoke5.setBlendingEnabled(true);
-		smoke5.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke5);
-		
-		smoke6 = new Plane(pW, pH, 1, 1);
-		smokeMat6.addTexture(mTextureManager.addTexture(smokeTex6));
-		smoke6.setMaterial(smokeMat6);
-		smoke6.setBlendingEnabled(true);
-		smoke6.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke6);
-		
-		smoke7 = new Plane(pW, pH, 1, 1);
-		smokeMat7.addTexture(mTextureManager.addTexture(smokeTex7));
-		smoke7.setMaterial(smokeMat7);
-		smoke7.setBlendingEnabled(true);
-		smoke7.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke7);
-		
-		smoke8 = new Plane(pW, pH, 1, 1);
-		smokeMat8.addTexture(mTextureManager.addTexture(smokeTex8));
-		smoke8.setMaterial(smokeMat8);
-		smoke8.setBlendingEnabled(true);
-		smoke8.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke8);
-		
-		smoke9 = new Plane(pW, pH, 1, 1);
-		smokeMat9.addTexture(mTextureManager.addTexture(smokeTex9));
-		smoke9.setMaterial(smokeMat9);
-		smoke9.setBlendingEnabled(true);
-		smoke9.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke9);
-		
-		smoke10 = new Plane(pW, pH, 1, 1);
-		smokeMat10.addTexture(mTextureManager.addTexture(smokeTex10));
-		smoke10.setMaterial(smokeMat10);
-		smoke10.setBlendingEnabled(true);
-		smoke10.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke10);
-		
-		smoke11 = new Plane(pW, pH, 1, 1);
-		smokeMat11.addTexture(mTextureManager.addTexture(smokeTex11));
-		smoke11.setMaterial(smokeMat11);
-		smoke11.setBlendingEnabled(true);
-		smoke11.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke11);
-		
-		smoke12 = new Plane(pW, pH, 1, 1);
-		smokeMat12.addTexture(mTextureManager.addTexture(smokeTex12));
-		smoke12.setMaterial(smokeMat12);
-		smoke12.setBlendingEnabled(true);
-		smoke12.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke12);
-		
-		smoke13 = new Plane(pW, pH, 1, 1);
-		smokeMat13.addTexture(mTextureManager.addTexture(smokeTex13));
-		smoke13.setMaterial(smokeMat13);
-		smoke13.setBlendingEnabled(true);
-		smoke13.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke13);
-		
-		smoke14 = new Plane(pW, pH, 1, 1);
-		smokeMat14.addTexture(mTextureManager.addTexture(smokeTex14));
-		smoke14.setMaterial(smokeMat14);
-		smoke14.setBlendingEnabled(true);
-		smoke14.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke14);
-		
-		smoke15 = new Plane(pW, pH, 1, 1);
-		smokeMat15.addTexture(mTextureManager.addTexture(smokeTex15));
-		smoke15.setMaterial(smokeMat15);
-		smoke15.setBlendingEnabled(true);
-		smoke15.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke15);
-		
-		smoke16 = new Plane(pW, pH, 1, 1);
-		smokeMat16.addTexture(mTextureManager.addTexture(smokeTex16));
-		smoke16.setMaterial(smokeMat16);
-		smoke16.setBlendingEnabled(true);
-		smoke16.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke16);
-		
-		smoke17 = new Plane(pW, pH, 1, 1);
-		smokeMat17.addTexture(mTextureManager.addTexture(smokeTex17));
-		smoke17.setMaterial(smokeMat17);
-		smoke17.setBlendingEnabled(true);
-		smoke17.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke17);
-		
-		smoke18 = new Plane(pW, pH, 1, 1);
-		smokeMat18.addTexture(mTextureManager.addTexture(smokeTex18));
-		smoke18.setMaterial(smokeMat18);
-		smoke18.setBlendingEnabled(true);
-		smoke18.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke18);
-		
-		smoke19 = new Plane(pW, pH, 1, 1);
-		smokeMat19.addTexture(mTextureManager.addTexture(smokeTex19));
-		smoke19.setMaterial(smokeMat19);
-		smoke19.setBlendingEnabled(true);
-		smoke19.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke19);
-		
-		smoke20 = new Plane(pW, pH, 1, 1);
-		smokeMat20.addTexture(mTextureManager.addTexture(smokeTex20));
-		smoke20.setMaterial(smokeMat20);
-		smoke20.setBlendingEnabled(true);
-		smoke20.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-		smokePlume.addChild(smoke20);
-		
-		smokePlume.setPosition(-520, 175, -3);
+		for(int i = 0; i < smokeInfo.length; i++){
+			BaseObject3D smokelet = new Plane(190, 190, 1, 1);
+			smokelet.setMaterial(new SimpleMaterial());
+			smokelet.addTexture(smokeInfo[i]);
+			smokelet.setBlendingEnabled(true);
+			smokelet.setBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+			smokePlume.addChild(smokelet);			
+		}
+						
+		smokePlume.setPosition(-520, 170, -3);
 		smokePlume.setScaleZ(1.02f);
 		smokePlume.setLookAt(mCamera.getX()-smokePlume.getX(), mCamera.getY()-smokePlume.getY(), mCamera.getZ()-smokePlume.getZ());	
 	}
@@ -1168,6 +966,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		clearChildren();
 		try{
 			super.onSurfaceDestroyed();
+			timer.cancel(); // cancel the timer animation
 		}catch (Exception e){
 			e.printStackTrace();
 		}		
@@ -1197,32 +996,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			plantsTex.recycle();
 			waterDockTex.recycle();
 			netTex.recycle();
-			flameTex1.recycle();
-			flameTex2.recycle();
-			flameTex3.recycle();
-			flameTex4.recycle();
-			flameTex5.recycle();
-			flameTex6.recycle();
-			smokeTex1.recycle();
-			smokeTex2.recycle();
-			smokeTex3.recycle();
-			smokeTex4.recycle();
-			smokeTex5.recycle();
-			smokeTex6.recycle();
-			smokeTex7.recycle();
-			smokeTex8.recycle();
-			smokeTex9.recycle();
-			smokeTex10.recycle();
-			smokeTex11.recycle();
-			smokeTex12.recycle();
-			smokeTex13.recycle();
-			smokeTex14.recycle();
-			smokeTex15.recycle();
-			smokeTex16.recycle();
-			smokeTex17.recycle();
-			smokeTex18.recycle();
-			smokeTex19.recycle();
-			smokeTex20.recycle();
 			System.gc();
 		} catch (Exception e){
 			e.printStackTrace();
@@ -1231,30 +1004,49 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	@Override
 	public void onDrawFrame(GL10 glUnused) {
-		try{
-			super.onDrawFrame(glUnused);
-			if(sceneInit){
-				showHide();
-				waveGenerator();
-				checkEngine();
-				camControl();
-				if(moveCamera)cameraMovement();
-				if(camIndex == 0 && !moveCamera) cameraLookNull.setZ(cameraLook[camIndex].z+camWave);
-				if(showFlies)flyMovement();
-				if(starMode!=0)shootingStarMovement();
-				if(showFlames)torchFlameMovement();
-				if(showFlames && lightFlicker)castLightMovement();
-				if(showSmoke)smokePlumeMovement();
-				waterMovement();
-				boatMovement();
-				treeMovement();
-				grassMovement();
-				moon.setLookAt(mCamera.getX()-moon.getX(), mCamera.getY()-moon.getY(), mCamera.getZ()-moon.getZ());
+		super.onDrawFrame(glUnused);
+	}
+	
+	@Override
+    public void onVisibilityChanged(boolean visible) {//Here we start/stop our timer on visibility change. 
+        super.onVisibilityChanged(visible);
+    	isVisible = visible;
+    	if(isVisible)
+    		initTimer();
+    }
+	
+	private void initTimer(){
+		TimerTask tTask = new TimerTask() {
+			public void run() {
+				onTimerTick();//This is called on each update, so simulates `onDrawFrame` while being clock based
+				if (isVisible == false)
+					this.cancel();
 			}
-		}catch (Exception e) {
-			e.printStackTrace();
+		};
+		timer.schedule(tTask, 33, 33); //33ms delay after the scene was created, 33ms delay there after
+	}
+
+	private void onTimerTick() {//Custom animation fired from here
+		if(sceneInit){
+			showHide();
+			waveGenerator();
+			checkEngine();
+			camControl();
+			if(moveCamera)cameraMovement();
+			if(camIndex == 0 && !moveCamera) cameraLookNull.setZ(cameraLook[camIndex].z+camWave);
+			if(showFlies)flyMovement();
+			if(starMode!=0)shootingStarMovement();
+			if(showFlames)torchFlameMovement();
+			if(showFlames && lightFlicker)castLightMovement();
+			if(showSmoke)smokePlumeMovement();
+			waterMovement();
+			boatMovement();
+			treeMovement();
+			grassMovement();
+			moon.setLookAt(mCamera.getX()-moon.getX(), mCamera.getY()-moon.getY(), mCamera.getZ()-moon.getZ());
 		}
 	}
+
 	
 	private void showHide() {
 		if(showSmoke) smokePlume.setVisible(true);
@@ -1416,40 +1208,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
    	    mCamera.setZ((mCamera.getZ() + xOffset));
 	}
 
-	private void cameraDolly(double offset) {
-	//	Number3D newPosition = new Number3D();
-	//	if(offset < 0){
-	//    	newPosition = cameraLook[camIndex];
-	//    	newPosition.add(5, 0, -5);
-	//	    }else if (offset > 0){
-	//	    	newPosition = cameraPos[camIndex];
-	//	    }
-	//	Animation3D zoomAnim = new TranslateAnimation3D(newPosition);
-	//	zoomAnim.setDuration(200);
-	//	zoomAnim.setRepeatCount(0);
-	//	zoomAnim.setTransformable3D(mCamera);
-	//	zoomAnim.setAnimationListener(new Animation3DListener() {
-	//
-	//		public void onAnimationEnd(Animation3D anim) {
-	//			anim.cancel();
-	//			anim.reset();
-	//			firstTouch = false;
-	//		}
-	//
-	//		public void onAnimationRepeat(Animation3D anim) {				
-	//		}
-	//
-	//		public void onAnimationStart(Animation3D anim) {
-	//		}
-	//		
-	//	});
-	//	zoomAnim.start();
-	
-	//	if (mCamera.getX() < -50) mCamera.setX(-50); 
-	//	if (mCamera.getX() > 35) mCamera.setX(35); 
-	//	if (mCamera.getX() >= -50) mCamera.setX((float) (mCamera.getX()+(offset*.05)));
-	}
-
 	private void cameraMovement() {
 		float xDif = worldPos[camIndex].x - parentObj.getX();
 		float yDif = worldPos[camIndex].y - parentObj.getY();
@@ -1536,8 +1294,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 					public void onAnimationUpdate(Animation3D animation,
 							float interpolatedTime) {
-						// TODO Auto-generated method stub
-						
 					}					
 				});
 				starAnim.start();
@@ -1573,8 +1329,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 					public void onAnimationUpdate(Animation3D animation,
 							float interpolatedTime) {
-						// TODO Auto-generated method stub
-						
 					}
 					
 				});
@@ -1587,27 +1341,51 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void flyMovement(){
 		if (flyTimer == 60) {
-			if(Math.random() > .33) blink(firefly);
-			if(Math.random() > .5) blink(firefly4);
+			if(Math.random() > .75) 
+				blink(flySwarm2.getChildAt(3));
+			else if(Math.random() > .5)
+				blink(flySwarm.getChildAt(3));
+			else if(Math.random() > .66) 
+				blink(flySwarm2.getChildAt(0));
+			else if(Math.random() > .33) 
+				blink(flySwarm.getChildAt(0));
 		}
 		else if (flyTimer == 90) {
-			if(Math.random() > .33) blink(firefly2);
-			if(Math.random() > .5) blink(firefly5);
+			if(Math.random() > .75) 
+				blink(flySwarm2.getChildAt(4));
+			else if(Math.random() > .5)
+				blink(flySwarm.getChildAt(4));
+			else if(Math.random() > .66) 
+				blink(flySwarm2.getChildAt(1));
+			else if(Math.random() > .33)
+				blink(flySwarm.getChildAt(1));
 		}
 		else if (flyTimer == 120) {
-			if(Math.random() > .33)  blink(firefly3);
+			if(Math.random() > .66) 
+				blink(flySwarm2.getChildAt(2));
+			else if(Math.random() > .33) 
+				blink(flySwarm.getChildAt(2));		
 		}
 		else if (flyTimer == 140) {
-			if(Math.random() > .33)  blink(firefly6);
+			if(Math.random() > .66) 
+				blink(flySwarm2.getChildAt(5));
+			else if(Math.random() > .33)
+				blink(flySwarm.getChildAt(5));
+		
 			flyTimer = 0;
 		}
 		flyTimer++;
-		firefly .setPosition((float) (firefly .getX()-(((Math.random()*5)*sWave/10)-(sWave/20))), (float) (firefly .getY()-(((Math.random()*5)*sWave/10)-(sWave/20))), (float) (firefly .getZ()-(((Math.random()*5)*sWave/10)-(sWave/20))));
-		firefly2.setPosition((float) (firefly2.getX()-(((Math.random()*5)*cWave/10)-(sWave/20))), (float) (firefly2.getY()-(((Math.random()*5)*cWave/10)-(sWave/20))), (float) (firefly2.getZ()-(((Math.random()*5)*cWave/10)-(sWave/20))));
-		firefly3.setPosition((float) (firefly3.getX()-(((Math.random()*5)*cWave/10)-(cWave/20))), (float) (firefly3.getY()-(((Math.random()*5)*cWave/10)-(cWave/20))), (float) (firefly3.getZ()-(((Math.random()*5)*cWave/10)-(cWave/20))));
-		firefly4.setPosition((float) (firefly4.getX()+(((Math.random()*5)*sWave/10)-(sWave/20))), (float) (firefly4.getY()+(((Math.random()*5)*sWave/10)-(sWave/20))), (float) (firefly4.getZ()+(((Math.random()*5)*sWave/10)-(sWave/20))));
-		firefly5.setPosition((float) (firefly5.getX()+(((Math.random()*5)*cWave/10)-(sWave/20))), (float) (firefly5.getY()+(((Math.random()*5)*cWave/10)-(sWave/20))), (float) (firefly5.getZ()+(((Math.random()*5)*cWave/10)-(sWave/20))));
-		firefly6.setPosition((float) (firefly6.getX()+(((Math.random()*5)*cWave/10)-(cWave/20))), (float) (firefly6.getY()+(((Math.random()*5)*cWave/10)-(cWave/20))), (float) (firefly6.getZ()+(((Math.random()*5)*cWave/10)-(cWave/20))));
+		
+		for(int i = 0; i < flySwarm.getNumChildren(); i++){
+			flySwarm.getChildAt(i) .setPosition(
+					(float) (flySwarm.getChildAt(i).getX()-(((Math.random()*5)*sWave*.05f)-(sWave*.01f))),
+					(float) (flySwarm.getChildAt(i).getY()-(((Math.random()*5)*sWave*.01f)-(cWave*.005f))), 
+					(float) (flySwarm.getChildAt(i).getZ()-(((Math.random()*5)*sWave*.05f)-(sWave*.01f))));
+			flySwarm2.getChildAt(i) .setPosition(
+					(float) (flySwarm2.getChildAt(i).getX()-(((Math.random()*5)*sWave*.05f)-(sWave*.05f))),
+					(float) (flySwarm2.getChildAt(i).getY()-(((Math.random()*5)*sWave*.01f)-(cWave*.005f))), 
+					(float) (flySwarm2.getChildAt(i).getZ()-(((Math.random()*5)*sWave*.05f)-(sWave*.01f))));
+		}
 	}
 	
 	private void castLightMovement(){ // REMOVED 12/20/2012 and re-added 1/3/2013
@@ -1633,32 +1411,32 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void torchFlameMovement(){
 		switch (flameCounter){
-			case 0: flame1.setVisible(true);
-			flame7.setVisible(false);
+			case 0: flames.getChildAt(0).setVisible(true);
+			flames.getChildAt(6).setVisible(false);
 			flameCounter++;	
 			break;
-			case 2: flame2.setVisible(true);
-			flame1.setVisible(false);
+			case 2: flames.getChildAt(1).setVisible(true);
+			flames.getChildAt(0).setVisible(false);
 			flameCounter++;	
 			break;
-			case 4: flame3.setVisible(true);
-			flame2.setVisible(false);
+			case 4: flames.getChildAt(2).setVisible(true);
+			flames.getChildAt(1).setVisible(false);
 			flameCounter++;	
 			break;
-			case 6: flame4.setVisible(true);
-			flame3.setVisible(false);
+			case 6: flames.getChildAt(3).setVisible(true);
+			flames.getChildAt(2).setVisible(false);
 			flameCounter++;	
 			break;
-			case 8: flame5.setVisible(true);
-			flame4.setVisible(false);
+			case 8: flames.getChildAt(4).setVisible(true);
+			flames.getChildAt(3).setVisible(false);
 			flameCounter++;	
 			break;
-			case 10: flame6.setVisible(true);
-			flame5.setVisible(false);
+			case 10: flames.getChildAt(5).setVisible(true);
+			flames.getChildAt(4).setVisible(false);
 			flameCounter++;	
 			break;
-			case 12: flame7.setVisible(true);
-			flame6.setVisible(false);
+			case 12: flames.getChildAt(6).setVisible(true);
+			flames.getChildAt(5).setVisible(false);
 			flameCounter=0;
 			break;
 			default: flameCounter++;	
@@ -1679,84 +1457,84 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	private void smokePlumeMovement(){
 		switch(smokeCounter){
-		case 0: smoke1.setVisible(true);
-		smoke20.setVisible(false);
+		case 0: smokePlume.getChildAt(0).setVisible(true);
+		smokePlume.getChildAt(19).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 2: smoke2.setVisible(true);
-		smoke1.setVisible(false);
+		case 2: smokePlume.getChildAt(1).setVisible(true);
+		smokePlume.getChildAt(0).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 4: smoke3.setVisible(true);
-		smoke2.setVisible(false);
+		case 4: smokePlume.getChildAt(2).setVisible(true);
+		smokePlume.getChildAt(1).setVisible(false);
 		smokeCounter++;
 		break;
-		case 6: smoke4.setVisible(true);
-		smoke3.setVisible(false);
+		case 6: smokePlume.getChildAt(3).setVisible(true);
+		smokePlume.getChildAt(2).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 8: smoke5.setVisible(true);
-		smoke4.setVisible(false);
+		case 8: smokePlume.getChildAt(4).setVisible(true);
+		smokePlume.getChildAt(3).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 10: smoke6.setVisible(true);
-		smoke5.setVisible(false);
+		case 10: smokePlume.getChildAt(5).setVisible(true);
+		smokePlume.getChildAt(4).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 12: smoke7.setVisible(true);
-		smoke6.setVisible(false);
+		case 12: smokePlume.getChildAt(6).setVisible(true);
+		smokePlume.getChildAt(5).setVisible(false);
 		smokeCounter++;
 		break;
-		case 14: smoke8.setVisible(true);
-		smoke7.setVisible(false);
+		case 14: smokePlume.getChildAt(7).setVisible(true);
+		smokePlume.getChildAt(6).setVisible(false);
 		smokeCounter++;
 		break;
-		case 16: smoke9.setVisible(true);
-		smoke8.setVisible(false);
+		case 16: smokePlume.getChildAt(8).setVisible(true);
+		smokePlume.getChildAt(7).setVisible(false);
 		smokeCounter++;
 		break;
-		case 18: smoke10.setVisible(true);
-		smoke9.setVisible(false);
+		case 18: smokePlume.getChildAt(9).setVisible(true);
+		smokePlume.getChildAt(8).setVisible(false);
 		smokeCounter++;
 		break;
-		case 20: smoke11.setVisible(true);
-		smoke10.setVisible(false);
+		case 20: smokePlume.getChildAt(10).setVisible(true);
+		smokePlume.getChildAt(9).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 22: smoke12.setVisible(true);
-		smoke11.setVisible(false);
+		case 22: smokePlume.getChildAt(11).setVisible(true);
+		smokePlume.getChildAt(10).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 24: smoke13.setVisible(true);
-		smoke12.setVisible(false);
+		case 24: smokePlume.getChildAt(12).setVisible(true);
+		smokePlume.getChildAt(11).setVisible(false);
 		smokeCounter++;
 		break;
-		case 26: smoke14.setVisible(true);
-		smoke13.setVisible(false);
+		case 26: smokePlume.getChildAt(13).setVisible(true);
+		smokePlume.getChildAt(12).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 28: smoke15.setVisible(true);
-		smoke14.setVisible(false);
+		case 28: smokePlume.getChildAt(14).setVisible(true);
+		smokePlume.getChildAt(13).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 30: smoke16.setVisible(true);
-		smoke15.setVisible(false);
+		case 30: smokePlume.getChildAt(15).setVisible(true);
+		smokePlume.getChildAt(14).setVisible(false);
 		smokeCounter++;
 		break; 
-		case 32: smoke17.setVisible(true);
-		smoke16.setVisible(false);
+		case 32: smokePlume.getChildAt(16).setVisible(true);
+		smokePlume.getChildAt(15).setVisible(false);
 		smokeCounter++;
 		break;
-		case 34: smoke18.setVisible(true);
-		smoke17.setVisible(false);
+		case 34: smokePlume.getChildAt(17).setVisible(true);
+		smokePlume.getChildAt(16).setVisible(false);
 		smokeCounter++;
 		break;
-		case 36: smoke19.setVisible(true);
-		smoke18.setVisible(false);
+		case 36: smokePlume.getChildAt(18).setVisible(true);
+		smokePlume.getChildAt(17).setVisible(false);
 		smokeCounter++;
 		break;
-		case 38: smoke20.setVisible(true);
-		smoke19.setVisible(false);
+		case 38: smokePlume.getChildAt(19).setVisible(true);
+		smokePlume.getChildAt(18).setVisible(false);
 		smokeCounter = 0;
 		break;
 		default: smokeCounter++;
@@ -1829,8 +1607,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	   else if (me.getPointerCount()==2 && firstTouch) {
 		           double distance = Math.sqrt(((me.getX(1)-me.getX(0))*(me.getX(1)-me.getX(0)))+((me.getY(1)-me.getY(0))*(me.getY(1)-me.getY(0))));
 	    		   if (lastDistance == 0) lastDistance = distance;
-		           double delta = lastDistance - distance;
-		           cameraDolly(delta);
 		           lastDistance = distance;
 	    	   }
 	    	   xpos = me.getX(0);
@@ -1846,7 +1622,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	       }
 	}
 			
-	public Bitmap textAsBitmap(String text) {// For later usage
+	public Bitmap textAsBitmap(String text) {// For later usage TODO:Make sign with editable text
 	    Paint paint = new Paint();
 	    paint.setTextSize(16);
 	    paint.setColor(0x666666);
@@ -1859,14 +1635,5 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    Canvas canvas = new Canvas(image);
 	    canvas.drawText(text, 0, baseline, paint);
 	    return image;
-	}
-		
-	@SuppressWarnings("unused")
-	private void objSerializer(int resourceId, String outputName){ //example Resource ID --> R.raw.myShape_Obj
-		ObjParser objParser = new ObjParser(mContext.getResources(), mTextureManager, resourceId);
-		objParser.parse();
-		BaseObject3D serializer = objParser.getParsedObject();
-		MeshExporter exporter = new MeshExporter(serializer);
-		exporter.export(outputName, ExportType.SERIALIZED);	
 	}
 }

@@ -34,24 +34,28 @@
 <!--                 android:entryValues="@array/scene"/> -->
 			
         
-	    	<PreferenceScreen 
-				android:title="Evnironment Settings"
-				android:summary="Change the environment options">
+<!-- 	    	<PreferenceScreen  -->
+<!-- 				android:title="Evnironment Settings" -->
+<!-- 				android:summary="Change the environment options"> -->
 	
 				<CheckBoxPreference 
 				    android:key="waterfall_pref" 
 				    android:defaultValue="true" 
 				    android:title="Waterfall"/>
 	            <CheckBoxPreference 
-				    android:key="fairies_pref" 
-				    android:defaultValue="true" 
-				    android:title="Fairies"/>
-	            <CheckBoxPreference 
 				    android:key="birds_pref" 
 				    android:defaultValue="true" 
 				    android:title="Birds"/>
+	            <CheckBoxPreference 
+				    android:key="rainbow_pref" 
+				    android:defaultValue="true" 
+				    android:title="Rainbow and Gold"/>
+	            <CheckBoxPreference 
+				    android:key="flags_pref" 
+				    android:defaultValue="true" 
+				    android:title="Castle Flags"/>
 				
-			</PreferenceScreen>
+<!-- 			</PreferenceScreen> -->
 
 <!-- 		    <PreferenceScreen  -->
 <!-- 				android:title="Tree House Settings" -->

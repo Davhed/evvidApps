@@ -22,9 +22,9 @@
 
 package com.evvid.wallpapers.shamrocklane;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.StreamCorruptedException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -34,11 +34,9 @@ import com.evvid.wallpapers.shamrocklane.R;
 import rajawali.BaseObject3D;
 import rajawali.SerializedObject3D;
 import rajawali.renderer.RajawaliRenderer;
-import rajawali.util.MeshExporter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources.NotFoundException;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.preference.PreferenceManager;
@@ -47,14 +45,12 @@ import android.view.MotionEvent;
 import rajawali.animation.Animation3D;
 import rajawali.animation.Animation3DListener;
 import rajawali.animation.CatmullRomPath3D;
-import rajawali.animation.RotationAnimation3D;
 import rajawali.animation.ScaleAnimation3D;
 import rajawali.animation.TranslateAnimation3D;
 import rajawali.lights.PointLight;
-import rajawali.materials.DiffuseMaterial;
 import rajawali.materials.GouraudMaterial;
 import rajawali.materials.PhongMaterial;
-import rajawali.materials.SimpleMaterial;
+import rajawali.materials.SimpleAlphaMaterial;
 import rajawali.materials.TextureInfo;
 import rajawali.materials.TextureManager.TextureType;
 import rajawali.math.Number3D;
@@ -71,8 +67,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			waterCounter = 0,
 			flapCounter = 0, 
 			waterIndex = 0,
-			flameCounter = 0,
-			flameIndex = 0,
+//			flameCounter = 0,
+//			flameIndex = 0,
 			flagCounter = 0,
 			flagIndex = 0,
 			camSpeed = 100, 
@@ -82,6 +78,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			performance = 30;
 	
 	private Boolean 
+			amVisible = false,
 			sceneInit = false,
 			redrawScene = false,
 			moveCamera = false, 
@@ -89,23 +86,24 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			firstTouch = true, 
 			birdDone = true;
 
-	private PointLight pLight_ground, pLight_ground2, pLight_pot, pLight_branches, pLight_candle1, pLight_candle2, pLight_candle3;
-	
+	private PointLight pLight_main, pLight_main2, pLight_secondary, pLight_pot, pLight_branches;//, pLight_candle1, pLight_candle2, pLight_candle3;
+
 	//Exterior
-	
+
 	private BaseObject3D exterior, camLookNull, clouddome1, clouddome2, sun, castle, castletowers, ground, path, walls, gate, arch, stump, largestump, stumpdecal, lilys, water, branches,
-	mountain, waterfallrock, waterfall, splashes, stream, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3,
-	grass1, grass2, grass3, grass4, grass5, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies, flag1, flag2, flag3, flags;
+	mountain, waterfallrock, waterfall, splashes, stream, pot, gold, rbow1, rbow2, tree, door, rocks, shrooms, shamrocks, treeferns, pondferns, fgtrees, fgferns, vines1, vines2, vines3, tools,
+	grass1, grass2, grass3, grass4, grass5, flowers1, flowers2, flowers3, flowers4, flowers5, flowers6, dirt, shadows1, shadows2, bird, fairies, flag1, flag2, flag3, flags, garden, log;
 	private BaseObject3D[] waterTiles, waterfallTiles, streamTiles, splashTiles, splash2Tiles, splash3Tiles, branchTiles;
 
 	private TextureInfo sunInfo, sunAlphaInfo, clouddomeInfo, clouddomeAlphaInfo, doorGoldArchInfo, waterfallrockTextureInfo, wallStumpRockInfo, pathDirtCloverPlantsInfo, pathDirtCloverPlantsAlphaInfo,
-	potGateFernRainbowTextureInfo, potGateFernRainbowTextureAlphaInfo, castleBranchDirtInfo, castleBranchDirtAlphaInfo, treeInfo, treeBumpInfo, grassInfo, mountainAlphaInfo,
+	potGateFernRainbowTextureInfo, potGateFernRainbowTextureAlphaInfo, castleBranchDirtInfo, castleBranchDirtAlphaInfo, treeInfo, treeNormInfo, grassInfo, gardenBannerInfo, mountainAlphaInfo,
 	waterInfo, waterAlphaInfo, fairyInfo, fairyAlphaInfo;
 
-	private TextureInfo[] waterfallTex, birdTex, intCandleTex, flagTex;
+	private TextureInfo[] waterfallTex, birdTex, flagTex;//, intCandleTex;
 	
-	private BaseObject3D timerNull;
-	private RotationAnimation3D timer;
+//	private BaseObject3D timerNull;
+//	private RotationAnimation3D timer;
+	private Timer timer = new Timer();
 	
 	private CatmullRomPath3D[] birdPaths;
 		
@@ -129,7 +127,6 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	
 	public WallpaperRenderer(Context context) {
 		super(context);
-		setFrameRate(performance);
 		setFogEnabled(true);
 		setBackgroundColor(0x829ede);
     }
@@ -173,15 +170,25 @@ public class WallpaperRenderer extends RajawaliRenderer{
 				} 
 				else if ("waterfall_pref".equals(key))
 				{
-//TODO:					showFalls = sharedPreferences.getBoolean(key, true);
-				}
-				else if ("fairies_pref".equals(key))
-				{
-//TODO:					showFairies = sharedPreferences.getBoolean(key, true);
+					waterfall.setVisible(sharedPreferences.getBoolean(key, true));
+					stream.setVisible(sharedPreferences.getBoolean(key, true));
+					splashes.setVisible(sharedPreferences.getBoolean(key, true));
 				}
 				else if ("birds_pref".equals(key))
 				{
-//TODO:					showBirds = sharedPreferences.getBoolean(key, true);
+					birdDone = sharedPreferences.getBoolean(key, true);
+				}
+				else if ("rainbow_pref".equals(key))
+				{
+					rbow1.setVisible(sharedPreferences.getBoolean(key, true));
+					rbow2.setVisible(sharedPreferences.getBoolean(key, true));
+					pot.setVisible(sharedPreferences.getBoolean(key, true));
+					gold.setVisible(sharedPreferences.getBoolean(key, true));
+					fairies.setVisible(sharedPreferences.getBoolean(key, true));
+				}
+				else if ("flags_pref".equals(key))
+				{
+					flags.setVisible(sharedPreferences.getBoolean(key, true));
 				}
 				preferences = sharedPreferences;
 			}
@@ -191,7 +198,10 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	private void setPrefsToLocal(){ // This grabs the users previous, or the default if never previously set, preferences.
 		camSpeed = Integer.parseInt(preferences.getString("camSpeed_pref", "100"));
 		performance = Integer.parseInt(preferences.getString("performance_pref", "30"));
-//		scene = Integer.parseInt(preferences.getString("scene_pref", "0")); 
+//		scene = Integer.parseInt(preferences.getString("scene_pref", "0"));
+
+		birdDone = preferences.getBoolean("birds_pref", true);
+		setFrameRate(performance);
 	}
 
 	private void setScene(){// Used to select interior from exterior and flag the scene and initialized
@@ -213,6 +223,17 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			sceneInit = false;
 			setScene();
 		}
+		if(sceneInit){
+			waterfall.setVisible(preferences.getBoolean("waterfall_pref", true));
+			stream.setVisible(preferences.getBoolean("waterfall_pref", true));
+			splashes.setVisible(preferences.getBoolean("waterfall_pref", true));
+			rbow1.setVisible(preferences.getBoolean("rainbow_pref", true));
+			rbow2.setVisible(preferences.getBoolean("rainbow_pref", true));
+			pot.setVisible(preferences.getBoolean("rainbow_pref", true));
+			gold.setVisible(preferences.getBoolean("rainbow_pref", true));
+			fairies.setVisible(preferences.getBoolean("rainbow_pref", true));
+			flags.setVisible(preferences.getBoolean("flags_pref", true));
+		}
 	}	
 	
 	private void loadTextures(){ // Load all textures right away, and all at once, to compartmentalize the heavy work load. Make sure alpha textures are denoted with TextureType.ALPHA 
@@ -222,6 +243,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		sunAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.sun_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.sun), TextureType.ALPHA);
 		clouddomeInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.clouddome), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome));
 		clouddomeAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.clouddome_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.clouddome), TextureType.ALPHA);
+		gardenBannerInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.mountain_tex), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mountain));
 		mountainAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.mountain_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mountain), TextureType.ALPHA);
 		doorGoldArchInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.door_gold_arch), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.door_gold_arch));
 		waterfallrockTextureInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.waterfallrock_mushroom), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.waterfallrock_mushroom));
@@ -234,13 +256,13 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		potGateFernRainbowTextureAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.pot_gate_fern_rainbow_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.pot_gate_fern_rainbow), TextureType.ALPHA);
 		grassInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.grass), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.grass));
 		treeInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree));
-		treeBumpInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree_norm), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree_norm), TextureType.BUMP);
+		treeNormInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.btree_norm), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.btree_norm), TextureType.BUMP);;
 		waterInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas));
 		waterAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.wateratlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.wateratlas), TextureType.ALPHA);
 		fairyInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.fairy_tex), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fairy_tex));
 		fairyAlphaInfo = mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.fairy_tex_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.fairy_tex), TextureType.ALPHA);
 		
-		birdTex = new TextureInfo[8]; //Arrays are used to store image sequences. If they have alpha they need to be double sized
+		birdTex = new TextureInfo[8]; //Arrays are used to store image sequences. If they have alpha they need to be double sized arrays
 		for(int i = 0; i <  birdTex.length/2; i++){ // so I divide the length by 2 in the for loop
     		int etc = mContext.getResources().getIdentifier("bird_0" + (i), "raw", "com.evvid.wallpapers.shamrocklane"); // get image bird_0(i)
     		int alph = mContext.getResources().getIdentifier("bird_0" + (i) + "_alpha", "raw", "com.evvid.wallpapers.shamrocklane");
@@ -290,15 +312,20 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	}
 
 	private void loadExterior(){
-		pLight_ground = new PointLight(); // Setting lights here because there is a different light rig for exterior/interior 
-		pLight_ground.setPosition(6.5f, 7, 15);
-		pLight_ground.setPower(2f);
-		pLight_ground.setAttenuation(50, 1, 0, 0);
+		pLight_main = new PointLight(); // Setting lights here because there is a different light rig for exterior/interior 
+		pLight_main.setPosition(6.5f, 7, 15);
+		pLight_main.setPower(2f);
+		pLight_main.setAttenuation(50, 1, 0, 0);
 			
-		pLight_ground2 = new PointLight();
-		pLight_ground2.setPosition(200, 50, -150);
-		pLight_ground2.setPower(3.25f);
-		pLight_ground2.setAttenuation(50, 1, 0, 0);
+		pLight_secondary = new PointLight();  
+		pLight_secondary.setPosition(6.5f, 7, 15);
+		pLight_secondary.setPower(2f);
+		pLight_secondary.setAttenuation(50, 1, 0, 0);
+			
+		pLight_main2 = new PointLight();
+		pLight_main2.setPosition(200, 50, -150);
+		pLight_main2.setPower(4.25f);
+		pLight_main2.setAttenuation(50, 1, 0, 0);
 		
 		pLight_branches = new PointLight();
 		pLight_branches.setPosition(-14.86f, 5, 9.7f);
@@ -308,70 +335,69 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		pLight_pot.setPosition(-10f, 15, 19f);
 		pLight_pot.setPower(20f);
 		
-		
 		///////////////
 		//Create Materials
 		///////////////
 		
-		SimpleMaterial sunMat = new SimpleMaterial(); //Create materials and add textures to them. I like this is better than adding the texture to the object later on.
+		SimpleAlphaMaterial sunMat = new SimpleAlphaMaterial(); //Create materials and add textures to them. I like this is better than adding the texture to the object later on.
 			sunMat.addTexture(sunInfo);
 			sunMat.addTexture(sunAlphaInfo);
 
-		SimpleMaterial clouddomeMat = new SimpleMaterial();
+		SimpleAlphaMaterial clouddomeMat = new SimpleAlphaMaterial();
 			clouddomeMat.addTexture(clouddomeInfo);
 			clouddomeMat.addTexture(clouddomeAlphaInfo);
 
-		DiffuseMaterial mountainMat = new DiffuseMaterial();
-			mountainMat.addTexture(mountainAlphaInfo);
+		SimpleAlphaMaterial gardenMat = new SimpleAlphaMaterial();
+			gardenMat.addTexture(gardenBannerInfo);
+			gardenMat.addTexture(mountainAlphaInfo);
 
-		SimpleMaterial doorArchMat = new SimpleMaterial();
+		SimpleAlphaMaterial doorArchMat = new SimpleAlphaMaterial();
 			doorArchMat.addTexture(doorGoldArchInfo);
 
-		SimpleMaterial waterfallrockMat = new SimpleMaterial();
+		SimpleAlphaMaterial waterfallrockMat = new SimpleAlphaMaterial();
 			waterfallrockMat.addTexture(waterfallrockTextureInfo);
 		
-		SimpleMaterial wallMat = new SimpleMaterial();
+		SimpleAlphaMaterial wallMat = new SimpleAlphaMaterial();
 			wallMat.addTexture(wallStumpRockInfo);
 		
-		SimpleMaterial castleDirtMat = new SimpleMaterial();
+		SimpleAlphaMaterial castleDirtMat = new SimpleAlphaMaterial();
 			castleDirtMat.addTexture(castleBranchDirtInfo);
 			castleDirtMat.addTexture(castleBranchDirtAlphaInfo);
 
-		SimpleMaterial pathDirtCloverPlantsMat = new SimpleMaterial();
+		SimpleAlphaMaterial pathDirtCloverPlantsMat = new SimpleAlphaMaterial();
 			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsInfo);
 			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsAlphaInfo);
 
-		SimpleMaterial gateFernRainbowMat = new SimpleMaterial();
+		SimpleAlphaMaterial gateFernRainbowMat = new SimpleAlphaMaterial();
 			gateFernRainbowMat.addTexture(potGateFernRainbowTextureInfo);
 			gateFernRainbowMat.addTexture(potGateFernRainbowTextureAlphaInfo);
-		
-		PhongMaterial shroomMat = new PhongMaterial();
-			shroomMat.setShininess(70.0f);
-			shroomMat.addTexture(waterfallrockTextureInfo);
 
 		SimpleGlowMaterial goldMat = new SimpleGlowMaterial();
 			goldMat.addTexture(doorGoldArchInfo);
-
-		PhongMaterial potMat = new PhongMaterial();
-			potMat.setShininess(92.3f);
-			potMat.addTexture(potGateFernRainbowTextureInfo);
-
-		PhongMaterial treeMat = new PhongMaterial();
-			treeMat.setShininess(100.0f);
-			treeMat.addTexture(treeInfo);
-		
-		PhongMaterial grassMat = new PhongMaterial();
-			grassMat.setShininess(100.0f);
-			grassMat.addTexture(grassInfo);
-		
+			
 		PhongMaterial stumpRockMat = new PhongMaterial();
 			stumpRockMat.setShininess(80.0f);
 			stumpRockMat.addTexture(wallStumpRockInfo);
-			
-		DiffuseMaterial bigtreeMat = new DiffuseMaterial();
-			bigtreeMat.addTexture(treeInfo);
-			bigtreeMat.addTexture(treeBumpInfo);
+				
+		PhongMaterial shroomMat = new PhongMaterial();
+			shroomMat.addTexture(waterfallrockTextureInfo);
 
+		PhongMaterial potMat = new PhongMaterial();
+			potMat.addTexture(potGateFernRainbowTextureInfo);
+			
+		GouraudMaterial grassMat = new GouraudMaterial();
+			grassMat.setSpecularIntensity(0,0,0,0);
+			grassMat.addTexture(grassInfo);
+
+		DiffuseSmartMaterial mountainMat = new DiffuseSmartMaterial();
+			mountainMat.addTexture(mountainAlphaInfo);
+
+		DiffuseSmartMaterial treeMat = new DiffuseSmartMaterial();
+			treeMat.addTexture(treeInfo);
+			
+		DiffuseSmartMaterial bigtreeMat = new DiffuseSmartMaterial();
+			bigtreeMat.addTexture(treeInfo);
+			bigtreeMat.addTexture(treeNormInfo);
 
 		///////////////
 		// Create Objects
@@ -387,8 +413,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	clouddome1.setBlendingEnabled(true);
 	    	clouddome1.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA); //Standard alpha blend for non PNG images
 
-	    	clouddome2 = clouddome1.clone(false); // clone works best when 'copyMaterial(false)` so I just re-apply a material after clone. I don't think there's any performance hit for doing this.
-	    	clouddome2.setMaterial(clouddomeMat);
+	    	clouddome2 = clouddome1.clone(); 
 	    	clouddome2.setPosition(0, 10, 0);
 	    	clouddome2.setRotY(185);
 	    	clouddome2.setScale(.50f);
@@ -424,15 +449,27 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.ground));
 	    	ground = new BaseObject3D((SerializedObject3D)ois.readObject());
 			ground.setMaterial(grassMat);
-			ground.addLight(pLight_ground);
-			ground.addLight(pLight_ground2);
+			ground.addLight(pLight_main);
+			ground.addLight(pLight_main2);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.dirt));
 	    	dirt = new BaseObject3D((SerializedObject3D)ois.readObject());
 			dirt.setMaterial(castleDirtMat);
-			dirt.setY(.1f);
+//			dirt.setY(.1f);
 			dirt.setBlendingEnabled(true);
 			dirt.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+					
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.tools));
+	    	tools = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	tools.setMaterial(gardenMat);
+	    	tools.setDoubleSided(true);
+					
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.gardendirt));
+	    	garden = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	garden.setMaterial(gardenMat);
+	    	garden.setDoubleSided(true);
+	    	garden.setBlendingEnabled(true);
+			garden.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.shadows1));
 	    	shadows1 = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -458,7 +495,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			lilys.setBlendingEnabled(true);
 			lilys.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			lilys.setY(.1f);
-
+		
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.flowers1));
 	    	flowers1 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			flowers1.setMaterial(pathDirtCloverPlantsMat);
@@ -508,15 +545,15 @@ public class WallpaperRenderer extends RajawaliRenderer{
 			vines1.setBlendingEnabled(true);
 			vines1.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.vines2));
-	    	vines2 = new BaseObject3D((SerializedObject3D)ois.readObject());
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.vines2));
+			vines2 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			vines2.setMaterial(pathDirtCloverPlantsMat);
 			vines2.setDoubleSided(true);
 			vines2.setBlendingEnabled(true);
 			vines2.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.vines3));
-	    	vines3 = new BaseObject3D((SerializedObject3D)ois.readObject());
+			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.vines3));
+			vines3 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			vines3.setMaterial(pathDirtCloverPlantsMat);
 			vines3.setDoubleSided(true);
 			vines3.setBlendingEnabled(true);
@@ -540,36 +577,41 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.stump));
 	    	stump = new BaseObject3D((SerializedObject3D)ois.readObject());
 			stump.setMaterial(stumpRockMat);
-			stump.addLight(pLight_ground);
+			stump.addLight(pLight_main);
 			
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.stumpdecal));
 	    	stumpdecal = new BaseObject3D((SerializedObject3D)ois.readObject());
 			stumpdecal.setMaterial(pathDirtCloverPlantsMat);
 			stumpdecal.setBlendingEnabled(true);
 			stumpdecal.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-			stumpdecal.setY(.15f);
 			
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.largestump));
 	    	largestump = new BaseObject3D((SerializedObject3D)ois.readObject());
 			largestump.setMaterial(bigtreeMat);
-			largestump.addLight(pLight_ground);
+			largestump.addLight(pLight_main);
+
+	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.log));
+	    	log = new BaseObject3D((SerializedObject3D)ois.readObject());
+	    	log.setPosition(-.5f, -.25f, .8f);
+	    	log.setMaterial(bigtreeMat);
+	    	log.addLight(pLight_secondary);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.waterfall));
 	    	waterfallrock = new BaseObject3D((SerializedObject3D)ois.readObject());
 			waterfallrock.setMaterial(waterfallrockMat);
-			waterfallrock.addLight(pLight_ground);
+			waterfallrock.addLight(pLight_main);
 
 			ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.pot));
 			pot = new BaseObject3D((SerializedObject3D)ois.readObject());
 			pot.setMaterial(potMat);
 			pot.setDoubleSided(true);
 			pot.addLight(pLight_pot);
-
+		
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.gold));
 	    	gold = new BaseObject3D((SerializedObject3D)ois.readObject());
 			gold.setMaterial(goldMat);
 			gold.setDoubleSided(true);
-			gold.addLight(pLight_ground);
+			gold.addLight(pLight_main);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.rbow1));
 	    	rbow1 = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -588,22 +630,22 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.tree));
 	    	tree = new BaseObject3D((SerializedObject3D)ois.readObject());
 			tree.setMaterial(bigtreeMat);
-			tree.addLight(pLight_ground);
+			tree.addLight(pLight_secondary);
 			
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.door));
 	    	door = new BaseObject3D((SerializedObject3D)ois.readObject());
 			door.setMaterial(doorArchMat);
-			door.addLight(pLight_ground);
+			door.addLight(pLight_main);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.rocks));
 	    	rocks = new BaseObject3D((SerializedObject3D)ois.readObject());
 			rocks.setMaterial(stumpRockMat);
-			rocks.addLight(pLight_ground);
+			rocks.addLight(pLight_secondary);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.shrooms));
 	    	shrooms = new BaseObject3D((SerializedObject3D)ois.readObject());
 			shrooms.setMaterial(shroomMat);
-			shrooms.addLight(pLight_ground);
+			shrooms.addLight(pLight_secondary);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.treeferns));
 	    	treeferns = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -647,13 +689,13 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	grass5 = new BaseObject3D((SerializedObject3D)ois.readObject());
 			grass5.setMaterial(pathDirtCloverPlantsMat);
 			grass5.setBlendingEnabled(true);
-			grass5.setPosition(.2f, .2f, .2f);
+			grass5.setPosition(.2f, 0, .2f);
 			grass5.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.fgtrees));
 	    	fgtrees = new BaseObject3D((SerializedObject3D)ois.readObject());
 			fgtrees.setMaterial(treeMat);
-			fgtrees.addLight(pLight_ground);
+			fgtrees.addLight(pLight_main);
 
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.fgferns));
 	    	fgferns = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -693,38 +735,38 @@ public class WallpaperRenderer extends RajawaliRenderer{
 //		///////////////
 //		// Create Materials
 //		///////////////
-//		SimpleMaterial intAlphaMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intAlphaMat = new SimpleAlphaMaterial();
 //			intAlphaMat.addTexture(intAlphaInfo);
 //			intAlphaMat.addTexture(intAlphaAlphaInfo);
 //		
-//		DiffuseMaterial intWallsMat = new DiffuseMaterial();
+//		DiffuseSmartMaterial intWallsMat = new DiffuseSmartMaterial();
 //			intWallsMat.addTexture(intWallsinfo);
 //	
-//		SimpleMaterial intFloorMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intFloorMat = new SimpleAlphaMaterial();
 //			intFloorMat.addTexture(intFloorInfo);
 //	
-//		SimpleMaterial intDoorStoveMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intDoorStoveMat = new SimpleAlphaMaterial();
 //			intDoorStoveMat.addTexture(intDoorStoveInfo);
 //	
-//		SimpleMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleAlphaMaterial();
 //			intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(intArchShelfOBookStepWsCandleBannerPoleInfo);
 //		
-//		SimpleMaterial intBoardMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intBoardMat = new SimpleAlphaMaterial();
 //			intBoardMat.addTexture(intHatStandBoardShoebuckleInfo);
 //			
-//		SimpleMaterial intHatStandMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intHatStandMat = new SimpleAlphaMaterial();
 //			intHatStandMat.addTexture(intHatStandBoardShoebuckleInfo);
 //			
 //		PhongMaterial intShoebuckleMat = new PhongMaterial();
 //			intShoebuckleMat.addTexture(intHatStandBoardShoebuckleInfo);
 //		
-//		SimpleMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleAlphaMaterial();
 //			intLogTablesRunnerMugPipeCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
 //	
 //		SimpleGlowMaterial intCoinMat = new SimpleGlowMaterial();
 //			intCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
 //	
-//		SimpleMaterial intChairsBookcaseBooksMat = new SimpleMaterial();
+//		SimpleAlphaMaterial intChairsBookcaseBooksMat = new SimpleAlphaMaterial();
 //			intChairsBookcaseBooksMat.addTexture(intChairsBookcaseBooksInfo);
 //		
 //		PhongMaterial vaseMat = new PhongMaterial();
@@ -948,7 +990,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		
 		for(int i = 0; i <  birdTex.length/2; i++){//I am using the 1/2 length of the texture array to figure out how many frames to add to the object
 			Plane birdFrame = new Plane(1,1,1,1,1);		
-			birdFrame.setMaterial(new SimpleMaterial());
+			birdFrame.setMaterial(new SimpleAlphaMaterial());
 			birdFrame.addTexture(birdTex[2*i]);//add diffuse
 			birdFrame.addTexture(birdTex[2*i+1]);//add alpha
 			birdFrame.setDoubleSided(true);
@@ -998,7 +1040,7 @@ private void createFlags(){
 	
 	for(int i = 0; i <  flagTex.length/2; i++){
 		Plane flagFrame = new Plane(3,3,1,1,1, true);		
-		flagFrame.setMaterial(new SimpleMaterial());
+		flagFrame.setMaterial(new SimpleAlphaMaterial());
 		flagFrame.addTexture(flagTex[2*i]);
 		flagFrame.addTexture(flagTex[2*i+1]);
 		flagFrame.setDoubleSided(true);
@@ -1028,7 +1070,7 @@ private void createFlags(){
 //	
 //	for(int i = 0; i <  intCandleTex.length/2; i++){
 //		Plane flameFrame = new Plane(1,1,1,1,1, true);		
-//		flameFrame.setMaterial(new SimpleMaterial());
+//		flameFrame.setMaterial(new SimpleAlphaMaterial());
 //		flameFrame.addTexture(intCandleTex[2*i]);
 //		flameFrame.addTexture(intCandleTex[2*i+1]);
 //		flameFrame.setDoubleSided(true);
@@ -1050,7 +1092,7 @@ private void createFlags(){
 		float tileWidth  = .25f;//this is 1 divided by the number of rows your sprite sheet has
 		water = new BaseObject3D(); //empty container
 		waterTiles = new BaseObject3D [16]; //Texture tile array
-		SimpleMaterial waterMat = new SimpleMaterial();
+		SimpleAlphaMaterial waterMat = new SimpleAlphaMaterial();
 		waterMat.addTexture(waterInfo);//add the full sprite sheet
 		waterMat.addTexture(waterAlphaInfo);//and alpha
 		
@@ -1078,7 +1120,7 @@ private void createFlags(){
 			water.addChild(waterTiles[i]);//add to container
     	}
 		
-		// the stream uses an image sequence, but it applys the textures to a loaded object rather than a procedural one.
+		// the stream uses an image sequence, but it applies the textures to a loaded object rather than a procedural one.
 		stream = new BaseObject3D();//empty container for the stream
 		streamTiles = new BaseObject3D [16];//texture array
 		BaseObject3D streamsprite = new BaseObject3D(); //this will be the sprite
@@ -1091,11 +1133,11 @@ private void createFlags(){
 		}
 
 		for(int i = 0; i <  streamTiles.length; i++){
-			streamTiles[i] = streamsprite.clone();
-			streamTiles[i].setMaterial(new SimpleMaterial());
+			streamTiles[i] = streamsprite.clone(false);
+			streamTiles[i].setMaterial(new SimpleAlphaMaterial());
 			streamTiles[i].addTexture(waterfallTex[2*i]);
 			streamTiles[i].addTexture(waterfallTex[2*i+1]);
-			streamTiles[i].addLight(pLight_ground);
+			streamTiles[i].addLight(pLight_main);
 			streamTiles[i].setDoubleSided(true);
 			streamTiles[i].setBlendingEnabled(true);
 			streamTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
@@ -1104,7 +1146,7 @@ private void createFlags(){
 		}
 		water.addChild(stream);
 		
-		//Water fall is the same as the stream with differnet geometry
+		//Water fall is the same as the stream with different geometry
 		waterfall = new BaseObject3D();
 		BaseObject3D waterfallsprite = new BaseObject3D();
     	try {
@@ -1118,8 +1160,8 @@ private void createFlags(){
 		waterfallTiles = new BaseObject3D [16];
 		
 		for(int i = 0; i <  waterfallTiles.length; i++){
-			waterfallTiles[i] = waterfallsprite.clone();
-			waterfallTiles[i].setMaterial(new SimpleMaterial());
+			waterfallTiles[i] = waterfallsprite.clone(false);
+			waterfallTiles[i].setMaterial(new SimpleAlphaMaterial());
 			waterfallTiles[i].addTexture(waterfallTex[2*i]);
 			waterfallTiles[i].addTexture(waterfallTex[2*i+1]);
 			waterfallTiles[i].setDoubleSided(true);
@@ -1143,7 +1185,7 @@ private void createFlags(){
 		splash2Tiles = new BaseObject3D [32];
 		splash3Tiles = new BaseObject3D [32];
 		
-		SimpleMaterial splashMat = new SimpleMaterial();
+		SimpleAlphaMaterial splashMat = new SimpleAlphaMaterial();
 		splashMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.DIFFUSE));
 		splashMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.ALPHA));
 		
@@ -1196,10 +1238,10 @@ private void createFlags(){
 
 	private void createFairies(){//Fairies are created with random positions within a container object
 		fairies = new BaseObject3D();
-		fairies.setPosition(-6, -.25f, 19.5f);
+		fairies.setPosition(-6.1f, -.25f, 19.4f);
 		int numChildren = 16; //the number of fairies is sort of variable, but you have to modify `fairyMovement()` as well
 
-		SimpleMaterial fairyMat = new SimpleMaterial();
+		SimpleAlphaMaterial fairyMat = new SimpleAlphaMaterial();
 		fairyMat.addTexture(fairyInfo);
 		fairyMat.addTexture(fairyAlphaInfo);
 		
@@ -1224,10 +1266,10 @@ private void createFlags(){
 			branchTiles[i] = new TexturedPlane(10, 10, 1, 1, 1, uvCoords);
 			branchTiles[i].setDoubleSided(true); //disable backface culling because we might see both sides of the branches
 			branchTiles[i].setBlendingEnabled(true); 
-			branchTiles[i].addLight(pLight_ground);
+			branchTiles[i].addLight(pLight_main);
 			branchTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			if(i > 0)branchTiles[i].setLookAt(new Number3D(-19, 3, 37)); // Point most branches at initial camera position
-			branchTiles[i].setMaterial(new SimpleMaterial());
+			branchTiles[i].setMaterial(new SimpleAlphaMaterial());
 			branchTiles[i].addTexture(castleBranchDirtInfo);
 			branchTiles[i].addTexture(castleBranchDirtAlphaInfo);
 			branchTiles[i].addLight(pLight_branches);
@@ -1286,8 +1328,8 @@ private void createFlags(){
 		branches.addChild(branchTiles[14]);
 	}
 	
-	private void createClovers(){//Only one clover is loaded. It is then cloned and and positioned
-		int cloverCount = 10;
+	private void createClovers(){ //Only one clover is loaded. It is then cloned and and positioned
+		int cloverCount = 11;
 		shamrocks = new BaseObject3D();
 		BaseObject3D shamrock = new BaseObject3D();
 		
@@ -1299,30 +1341,34 @@ private void createFlags(){
 			e.printStackTrace();
 		}
 
-		SimpleMaterial cloverMat = new SimpleMaterial();
+		SimpleAlphaMaterial cloverMat = new SimpleAlphaMaterial();
 		cloverMat.addTexture(pathDirtCloverPlantsInfo);
 		cloverMat.addTexture(pathDirtCloverPlantsAlphaInfo);
+		shamrock.setMaterial(cloverMat);
 
 		for(int i = 0; i < cloverCount; i++){
-			BaseObject3D clover = shamrock.clone(false);
-			clover.setMaterial(cloverMat);
+			BaseObject3D clover = shamrock.clone();
+			if(i > 0) clover.setManageMaterial(true);
 			clover.setBlendingEnabled(true);
 			clover.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			clover.setRotY((float) (Math.random()*60));
-			clover.setScale((float) (Math.max(Math.random()+.5f,1)));
+			clover.setScale((float) (Math.max(Math.random()+.125f,.35f)));
 			shamrocks.addChild(clover);
 		}
 
-		shamrocks.getChildAt(0).setPosition(-7.8f, -2.1f, -3.2f);
-		shamrocks.getChildAt(1).setPosition(-8.15f, -2.5f, -1.6f);
-		shamrocks.getChildAt(2).setPosition(-8.25f, -2.38f, 0.3f);
-		shamrocks.getChildAt(3).setPosition(-5.25f, -2.9f, -3.9f);
-		shamrocks.getChildAt(4).setPosition(-5.6f, -2.8f, -2.35f);
-		shamrocks.getChildAt(5).setPosition(-5.7f, -2.75f, -0.4f);
-		shamrocks.getChildAt(6).setPosition(-6.2f, -2.6f, 1.2f);
-		shamrocks.getChildAt(7).setPosition(-3f, -2.9f, -1.19f);
-		shamrocks.getChildAt(8).setPosition(-3.35f, -2.9f, -0.3f);
-		shamrocks.getChildAt(9).setPosition(-3.8f, -2.8f, 2.33f);
+		shamrocks.getChildAt(0).setPosition(-7.8f, -2.1f, -1.2f);
+		shamrocks.getChildAt(1).setPosition(-8.15f, -2.5f, .3f);
+		shamrocks.getChildAt(2).setPosition(-8.25f, -2.38f, 2.4f);
+		shamrocks.getChildAt(3).setPosition(-8.35f, -2.18f, 3.1f);
+		
+		shamrocks.getChildAt(4).setPosition(-5.25f, -2.9f, -3.9f);
+		shamrocks.getChildAt(5).setPosition(-5.6f, -2.8f, -2.35f);
+		shamrocks.getChildAt(6).setPosition(-5.7f, -2.75f, -0.4f);
+		shamrocks.getChildAt(7).setPosition(-6.2f, -2.6f, 1.2f);
+		shamrocks.getChildAt(8).setPosition(-6.5f, -2.5f, 2.8f);
+
+		shamrocks.getChildAt(9).setPosition(-3.35f, -2.9f, -0.3f);
+		shamrocks.getChildAt(10).setPosition(-3.8f, -2.8f, 2.33f);
 	}
 	
 	private void addObjects(){ //Add object to scene. I made this function because it makes fixing layer ordering issues much easier
@@ -1341,11 +1387,13 @@ private void createFlags(){
 		exterior.addChild(walls);
 		exterior.addChild(arch);
 		exterior.addChild(largestump);
+		exterior.addChild(log);
 		exterior.addChild(stump);
 		exterior.addChild(door);
 		exterior.addChild(pot);		
 		exterior.addChild(gold);
-		//Load transparent image - order matters
+		exterior.addChild(tools);
+		//Load transparent images - order matters
 		exterior.addChild(clouddome1);
 		exterior.addChild(sun);
 		exterior.addChild(mountain);
@@ -1354,12 +1402,13 @@ private void createFlags(){
 		exterior.addChild(castletowers);
 		exterior.addChild(castle);
 		exterior.addChild(flags);
+		exterior.addChild(garden);
 		exterior.addChild(path);
 		exterior.addChild(bird);
 		exterior.addChild(dirt);
 		exterior.addChild(shadows1);
-		exterior.addChild(shadows2);
 		exterior.addChild(water);
+		exterior.addChild(shadows2);
 		exterior.addChild(lilys);
 		exterior.addChild(gate);
 		exterior.addChild(stumpdecal);
@@ -1448,30 +1497,27 @@ private void createFlags(){
 		super.onSurfaceCreated(gl, config);
 		PreferenceManager.setDefaultValues(mContext, R.xml.settings, true);//Set the stored preference defaults to the preference manager
 		preferences.registerOnSharedPreferenceChangeListener(mListener);//Start our preference listener
-        if(timer != null)timer.start();//if timer animation is available, start it
 	}
 
 	@Override
 	public void onSurfaceDestroyed() {
-		super.onSurfaceDestroyed();
-		preferences.unregisterOnSharedPreferenceChangeListener(mListener); //Stop our preference listener
 		try {
+			sceneInit = false;
+			super.onSurfaceDestroyed();
 			timer.cancel(); // cancel the timer animation
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+		preferences.unregisterOnSharedPreferenceChangeListener(mListener); //Stop our preference listener
 		System.gc(); // force garbage collection to clean up all memory used by this instance cause we've got nothing left to lose!
 	}
 	
 	@Override
     public void onVisibilityChanged(boolean visible) {//Here we start/stop our infinite timer on visibility change. 
         super.onVisibilityChanged(visible);
-        if(!visible)
-        {
-            if(timer != null)timer.cancel();
-        }else if(visible){
-            if(timer != null)timer.start();
-        }
+    	amVisible = visible;
+    	if(amVisible)
+    		initTimer();
     }
 
 	@Override
@@ -1480,7 +1526,7 @@ private void createFlags(){
 		checkScene();
 		if(sceneInit && !redrawScene){
 			if(scene == 0){
-				if(Math.random() > .25f && totalCount % 300 == 0 && birdDone) //Every 5 seconds there is a 75% chance that the bird will start moving, as long as it is not moving already
+				if(Math.random() > .5f && totalCount % 300 == 0 && birdDone) //Every 5 seconds there is a ~50% chance that the bird will start moving, as long as it is not moving already
 					birdMovement();
 				fairyMovement();
 			}else if (scene == 1){
@@ -1527,30 +1573,16 @@ private void createFlags(){
 	///////////////
 	/////Animation and Conditionals
 	///////////////
-	private void initTimer() {//HACK: This animation is just used as a timer for customized animations. There's a better way I just have to learn it
-		timerNull = new BaseObject3D();
-
-		timer = new RotationAnimation3D(0, 1, 0);
-		timer.setDuration(1000);
-		timer.setRepeatCount(Animation3D.INFINITE);
-		timer.setRepeatMode(Animation3D.RESTART);
-		timer.setTransformable3D(timerNull);
-		timer.setAnimationListener(new Animation3DListener(){
-
-			public void onAnimationEnd(Animation3D anim) {
+	
+	private void initTimer(){
+		TimerTask tTask = new TimerTask() {
+			public void run() {
+				onTimerTick();//This is called on each update, so simulates `onDrawFrame` while being clock based
+				if (amVisible == false)
+					this.cancel();
 			}
-
-			public void onAnimationRepeat(Animation3D anim) {				
-			}
-
-			public void onAnimationStart(Animation3D anim) {
-			}
-
-			public void onAnimationUpdate(Animation3D animation, float interpolatedTime) {
-				onTimerTick();//This is called on each animation update, so simulates `onDrawFrame` while being clock based
-			}
-		});
-		timer.start();
+		};
+		timer.schedule(tTask, 10, 10); //10ms delay after the scene was created, 10ms delay there after
 	}
 
 	private void onTimerTick() {//Custom animation fired from here
@@ -1566,7 +1598,7 @@ private void createFlags(){
 			}
 		}
 	}
-	
+ 	
 	private void skyMovement(){ //Spin the sun and rotate the clouds
 		sun.setRotation(sun.getRotX()-.05f, 90, 5);
 		clouddome1.setRotY(clouddome1.getRotY()-.004f);
@@ -1629,7 +1661,7 @@ private void createFlags(){
 
 	private void flagMovement(){ // Hide/Show animation for the flags
 		int speed = 10;
-		if(flagCounter%speed == 0) {
+		if(flagCounter%speed == 0 && flag1 != null) {
 	    	flag1.getChildAt(flagIndex).setVisible(true);
 	    	flag2.getChildAt(flagIndex).setVisible(true);
 	    	flag3.getChildAt(flagIndex).setVisible(true);
@@ -1651,50 +1683,52 @@ private void createFlags(){
 	}
 
 	private void fairyMovement(){//This blinks and moves the fairies
-		if (fairyTimer == 10) {//Each fairy has some random chance of firing each time. Gives a nice randomized effect but makes it a bit unflexible and requires manual updates to increase fairy count
-			if(Math.random() > .33) blink(fairies.getChildAt(0));
-			if(Math.random() > .5) blink(fairies.getChildAt(4));
-			if(Math.random() > .7) blink(fairies.getChildAt(8));
-			if(Math.random() > .9) blink(fairies.getChildAt(12));
-		}
-		else if (fairyTimer == 20) {
-			if(Math.random() > .33) blink(fairies.getChildAt(1));
-			if(Math.random() > .5) blink(fairies.getChildAt(5));
-			if(Math.random() > .7) blink(fairies.getChildAt(9));
-			if(Math.random() > .9) blink(fairies.getChildAt(13));
-		}
-		else if (fairyTimer == 30) {
-			if(Math.random() > .33)  blink(fairies.getChildAt(2));
-			if(Math.random() > .5) blink(fairies.getChildAt(6));
-			if(Math.random() > .7) blink(fairies.getChildAt(10));
-			if(Math.random() > .9) blink(fairies.getChildAt(14));
-		}
-		else if (fairyTimer == 40) {
-			if(Math.random() > .33)  blink(fairies.getChildAt(3));
-			if(Math.random() > .5) blink(fairies.getChildAt(7));
-			if(Math.random() > .7) blink(fairies.getChildAt(11));
-			if(Math.random() > .9) blink(fairies.getChildAt(15));
-			fairyTimer = 0;
-		}
-		fairyTimer++;
-
-		for(int i = 0; i < fairies.getNumChildren(); ++i){// Move the fairies around in random wave patterns. No real genius went into this math, so it could be doing bad things
-			BaseObject3D objPointer = fairies.getChildAt(i);
-			
-			float theta = (float) (totalCount*.005);
-			float constant = .001f * i;
-			
-			objPointer.setPosition(
-					(float) (objPointer.getX()+(Math.sin(theta)*(Math.random()*constant))), 
-					(float) (objPointer.getY()+(Math.cos(theta)*(Math.random()*constant))), 
-					(float) (objPointer.getZ()+(Math.sin(theta)*(Math.random()*constant)))
-					);
-			objPointer.setLookAt(mCamera.getPosition());// After the sprite is moved make sure it's facing the camera
+		if(fairies != null){
+			if (fairyTimer == 10) {//Each fairy has some random chance of firing each time. Gives a nice randomized effect but makes it a bit unflexible and requires manual updates to increase fairy count
+				if(Math.random() > .6) blink(fairies.getChildAt(0));
+				if(Math.random() > .7) blink(fairies.getChildAt(4));
+				if(Math.random() > .8) blink(fairies.getChildAt(8));
+				if(Math.random() > .9) blink(fairies.getChildAt(12));
+			}
+			else if (fairyTimer == 20) {
+				if(Math.random() > .6) blink(fairies.getChildAt(1));
+				if(Math.random() > .7) blink(fairies.getChildAt(5));
+				if(Math.random() > .8) blink(fairies.getChildAt(9));
+				if(Math.random() > .9) blink(fairies.getChildAt(13));
+			}
+			else if (fairyTimer == 30) {
+				if(Math.random() > .6)  blink(fairies.getChildAt(2));
+				if(Math.random() > .7) blink(fairies.getChildAt(6));
+				if(Math.random() > .8) blink(fairies.getChildAt(10));
+				if(Math.random() > .9) blink(fairies.getChildAt(14));
+			}
+			else if (fairyTimer == 40) {
+				if(Math.random() > .6)  blink(fairies.getChildAt(3));
+				if(Math.random() > .7) blink(fairies.getChildAt(7));
+				if(Math.random() > .8) blink(fairies.getChildAt(11));
+				if(Math.random() > .9) blink(fairies.getChildAt(15));
+				fairyTimer = 0;
+			}
+			fairyTimer++;
+	
+			for(int i = 0; i < fairies.getNumChildren(); ++i){// Move the fairies around in random wave patterns. No real genius went into this math, so it could be doing bad things
+				BaseObject3D objPointer = fairies.getChildAt(i);
+				
+				float theta = (float) (totalCount*.005);
+				float constant = .006f * (i *.125f);
+				
+				objPointer.setPosition(
+						(float) (objPointer.getX()+(Math.sin(theta)*(constant))), 
+						(float) (objPointer.getY()+(Math.cos(theta)*(constant))), 
+						(float) (objPointer.getZ()+(Math.sin(theta)*(constant)))
+						);
+				objPointer.setLookAt(mCamera.getPosition());// After the sprite is moved make sure it's facing the camera
+			}
 		}
 	}
 
 	private void birdMovement(){
-		int r = (int) Math.round(birdPaths.length - 1 * Math.random());//Select a path randomly from the available pool
+		int r = (int) Math.round((birdPaths.length - 1) * Math.random());//Select a path randomly from the available pool
 		TranslateAnimation3D birdFlight = new TranslateAnimation3D(birdPaths[r]);//Build a path based translation animation
 		birdFlight.setDuration(9000); // over 9 seconds
 		birdFlight.setOrientToPath(true); // orient the bird to the path
@@ -1772,6 +1806,7 @@ private void createFlags(){
 			mCamera.setFogColor(0x7d98da);
 			mCamera.setFogFar(200);
 			mCamera.setFogNear(20);
+			
 			cameraPos = new Number3D [7];// Array of camera positions 
 			cameraPos[0] = new Number3D(-19, 3, 37);
 			cameraPos[1] = new Number3D(5, 1, 42);
@@ -1787,7 +1822,7 @@ private void createFlags(){
 			cameraLook[2] = new Number3D(13, -1, 14);
 			cameraLook[3] = new Number3D(2, -1, 5);
 			cameraLook[4] = new Number3D(-14, -1, 9.5f);
-			cameraLook[5] = new Number3D(0, 0, 0);
+			cameraLook[5] = new Number3D(-2, 0, 0);
 			cameraLook[6] = new Number3D(9, -3, 12);			
 		} else if(scene == 1){// Settings for the unused interior scene
 			mCamera.setFarPlane(1000);
@@ -1840,7 +1875,7 @@ private void createFlags(){
 			float zLookDif = cameraLook[camIndex].z - camLookNull.getZ();
 
 			float newLookX = camLookNull.getX()+(xLookDif/(camSpeed*2)); //but at half of the speed of the position
-			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2)); //provides a feeling of animated follow through motion
+			float newLookY = camLookNull.getY()+(yLookDif/(camSpeed*2)); //provides a feeling of follow through motion
 			float newLookZ = camLookNull.getZ()+(zLookDif/(camSpeed*2));
 
 			camLookNull.setPosition(newLookX, newLookY, newLookZ); //Set new Camera and Look locations

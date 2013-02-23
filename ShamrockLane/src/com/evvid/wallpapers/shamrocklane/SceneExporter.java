@@ -23,6 +23,7 @@
 package com.evvid.wallpapers.shamrocklane;
 
 import rajawali.renderer.RajawaliRenderer;
+import rajawali.util.MeshExporter;
 import android.content.Context;
 
 public class SceneExporter extends RajawaliRenderer{
