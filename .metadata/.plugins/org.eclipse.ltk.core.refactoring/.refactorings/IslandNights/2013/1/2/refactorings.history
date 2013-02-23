@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring accessors="true" comment="Delete 6 elements from project &apos;IslandNights&apos;&#x0D;&#x0A;- Original project: &apos;IslandNights&apos;&#x0D;&#x0A;- Original elements:&#x0D;&#x0A;     armeabi&#x0D;&#x0A;     armeabi-v7a&#x0D;&#x0A;     src&#x0D;&#x0A;     x86&#x0D;&#x0A;     android-support-v4.jar&#x0D;&#x0A;     rajawali.jar" description="Delete elements" element1="libs/src" element2="libs/rajawali.jar" element3="libs/x86" element4="libs/android-support-v4.jar" element5="libs/armeabi" element6="libs/armeabi-v7a" elements="0" flags="589830" id="org.eclipse.jdt.ui.delete" resources="6" stamp="1357676785870" subPackages="false" version="1.0"/>
-</session>

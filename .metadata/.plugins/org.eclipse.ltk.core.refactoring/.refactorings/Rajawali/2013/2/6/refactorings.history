@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename field &apos;mHasAlpha&apos; in &apos;rajawali.materials.AMaterial&apos; to &apos;mUseAlphaMap&apos;&#x0D;&#x0A;- Original project: &apos;Rajawali&apos;&#x0D;&#x0A;- Original element: &apos;rajawali.materials.AMaterial.mHasAlpha&apos;&#x0D;&#x0A;- Renamed element: &apos;rajawali.materials.AMaterial.mUseAlphaMap&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update textual occurrences in comments and strings" delegate="false" deprecate="false" description="Rename field &apos;mHasAlpha&apos;" flags="589830" getter="false" id="org.eclipse.jdt.ui.rename.field" input="/src&lt;rajawali.materials{AMaterial.java[AMaterial^mHasAlpha" name="mUseAlphaMap" references="true" setter="false" stamp="1360105852796" textual="false" version="1.0"/>
-</session>

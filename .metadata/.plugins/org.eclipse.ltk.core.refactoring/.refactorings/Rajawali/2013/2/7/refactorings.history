@@ -1,4 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<session version="1.0">
-<refactoring comment="Rename local variable &apos;sb&apos; in &apos;rajawali.materials.GouraudMaterial.setShaders(...)&apos; to &apos;vc&apos;&#x0D;&#x0A;- Original project: &apos;Rajawali&apos;&#x0D;&#x0A;- Original element: &apos;rajawali.materials.GouraudMaterial.setShaders(String, String).sb&apos;&#x0D;&#x0A;- Renamed element: &apos;sb&apos;&#x0D;&#x0A;- Update references to refactored element" description="Rename local variable &apos;sb&apos;" id="org.eclipse.jdt.ui.rename.local.variable" input="/src&lt;rajawali.materials{GouraudMaterial.java[GouraudMaterial~setShaders~QString;~QString;@sb!4365!4401!4378!4379!QStringBuffer;!0!false" name="vc" references="true" stamp="1360547549086" version="1.0"/>
-</session>
