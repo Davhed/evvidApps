@@ -3,28 +3,29 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="257" key="DIALOG_WIDTH"/>
 		<item value="623" key="DIALOG_Y_ORIGIN"/>
-		<item value="430" key="DIALOG_X_ORIGIN"/>
 		<item value="380" key="DIALOG_HEIGHT"/>
+		<item value="430" key="DIALOG_X_ORIGIN"/>
 		<item value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="true" key="casesensitive"/>
 		<item value="false" key="isRegEx"/>
+		<item value="true" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="flyMovement" key="selection"/>
+		<item value="SimpleAlphaMaterial" key="selection"/>
 		<list key="findhistory">
+			<item value="SimpleMaterial"/>
+			<item value="diffuse"/>
 			<item value="flyMovement"/>
 			<item value="ALPHA_MAP"/>
 			<item value="intensity"/>
 			<item value="s"/>
 			<item value="DiffuseMaterial"/>
 			<item value="ALPHA"/>
-			<item value="validate"/>
-			<item value="update"/>
 		</list>
 		<list key="replacehistory">
+			<item value="SimpleAlphaMaterial"/>
 			<item value="ALPHA"/>
 			<item value="DiffuseSmartMaterial"/>
 			<item value="ALPHA_MAP"/>
@@ -32,7 +33,6 @@
 			<item value="DiffuseMaterial"/>
 			<item value="vNormal"/>
 			<item value="vEyeVec"/>
-			<item value="SimpleMaterial"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.GotoLineAction$GotoLineDialog_dialogBounds">
