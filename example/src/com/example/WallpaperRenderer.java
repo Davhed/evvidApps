@@ -1,36 +1,26 @@
 package com.example;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import rajawali.BaseObject3D;
 import rajawali.materials.SimpleMaterial;
-import rajawali.primitives.Sphere;
+import rajawali.materials.TextureAtlas;
+import rajawali.materials.TexturePacker;
+import rajawali.primitives.Plane;
 import rajawali.renderer.RajawaliRenderer;
 import android.content.Context;
 
 public class WallpaperRenderer extends RajawaliRenderer{
 	
-	private BaseObject3D mSphere;
-
 	public WallpaperRenderer(Context context) {
-		super(context);
-		setFrameRate(30);
-		setBackgroundColor(0x666666);
-	}
-		
-	@Override
-	public void initScene() {
-		mCamera.setFarPlane(10000);	
-	    mSphere = new Sphere(400, 8, 8);
-	    mSphere.setMaterial(new SimpleMaterial());
-	    mSphere.getMaterial().setUseColor(true);
-	    mSphere.setColor(0xff0000);
-	    mSphere.setDoubleSided(true);
-	    addChild(mSphere);
+	    super(context);
+	    setFrameRate(60);
+	    setBackgroundColor(0xff0000);
 	}
 
-	@Override
-	public void onDrawFrame(GL10 glUnused) {
-	    super.onDrawFrame(glUnused);
+	public void initScene() {
+	    TextureAtlas mAtlas = new TexturePacker(mContext).packTexturesFromAssets("AwesomeAtlas", 1024, 1024, 0, false, "atlas");
+	    
+	    Plane mPlane = new Plane (2,2,1,1);
+	    mPlane.setMaterial(new SimpleMaterial());
+	    mPlane.addTexture(mTextureManager.addTexture(mAtlas.getTile("becks").getPage()));
+	    addChild(mPlane);
 	}
 }

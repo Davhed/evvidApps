@@ -34,12 +34,14 @@ import com.evvid.wallpapers.shamrocklane.R;
 import rajawali.BaseObject3D;
 import rajawali.SerializedObject3D;
 import rajawali.renderer.RajawaliRenderer;
+import rajawali.util.MeshExporter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import rajawali.animation.Animation3D;
@@ -50,7 +52,8 @@ import rajawali.animation.TranslateAnimation3D;
 import rajawali.lights.PointLight;
 import rajawali.materials.GouraudMaterial;
 import rajawali.materials.PhongMaterial;
-import rajawali.materials.SimpleAlphaMaterial;
+import rajawali.materials.SimpleMaterial;
+import rajawali.materials.SimpleMaterial;
 import rajawali.materials.TextureInfo;
 import rajawali.materials.TextureManager.TextureType;
 import rajawali.math.Number3D;
@@ -313,8 +316,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 
 	private void loadExterior(){
 		pLight_main = new PointLight(); // Setting lights here because there is a different light rig for exterior/interior 
-		pLight_main.setPosition(6.5f, 7, 15);
-		pLight_main.setPower(2f);
+		pLight_main.setPosition(-100, 50, 50);
+		pLight_main.setPower(.75f);
 		pLight_main.setAttenuation(50, 1, 0, 0);
 			
 		pLight_secondary = new PointLight();  
@@ -323,8 +326,9 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		pLight_secondary.setAttenuation(50, 1, 0, 0);
 			
 		pLight_main2 = new PointLight();
-		pLight_main2.setPosition(200, 50, -150);
-		pLight_main2.setPower(4.25f);
+		pLight_main2.setPosition(200, 50, -350);
+		pLight_main2.setPower(18f);
+		pLight_main2.setColor(0x101010);
 		pLight_main2.setAttenuation(50, 1, 0, 0);
 		
 		pLight_branches = new PointLight();
@@ -338,37 +342,37 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		///////////////
 		//Create Materials
 		///////////////
-		
-		SimpleAlphaMaterial sunMat = new SimpleAlphaMaterial(); //Create materials and add textures to them. I like this is better than adding the texture to the object later on.
+				
+		SimpleMaterial sunMat = new SimpleMaterial(); //Create materials and add textures to them. I like this is better than adding the texture to the object later on.
 			sunMat.addTexture(sunInfo);
 			sunMat.addTexture(sunAlphaInfo);
 
-		SimpleAlphaMaterial clouddomeMat = new SimpleAlphaMaterial();
+		SimpleMaterial clouddomeMat = new SimpleMaterial();
 			clouddomeMat.addTexture(clouddomeInfo);
 			clouddomeMat.addTexture(clouddomeAlphaInfo);
 
-		SimpleAlphaMaterial gardenMat = new SimpleAlphaMaterial();
+		SimpleMaterial gardenMat = new SimpleMaterial();
 			gardenMat.addTexture(gardenBannerInfo);
 			gardenMat.addTexture(mountainAlphaInfo);
 
-		SimpleAlphaMaterial doorArchMat = new SimpleAlphaMaterial();
+		SimpleMaterial doorArchMat = new SimpleMaterial();
 			doorArchMat.addTexture(doorGoldArchInfo);
 
-		SimpleAlphaMaterial waterfallrockMat = new SimpleAlphaMaterial();
+		SimpleMaterial waterfallrockMat = new SimpleMaterial();
 			waterfallrockMat.addTexture(waterfallrockTextureInfo);
 		
-		SimpleAlphaMaterial wallMat = new SimpleAlphaMaterial();
+		SimpleMaterial wallMat = new SimpleMaterial();
 			wallMat.addTexture(wallStumpRockInfo);
 		
-		SimpleAlphaMaterial castleDirtMat = new SimpleAlphaMaterial();
+		SimpleMaterial castleDirtMat = new SimpleMaterial();
 			castleDirtMat.addTexture(castleBranchDirtInfo);
 			castleDirtMat.addTexture(castleBranchDirtAlphaInfo);
 
-		SimpleAlphaMaterial pathDirtCloverPlantsMat = new SimpleAlphaMaterial();
+		SimpleMaterial pathDirtCloverPlantsMat = new SimpleMaterial();
 			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsInfo);
 			pathDirtCloverPlantsMat.addTexture(pathDirtCloverPlantsAlphaInfo);
 
-		SimpleAlphaMaterial gateFernRainbowMat = new SimpleAlphaMaterial();
+		SimpleMaterial gateFernRainbowMat = new SimpleMaterial();
 			gateFernRainbowMat.addTexture(potGateFernRainbowTextureInfo);
 			gateFernRainbowMat.addTexture(potGateFernRainbowTextureAlphaInfo);
 
@@ -463,6 +467,8 @@ public class WallpaperRenderer extends RajawaliRenderer{
 	    	tools = new BaseObject3D((SerializedObject3D)ois.readObject());
 	    	tools.setMaterial(gardenMat);
 	    	tools.setDoubleSided(true);
+	    	tools.setBlendingEnabled(true);
+	    	tools.setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 					
 	    	ois = new ObjectInputStream(mContext.getResources().openRawResource(R.raw.gardendirt));
 	    	garden = new BaseObject3D((SerializedObject3D)ois.readObject());
@@ -735,38 +741,38 @@ public class WallpaperRenderer extends RajawaliRenderer{
 //		///////////////
 //		// Create Materials
 //		///////////////
-//		SimpleAlphaMaterial intAlphaMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intAlphaMat = new SimpleMaterial();
 //			intAlphaMat.addTexture(intAlphaInfo);
 //			intAlphaMat.addTexture(intAlphaAlphaInfo);
 //		
 //		DiffuseSmartMaterial intWallsMat = new DiffuseSmartMaterial();
 //			intWallsMat.addTexture(intWallsinfo);
 //	
-//		SimpleAlphaMaterial intFloorMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intFloorMat = new SimpleMaterial();
 //			intFloorMat.addTexture(intFloorInfo);
 //	
-//		SimpleAlphaMaterial intDoorStoveMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intDoorStoveMat = new SimpleMaterial();
 //			intDoorStoveMat.addTexture(intDoorStoveInfo);
 //	
-//		SimpleAlphaMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intArchShelfOBookStepWsCandleBannerPoleMat = new SimpleMaterial();
 //			intArchShelfOBookStepWsCandleBannerPoleMat.addTexture(intArchShelfOBookStepWsCandleBannerPoleInfo);
 //		
-//		SimpleAlphaMaterial intBoardMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intBoardMat = new SimpleMaterial();
 //			intBoardMat.addTexture(intHatStandBoardShoebuckleInfo);
 //			
-//		SimpleAlphaMaterial intHatStandMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intHatStandMat = new SimpleMaterial();
 //			intHatStandMat.addTexture(intHatStandBoardShoebuckleInfo);
 //			
 //		PhongMaterial intShoebuckleMat = new PhongMaterial();
 //			intShoebuckleMat.addTexture(intHatStandBoardShoebuckleInfo);
 //		
-//		SimpleAlphaMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intLogTablesRunnerMugPipeCoinMat = new SimpleMaterial();
 //			intLogTablesRunnerMugPipeCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
 //	
 //		SimpleGlowMaterial intCoinMat = new SimpleGlowMaterial();
 //			intCoinMat.addTexture(intLogTablesRunnerMugPipeCoinInfo);
 //	
-//		SimpleAlphaMaterial intChairsBookcaseBooksMat = new SimpleAlphaMaterial();
+//		SimpleMaterial intChairsBookcaseBooksMat = new SimpleMaterial();
 //			intChairsBookcaseBooksMat.addTexture(intChairsBookcaseBooksInfo);
 //		
 //		PhongMaterial vaseMat = new PhongMaterial();
@@ -990,7 +996,7 @@ public class WallpaperRenderer extends RajawaliRenderer{
 		
 		for(int i = 0; i <  birdTex.length/2; i++){//I am using the 1/2 length of the texture array to figure out how many frames to add to the object
 			Plane birdFrame = new Plane(1,1,1,1,1);		
-			birdFrame.setMaterial(new SimpleAlphaMaterial());
+			birdFrame.setMaterial(new SimpleMaterial());
 			birdFrame.addTexture(birdTex[2*i]);//add diffuse
 			birdFrame.addTexture(birdTex[2*i+1]);//add alpha
 			birdFrame.setDoubleSided(true);
@@ -1040,7 +1046,7 @@ private void createFlags(){
 	
 	for(int i = 0; i <  flagTex.length/2; i++){
 		Plane flagFrame = new Plane(3,3,1,1,1, true);		
-		flagFrame.setMaterial(new SimpleAlphaMaterial());
+		flagFrame.setMaterial(new SimpleMaterial());
 		flagFrame.addTexture(flagTex[2*i]);
 		flagFrame.addTexture(flagTex[2*i+1]);
 		flagFrame.setDoubleSided(true);
@@ -1070,7 +1076,7 @@ private void createFlags(){
 //	
 //	for(int i = 0; i <  intCandleTex.length/2; i++){
 //		Plane flameFrame = new Plane(1,1,1,1,1, true);		
-//		flameFrame.setMaterial(new SimpleAlphaMaterial());
+//		flameFrame.setMaterial(new SimpleMaterial());
 //		flameFrame.addTexture(intCandleTex[2*i]);
 //		flameFrame.addTexture(intCandleTex[2*i+1]);
 //		flameFrame.setDoubleSided(true);
@@ -1092,7 +1098,7 @@ private void createFlags(){
 		float tileWidth  = .25f;//this is 1 divided by the number of rows your sprite sheet has
 		water = new BaseObject3D(); //empty container
 		waterTiles = new BaseObject3D [16]; //Texture tile array
-		SimpleAlphaMaterial waterMat = new SimpleAlphaMaterial();
+		SimpleMaterial waterMat = new SimpleMaterial();
 		waterMat.addTexture(waterInfo);//add the full sprite sheet
 		waterMat.addTexture(waterAlphaInfo);//and alpha
 		
@@ -1134,7 +1140,7 @@ private void createFlags(){
 
 		for(int i = 0; i <  streamTiles.length; i++){
 			streamTiles[i] = streamsprite.clone(false);
-			streamTiles[i].setMaterial(new SimpleAlphaMaterial());
+			streamTiles[i].setMaterial(new SimpleMaterial());
 			streamTiles[i].addTexture(waterfallTex[2*i]);
 			streamTiles[i].addTexture(waterfallTex[2*i+1]);
 			streamTiles[i].addLight(pLight_main);
@@ -1161,7 +1167,7 @@ private void createFlags(){
 		
 		for(int i = 0; i <  waterfallTiles.length; i++){
 			waterfallTiles[i] = waterfallsprite.clone(false);
-			waterfallTiles[i].setMaterial(new SimpleAlphaMaterial());
+			waterfallTiles[i].setMaterial(new SimpleMaterial());
 			waterfallTiles[i].addTexture(waterfallTex[2*i]);
 			waterfallTiles[i].addTexture(waterfallTex[2*i+1]);
 			waterfallTiles[i].setDoubleSided(true);
@@ -1185,7 +1191,7 @@ private void createFlags(){
 		splash2Tiles = new BaseObject3D [32];
 		splash3Tiles = new BaseObject3D [32];
 		
-		SimpleAlphaMaterial splashMat = new SimpleAlphaMaterial();
+		SimpleMaterial splashMat = new SimpleMaterial();
 		splashMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.DIFFUSE));
 		splashMat.addTexture(mTextureManager.addEtc1Texture(mContext.getResources().openRawResource(R.raw.splashatlas_alpha), BitmapFactory.decodeResource(mContext.getResources(), R.drawable.splashatlas), TextureType.ALPHA));
 		
@@ -1241,7 +1247,7 @@ private void createFlags(){
 		fairies.setPosition(-6.1f, -.25f, 19.4f);
 		int numChildren = 16; //the number of fairies is sort of variable, but you have to modify `fairyMovement()` as well
 
-		SimpleAlphaMaterial fairyMat = new SimpleAlphaMaterial();
+		SimpleMaterial fairyMat = new SimpleMaterial();
 		fairyMat.addTexture(fairyInfo);
 		fairyMat.addTexture(fairyAlphaInfo);
 		
@@ -1266,12 +1272,12 @@ private void createFlags(){
 			branchTiles[i] = new TexturedPlane(10, 10, 1, 1, 1, uvCoords);
 			branchTiles[i].setDoubleSided(true); //disable backface culling because we might see both sides of the branches
 			branchTiles[i].setBlendingEnabled(true); 
-			branchTiles[i].addLight(pLight_main);
 			branchTiles[i].setBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 			if(i > 0)branchTiles[i].setLookAt(new Number3D(-19, 3, 37)); // Point most branches at initial camera position
-			branchTiles[i].setMaterial(new SimpleAlphaMaterial());
+			branchTiles[i].setMaterial(new SimpleMaterial());
 			branchTiles[i].addTexture(castleBranchDirtInfo);
 			branchTiles[i].addTexture(castleBranchDirtAlphaInfo);
+			branchTiles[i].addLight(pLight_main);
 			branchTiles[i].addLight(pLight_branches);
 		}
 
@@ -1341,7 +1347,7 @@ private void createFlags(){
 			e.printStackTrace();
 		}
 
-		SimpleAlphaMaterial cloverMat = new SimpleAlphaMaterial();
+		SimpleMaterial cloverMat = new SimpleMaterial();
 		cloverMat.addTexture(pathDirtCloverPlantsInfo);
 		cloverMat.addTexture(pathDirtCloverPlantsAlphaInfo);
 		shamrock.setMaterial(cloverMat);

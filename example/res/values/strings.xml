@@ -11,5 +11,17 @@
     
     <string name="lwp_settings">FOO Settings</string>
    
+    <string-array name="cam_pos_titles">
+        <item >Slow</item>
+        <item >Medium</item>
+        <item >Fast</item>
+    </string-array>
+    
+    <string-array name="cam_pos">
+        <item>-7.9</item>
+        <item>-4.2</item>
+        <item>-2.5</item>
+    </string-array>
+    
     
     </resources>

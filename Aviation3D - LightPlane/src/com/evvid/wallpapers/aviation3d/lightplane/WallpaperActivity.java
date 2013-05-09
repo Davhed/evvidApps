@@ -42,11 +42,5 @@ public class WallpaperActivity extends Wallpaper{
         super.onDestroy();
         mRenderer.onSurfaceDestroyed();
      }
-	
-	@Override
-	public void onCreate() {
-		super.onCreate();
-	}
-
 }
 

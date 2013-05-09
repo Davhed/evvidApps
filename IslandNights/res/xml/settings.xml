@@ -22,17 +22,29 @@
                 android:title="Performance" 
                 android:entries="@array/performance_titles"
                 android:entryValues="@array/performance"/>
-			
+
         </PreferenceCategory>
-        
+               
         <PreferenceCategory 
             android:title="Environment Settings">
+			<CheckBoxPreference 
+			    android:key="sign_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable Sign Post" 
+			    android:title="Sign Post"/>
+	        <EditTextPreference
+	            android:key="signText_pref"
+	            android:title="Village Name"
+	            android:summary="Change the village's name"
+	            android:dialogTitle="Village Name"
+	            android:defaultValue="Customize this text!"
+	            android:dependency="sign_pref"/>
 			<CheckBoxPreference 
 			    android:key="smokePlume_pref" 
 			    android:defaultValue="true" 
 			    android:summary="Enable/Disable Volcano Smoke" 
 			    android:title="Volcano Smoke"/>
-            <CheckBoxPreference 
+			<CheckBoxPreference 
 			    android:key="torches_pref" 
 			    android:defaultValue="true" 
 			    android:summary="Enable/Disable Tiki Torch Flames" 
@@ -53,12 +65,18 @@
 			    android:defaultValue="true" 
 			    android:summary="Enable/Disable High Density Plants" 
 			    android:title="High Density Foliage"/>
+            <CheckBoxPreference 
+			    android:key="moon_pref" 
+			    android:defaultValue="true" 
+			    android:summary="Enable/Disable The Moon" 
+			    android:title="Moon"/>
        		<ListPreference 
                 android:summary="Set the phase of the moon" 
                 android:key="moon_phase" 
                 android:title="Moon Phase" 
                 android:entries="@array/moon_phase_titles"
-                android:entryValues="@array/moon_phase"/>
+                android:entryValues="@array/moon_phase"
+                android:dependency="moon_pref"/>
      	   <ListPreference 
                 android:summary="Change the shooting star mode" 
                 android:key="shootingstar" 

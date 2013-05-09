@@ -3,7 +3,19 @@
         android:key="foosharedprefs">
      	
         
-
+     	
+        
+        <PreferenceCategory 
+            android:title="Camera Settings">
+     	   <ListPreference 
+                android:summary="Set the camera movement speed" 
+                android:key="pref_cam_position" 
+                android:title="Camera Position" 
+                android:entries="@array/cam_pos_titles"
+                android:entryValues="@array/cam_pos"/>
+			
+        </PreferenceCategory>
+    
        
     
 </PreferenceScreen>

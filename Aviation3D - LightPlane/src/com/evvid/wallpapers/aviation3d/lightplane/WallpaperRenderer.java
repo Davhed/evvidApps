@@ -97,7 +97,6 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		super(context);
 		setFrameRate(30);
 		setFogEnabled(true);
-		
     }
 		
 	public void initScene() {	
@@ -147,9 +146,6 @@ public class WallpaperRenderer extends RajawaliRenderer  implements SensorEventL
 		cloudTex.recycle();
 		cloud2Tex.recycle();
 		cloud3Tex.recycle();
-//		cloud4Tex.recycle();
-//		cloud5Tex.recycle();
-//		cloud6Tex.recycle();
 		System.gc();
 	}
 
